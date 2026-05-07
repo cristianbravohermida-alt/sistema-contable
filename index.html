@@ -37,6 +37,16 @@ a{color:var(--accent);text-decoration:none}
 .nav-item:hover{background:var(--surface2);color:var(--text)}
 .nav-item.active{background:var(--accent-bg);color:var(--accent);font-weight:500}
 .nav-item svg{width:16px;height:16px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:2}
+.nav-group-btn{display:flex;align-items:center;gap:9px;padding:8px 10px;margin:1px 8px;border-radius:var(--radius);cursor:pointer;font-size:13px;font-weight:500;color:var(--text2);transition:all .12s;user-select:none}
+.nav-group-btn:hover{background:var(--surface2);color:var(--text)}
+.nav-group-btn svg.icon{width:16px;height:16px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:2}
+.nav-group-btn .chev{width:13px;height:13px;margin-left:auto;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:2;transition:transform .2s}
+.nav-group-btn.open .chev{transform:rotate(90deg)}
+.nav-group-btn.open{color:var(--text)}
+.nav-sub{display:none;padding-left:6px}
+.nav-sub.open{display:block}
+.nav-sub .nav-item{font-size:12.5px;padding:6px 10px;margin:1px 4px}
+.nav-sub .nav-item.active{background:var(--accent-bg);color:var(--accent)}
 /* Menú colapsable */
 .nav-group{}
 .nav-group-header{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:var(--radius);margin:1px 8px;cursor:pointer;font-size:13px;color:var(--text2);transition:all .12s;user-select:none;font-weight:500}
@@ -279,43 +289,96 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
       style="width:100%;font-size:12px;font-weight:500;padding:6px 8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--accent-bg);color:var(--accent);cursor:pointer">
     </select>
   </div>
-  <div class="nav-section">Contabilidad</div>
-  <div class="nav-item active" onclick="nav('cuentas',this)">
-    <svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="12" y2="16"/></svg>
-    Plan de Cuentas
-  </div>
-  <div class="nav-item" onclick="nav('diario',this)">
-    <svg viewBox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h10M4 18h7"/><rect x="2" y="3" width="20" height="18" rx="2" stroke-width="1.5"/></svg>
-    Libro Diario
-  </div>
-  <div class="nav-item" onclick="nav('mayor',this)">
-    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-    Libro Mayor
-  </div>
-  <div class="nav-item" onclick="nav('auxiliares',this)">
-    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-    Auxiliares
-  </div>
 
-  <div class="nav-section">Informes</div>
-  <div class="nav-item" onclick="nav('balance8',this)">
-    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="12" y1="3" x2="12" y2="21"/></svg>
-    Balance 8 Col.
+  <!-- ══ DASHBOARD ══ -->
+  <div class="nav-item active" data-sec="cuentas" style="margin:4px 8px;font-weight:500">
+    <svg class="icon" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    Dashboard
   </div>
-  <div class="nav-item" onclick="nav('eerr',this)">
-    <svg viewBox="0 0 24 24"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
-    Estado Resultado
+  <div class="nav-group" id="grp-config">
+    <div class="nav-group-btn" id="grp-config-btn" onclick="toggleGrp('config')">
+      <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Configuración<svg class="chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
+    <div class="nav-sub" id="grp-config-sub">
+      <div class="nav-item" data-sec="config">Configuración Sistema</div>
+      <div class="nav-item" data-sec="sistema">Gestión del Sistema</div>
+    </div>
   </div>
-
-  <div class="nav-section" id="nav-sec-sistema">Sistema</div>
-  <div class="nav-item role-admin" id="nav-sistema" onclick="nav('sistema',this)">
-    <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-    Gestión del Sistema
+  <div class="nav-group" id="grp-admin">
+    <div class="nav-group-btn" id="grp-admin-btn" onclick="toggleGrp('admin')">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/></svg>Administración<svg class="chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
+    <div class="nav-sub" id="grp-admin-sub">
+      <div class="nav-item" data-sec="cuentas">Plan de Cuentas</div>
+    </div>
   </div>
-  <div class="nav-item" onclick="nav('config',this)">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-    Configuración
+  <div class="nav-group" id="grp-auxiliares">
+    <div class="nav-group-btn" id="grp-auxiliares-btn" onclick="toggleGrp('auxiliares')">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Libros Auxiliares<svg class="chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
+    <div class="nav-sub" id="grp-auxiliares-sub">
+      <div class="nav-item" data-sec="auxiliares">Auxiliares / Terceros</div>
+    </div>
   </div>
+  <div class="nav-group" id="grp-ingreso">
+    <div class="nav-group-btn" id="grp-ingreso-btn" onclick="toggleGrp('ingreso')">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M4 6h16M4 10h16M4 14h10M4 18h7"/></svg>Ingreso Contable<svg class="chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
+    <div class="nav-sub" id="grp-ingreso-sub">
+      <div class="nav-item" data-sec="diario">Ingreso Comprobante</div>
+    </div>
+  </div>
+  <div class="nav-group" id="grp-tesoreria">
+    <div class="nav-group-btn" id="grp-tesoreria-btn" onclick="toggleGrp('tesoreria')">
+      <svg class="icon" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Tesorería<svg class="chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
+    <div class="nav-sub" id="grp-tesoreria-sub">
+      <div class="nav-item" style="color:var(--text3);cursor:default;font-style:italic"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Próximamente</div>
+    </div>
+  </div>
+  <div class="nav-group" id="grp-libros">
+    <div class="nav-group-btn" id="grp-libros-btn" onclick="toggleGrp('libros')">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Libros Contables<svg class="chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
+    <div class="nav-sub" id="grp-libros-sub">
+      <div class="nav-item" data-sec="mayor">Libro Mayor</div>
+    </div>
+  </div>
+  <div class="nav-group" id="grp-estados">
+    <div class="nav-group-btn" id="grp-estados-btn" onclick="toggleGrp('estados')">
+      <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>Estados Financieros<svg class="chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
+    <div class="nav-sub" id="grp-estados-sub">
+      <div class="nav-item" data-sec="balance8">Balance 8 Columnas</div>
+      <div class="nav-item" data-sec="eerr">Estado de Resultado</div>
+    </div>
+  </div>
+  <div class="nav-group" id="grp-informes">
+    <div class="nav-group-btn" id="grp-informes-btn" onclick="toggleGrp('informes')">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Informes de gestión<svg class="chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
+    <div class="nav-sub" id="grp-informes-sub">
+      <div class="nav-item" style="color:var(--text3);cursor:default;font-style:italic"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Próximamente</div>
+    </div>
+  </div>
+  <div class="nav-group" id="grp-comercial">
+    <div class="nav-group-btn" id="grp-comercial-btn" onclick="toggleGrp('comercial')">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>Comercial<svg class="chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
+    <div class="nav-sub" id="grp-comercial-sub">
+      <div class="nav-item" style="color:var(--text3);cursor:default;font-style:italic"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Próximamente</div>
+    </div>
+  </div>
+  <div class="nav-group" id="grp-activos">
+    <div class="nav-group-btn" id="grp-activos-btn" onclick="toggleGrp('activos')">
+      <svg class="icon" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Activos Fijos<svg class="chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
+    <div class="nav-sub" id="grp-activos-sub">
+      <div class="nav-item" style="color:var(--text3);cursor:default;font-style:italic"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Próximamente</div>
+    </div>
+  </div>
+  <div id="nav-sec-sistema" style="display:none"></div>
+  <div id="nav-sistema" style="display:none"></div>
 
   <div class="sidebar-footer" style="padding:10px 12px">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
@@ -1320,6 +1383,7 @@ function doLogout(){
   DB = {config:{empresa:'',rut:'',giro:'',dir:'',periodo:''},cuentas:[],asientos:[],numAsiento:1,terceros:[]};
   document.getElementById('app-layout').style.display = 'none';
   document.getElementById('login-screen').classList.add('show');
+  initNavListeners();
   document.getElementById('li-user').value='';
   document.getElementById('li-pass').value='';
   document.getElementById('login-err').classList.remove('show');
@@ -1361,15 +1425,14 @@ function applyRoleRestrictions(){
   var isLectura  = rol==='lectura';
 
   // Gestión del sistema: solo admin
-  var navSistema = document.getElementById('nav-sistema');
+  var navSistema = findNavItem('sistema');
   if(navSistema) navSistema.style.display = isAdmin ? '' : 'none';
-  // Configuración: admin y contador
-  var navConfig = findNavItem('config');
-  if(navConfig) navConfig.style.display = isLectura ? 'none' : '';
-  // Módulos de ingreso (diario, cuentas, auxiliares): ocultos para lectura
-  ['cuentas','diario','mayor','auxiliares'].forEach(function(id){
-    var nav = findNavItem(id);
-    if(nav) nav.style.display = isLectura ? 'none' : '';
+  var grpConfig = document.getElementById('grp-config-btn');
+  if(grpConfig) grpConfig.style.display = isLectura ? 'none' : '';
+  // Módulos de ingreso: ocultos para lectura
+  ['cuentas','diario','mayor','auxiliares'].forEach(function(secId){
+    var el = findNavItem(secId);
+    if(el) el.style.display = isLectura ? 'none' : '';
   });
   // Botones de escritura: ocultos para lectura
   document.querySelectorAll('.role-escritura').forEach(function(el){
@@ -3302,50 +3365,52 @@ function renderStatsTerceros(){
 
 
 // Helper: buscar nav-item por sección
-function findNavItem(secId){
-  var items = document.querySelectorAll('.nav-item');
-  for(var i=0;i<items.length;i++){
-    var oc = items[i].getAttribute('onclick')||'';
-    if(oc.indexOf("'"+secId+"'") > -1) return items[i];
-  }
-  return null;
-}
+
 // ── Menú colapsable
-function toggleNavGroup(id){
-  var header = document.querySelector('#'+id+' .nav-group-header');
-  var body   = document.getElementById(id+'-body');
-  if(!header||!body) return;
-  var isOpen = body.classList.contains('open');
-  // Cerrar todos (opcional — comentar si se quiere multi-abierto)
-  // document.querySelectorAll('.nav-group-body.open').forEach(function(b){b.classList.remove('open');});
-  // document.querySelectorAll('.nav-group-header.open').forEach(function(h){h.classList.remove('open');});
-  if(isOpen){
-    body.classList.remove('open');
-    header.classList.remove('open');
-  } else {
-    body.classList.add('open');
-    header.classList.add('open');
-  }
-}
+
 
 
 // Abrir el grupo que contiene el nav-item activo
-function abrirGrupoActivo(secId){
-  var items = document.querySelectorAll('.nav-group-body .nav-item');
-  var found = null;
-  for(var i=0;i<items.length;i++){
-    var oc = items[i].getAttribute('onclick')||'';
-    if(oc.indexOf("'"+secId+"'") > -1){ found = items[i]; break; }
-  }
-  if(!found) return;
-  var body = found.closest('.nav-group-body');
-  if(!body) return;
-  var grpId = body.id.replace('-body','');
-  var header = document.querySelector('#'+grpId+' .nav-group-header');
-  body.classList.add('open');
-  if(header) header.classList.add('open');
+
+
+
+
+// ══ MENÚ COLAPSABLE ══════════════════════════════════════════
+function toggleGrp(gid){
+  var btn = document.getElementById('grp-'+gid+'-btn');
+  var sub = document.getElementById('grp-'+gid+'-sub');
+  if(!btn||!sub) return;
+  var open = sub.classList.contains('open');
+  if(open){ sub.classList.remove('open'); btn.classList.remove('open'); }
+  else     { sub.classList.add('open');   btn.classList.add('open');    }
 }
 
+function findNavItem(secId){
+  return document.querySelector('.nav-item[data-sec="'+secId+'"]');
+}
+
+function abrirGrupoActivo(secId){
+  var item = findNavItem(secId);
+  if(!item) return;
+  var sub = item.closest('.nav-sub');
+  if(!sub) return;
+  sub.classList.add('open');
+  var grpId = sub.id.replace('-sub','').replace('grp-','');
+  var btn = document.getElementById('grp-'+grpId+'-btn');
+  if(btn) btn.classList.add('open');
+}
+
+// Registrar clicks en nav-items con data-sec (evita onclick inline)
+function initNavListeners(){
+  document.querySelectorAll('.nav-item[data-sec]').forEach(function(el){
+    el.addEventListener('click', function(){
+      var secId = el.getAttribute('data-sec');
+      if(!secId || el.style.cursor==='default') return;
+      nav(secId, el);
+    });
+  });
+}
+// ═════════════════════════════════════════════════════════════
 
 // ============================================================
 // INIT
@@ -3357,6 +3422,7 @@ window.addEventListener('load', async function(){
   await loadSYS(); // recargar después de init
   hideLoading();
   document.getElementById('login-screen').classList.add('show');
+  initNavListeners();
   if(SYS.usuarios.length===1){ document.getElementById('li-user').value=SYS.usuarios[0].user; }
 });
 
