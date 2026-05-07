@@ -1390,13 +1390,7 @@ async function doLogin(){
   if(!usr.empresaIds || !usr.empresaIds.length){ alert('Este usuario no tiene empresas asignadas.'); return; }
   SESSION = { userId:usr.id, empresaId:usr.empresaIds[0], rol:usr.rol, nombre:usr.nombre };
   await loadDB();
-  // Si empresa no tiene cuentas → copiar plan base
-  if(DB.cuentas.length === 0){
-    var emp = SYS.empresas.find(function(e){return e.id===SESSION.empresaId;});
-    DB.cuentas = SYS.planBase.map(function(c){ return Object.assign({},c); });
-    if(emp){ DB.config.empresa=emp.razon; DB.config.rut=emp.rut; DB.config.periodo=emp.periodo||''; }
-    saveDB();
-  }
+  // Si empresa no tiene cuentas, no sobreescribir — las cuentas se cargan desde Supabase
   document.getElementById('login-screen').classList.remove('show');
   document.getElementById('app-layout').style.display = 'flex';
   document.getElementById('li-pass').value = '';
@@ -1435,11 +1429,11 @@ function initAppPostLogin(){
   // Navegar a la sección inicial
   document.querySelectorAll('.section').forEach(function(s){s.classList.remove('active');});
   document.querySelectorAll('.nav-item').forEach(function(b){b.classList.remove('active');});
-  abrirGrupoActivo(id);
   var startSec = SESSION.rol==='lectura' ? 'balance8' : 'cuentas';
+  abrirGrupoActivo(startSec);
   var startNav = findNavItem(startSec);
-  document.getElementById('sec-'+startSec).classList.add('active');
   if(startNav) startNav.classList.add('active');
+  document.getElementById('sec-'+startSec).classList.add('active');
   if(startSec==='balance8'){ initB8Selects(); toggleB8Modo(); renderBalance8(); }
   else { renderCuentas(); renderStatsCuentas(); renderDiario(); loadConfigForm(); }
 }
@@ -1739,6 +1733,7 @@ function nav(id, el){
   document.querySelectorAll('.nav-item').forEach(function(b){b.classList.remove('active');});
   document.getElementById('sec-'+id).classList.add('active');
   if(el) el.classList.add('active');
+  abrirGrupoActivo(id);
   if(id==='cuentas'){ renderCuentas(); renderStatsCuentas(); }
   if(id==='diario'){ renderDiario(); }
   if(id==='mayor'){ populateMayorSel(); renderMayor(); }
@@ -3153,7 +3148,17 @@ async function cambiarEmpresaDesdeSelector(empId){
   }
   document.getElementById('sidebar-empresa').textContent = emp?emp.razon:'';
   // Re-renderizar todo
-  renderCuentas(); renderStatsCuentas(); renderDiario(); loadConfigForm();
+  // Re-renderizar sección activa
+  var secActiva = document.querySelector('.section.active');
+  var secId = secActiva ? secActiva.id.replace('sec-','') : 'cuentas';
+  if(secId==='cuentas'){ renderCuentas(); renderStatsCuentas(); }
+  else if(secId==='diario'){ renderDiario(); }
+  else if(secId==='mayor'){ populateMayorSel(); renderMayor(); }
+  else if(secId==='auxiliares'){ renderTerceros(); renderStatsTerceros(); }
+  else if(secId==='balance8'){ initB8Selects(); toggleB8Modo(); renderBalance8(); }
+  else if(secId==='eerr'){ initEERRSelects(); toggleEERRModo(); renderEERR(); }
+  else { renderCuentas(); renderStatsCuentas(); }
+  loadConfigForm();
   // Avisar brevemente
   var msg = document.createElement('div');
   msg.style.cssText='position:fixed;bottom:16px;right:16px;background:var(--text);color:var(--surface);padding:10px 16px;border-radius:var(--radius);font-size:13px;z-index:999;box-shadow:var(--shadow)';
