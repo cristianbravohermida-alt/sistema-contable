@@ -931,7 +931,7 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
       <div id="msg-modal-cuenta"></div>
       <div class="form-grid cols3" style="gap:14px">
         <div class="field"><label>Tipo Plan *</label>
-          <select id="mc-tipo-plan">
+          <select id="mc-tipo-plan" onchange="filtrarSubtiposPlan(this.value)">
             <option value="">— Seleccionar —</option>
             <option value="Activo">Activo</option>
             <option value="Pasivo">Pasivo</option>
@@ -947,11 +947,7 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
         <div class="field span3"><label>Nombre de la cuenta *</label><input id="mc-nom" placeholder="ej: Caja y Bancos"></div>
         <div class="field"><label>Subtipo Plan</label>
           <select id="mc-subtipo-plan">
-            <option value="">— Ninguno —</option>
-            <option value="Corriente">Corriente</option>
-            <option value="No Corriente">No Corriente</option>
-            <option value="Operacional">Operacional</option>
-            <option value="No Operacional">No Operacional</option>
+            <option value="">— Seleccione Tipo Plan primero —</option>
           </select>
         </div>
         <div class="field"><label>Subtipo Flujo</label>
@@ -3543,6 +3539,105 @@ function mostrarToast(msg, tipo){
   t.textContent = msg;
   document.body.appendChild(t);
   setTimeout(function(){ t.style.opacity='0'; setTimeout(function(){ t.remove(); },400); }, 3000);
+}
+// ═════════════════════════════════════════════════════════════
+
+
+// ══ CATÁLOGO SUBTIPO PLAN ══════════════════════════════════════
+var SUBTIPO_PLAN_DATA = [
+  {cod:'110100',tipo:'Activo',subtipo:'Efectivo y efectivo equivalente',nombre:'Efectivo y efectivo equivalente'},
+  {cod:'110200',tipo:'Activo',subtipo:'Activos corrientes',nombre:'Otros activos financieros corrientes'},
+  {cod:'110300',tipo:'Activo',subtipo:'Activos corrientes',nombre:'Otros activos corrientes'},
+  {cod:'110400',tipo:'Activo',subtipo:'Activos corrientes',nombre:'Deudores Comerciales'},
+  {cod:'110500',tipo:'Activo',subtipo:'Activos corrientes',nombre:'Cuentas por cobrar a entidades relacionadas, corrientes'},
+  {cod:'110600',tipo:'Activo',subtipo:'Activos corrientes',nombre:'Inventarios corrientes'},
+  {cod:'110700',tipo:'Activo',subtipo:'Activos corrientes',nombre:'Activos biológicos corrientes'},
+  {cod:'110800',tipo:'Activo',subtipo:'Activos corrientes',nombre:'Impuestos por recuperar'},
+  {cod:'110900',tipo:'Activo',subtipo:'Activos corrientes',nombre:'Otros Activos Corrientes'},
+  {cod:'111000',tipo:'Activo',subtipo:'Activos corrientes',nombre:'Activos no corrientes o grupos de activos para su disposición clasificados como mantenidos para la venta o como mantenidos para distribuir a los propietarios'},
+  {cod:'111100',tipo:'Activo',subtipo:'Activos corrientes',nombre:'Otros activos financieros no corrientes'},
+  {cod:'111200',tipo:'Activo',subtipo:'Activos no corrientes',nombre:'Activos Financieros No Corrientes'},
+  {cod:'111300',tipo:'Activo',subtipo:'Activos corrientes',nombre:'Cuentas por cobrar no corrientes'},
+  {cod:'111400',tipo:'Activo',subtipo:'Activos corrientes',nombre:'Inventarios no corrientes'},
+  {cod:'111500',tipo:'Activo',subtipo:'Activos corrientes',nombre:'Cuentas por Cobrar EE.RR.'},
+  {cod:'111600',tipo:'Activo',subtipo:'Activos corrientes',nombre:'Participación Empresas Relacionadas'},
+  {cod:'120100',tipo:'Activo',subtipo:'Activos no corrientes',nombre:'Propiedad planta y equipos'},
+  {cod:'120200',tipo:'Activo',subtipo:'Activos no corrientes',nombre:'Plusvalía'},
+  {cod:'120300',tipo:'Activo',subtipo:'Activos no corrientes',nombre:'Activos biológicos no corrientes'},
+  {cod:'120400',tipo:'Activo',subtipo:'Activos no corrientes',nombre:'Propiedad de Inversión'},
+  {cod:'120500',tipo:'Activo',subtipo:'Activos no corrientes',nombre:'Activos por impuestos corrientes, no corrientes'},
+  {cod:'120600',tipo:'Activo',subtipo:'Activos no corrientes',nombre:'Activos por impuestos diferidos'},
+  {cod:'120700',tipo:'Activo',subtipo:'Activos no corrientes',nombre:'Otros Activos No Corrientes'},
+  {cod:'120800',tipo:'Activo',subtipo:'Activos no corrientes',nombre:'Intangibles'},
+  {cod:'210100',tipo:'Pasivo',subtipo:'Pasivos corrientes',nombre:'Pasivos Financieros Corrientes'},
+  {cod:'210200',tipo:'Pasivo',subtipo:'Pasivos corrientes',nombre:'Facturas y Cuentas por pagar'},
+  {cod:'210300',tipo:'Pasivo',subtipo:'Pasivos corrientes',nombre:'Cuentas por pagar a entidades relacionadas, corrientes'},
+  {cod:'210400',tipo:'Pasivo',subtipo:'Pasivos corrientes',nombre:'Otras Provisiones Corto Plazo'},
+  {cod:'210500',tipo:'Pasivo',subtipo:'Pasivos corrientes',nombre:'Pasivos por impuestos corrientes, corrientes'},
+  {cod:'210600',tipo:'Pasivo',subtipo:'Pasivos corrientes',nombre:'Provisiones corrientes por beneficios a los empleados'},
+  {cod:'220100',tipo:'Pasivo',subtipo:'Pasivos corrientes',nombre:'Otros pasivos no financieros corrientes'},
+  {cod:'220200',tipo:'Pasivo',subtipo:'Pasivos no corrientes',nombre:'Pasivos incluidos en grupos de activos para su disposición clasificados como mantenidos para la venta'},
+  {cod:'220300',tipo:'Pasivo',subtipo:'Pasivos no corrientes',nombre:'Otros pasivos financieros no corrientes'},
+  {cod:'220400',tipo:'Pasivo',subtipo:'Pasivos no corrientes',nombre:'Cuentas por pagar no corrientes'},
+  {cod:'220500',tipo:'Pasivo',subtipo:'Pasivos no corrientes',nombre:'Cuentas Por Pagar Entidades Relacionadas no corrientes'},
+  {cod:'220600',tipo:'Pasivo',subtipo:'Pasivos no corrientes',nombre:'Otras Provisiones a Largo Plazo'},
+  {cod:'220700',tipo:'Pasivo',subtipo:'Pasivos no corrientes',nombre:'Pasivo por impuestos diferidos'},
+  {cod:'220800',tipo:'Pasivo',subtipo:'Pasivos no corrientes',nombre:'Pasivos por impuestos corrientes, no corrientes'},
+  {cod:'220900',tipo:'Pasivo',subtipo:'Pasivos no corrientes',nombre:'Provisiones no corrientes por beneficio a empleados'},
+  {cod:'221000',tipo:'Pasivo',subtipo:'Pasivos no corrientes',nombre:'Otros pasivos no financieros no corrientes'},
+  {cod:'310100',tipo:'Patrimonio',subtipo:'',nombre:'Capital emitido'},
+  {cod:'310200',tipo:'Patrimonio',subtipo:'',nombre:'Ganancias (pérdidas) acumuladas'},
+  {cod:'310300',tipo:'Patrimonio',subtipo:'',nombre:'Prima de emisión'},
+  {cod:'310400',tipo:'Patrimonio',subtipo:'',nombre:'Acciones propias en cartera'},
+  {cod:'310500',tipo:'Patrimonio',subtipo:'',nombre:'Otras participaciones en patrimonio'},
+  {cod:'310600',tipo:'Patrimonio',subtipo:'',nombre:'Otras reservas'},
+  {cod:'310700',tipo:'Patrimonio',subtipo:'',nombre:'Patrimonio atribuible a los propietarios de la controladora'},
+  {cod:'310800',tipo:'Patrimonio',subtipo:'',nombre:'Participaciones no controladoras'},
+  {cod:'310900',tipo:'Patrimonio',subtipo:'',nombre:'Utilidad/Perdida Ejercicio'},
+  {cod:'311000',tipo:'Patrimonio',subtipo:'',nombre:'Capital no pagado'},
+  {cod:'410100',tipo:'Ingresos',subtipo:'Ingreso por venta',nombre:'Ingresos de la Operación'},
+  {cod:'420100',tipo:'Ingresos',subtipo:'Otros ingresos no operacionales',nombre:'Otros ingresos'},
+  {cod:'420200',tipo:'Ingresos',subtipo:'Ingresos Financieros',nombre:'Ingresos financieros'},
+  {cod:'510100',tipo:'Costos',subtipo:'Costo de venta',nombre:'Costo de ventas'},
+  {cod:'510200',tipo:'Costos',subtipo:'Costo de venta',nombre:'Costos de distribución'},
+  {cod:'520100',tipo:'Gastos',subtipo:'Gasto de administración y ventas',nombre:'Gastos de administración'},
+  {cod:'520200',tipo:'Gastos',subtipo:'Gasto de administración y ventas',nombre:'Otros gastos, por función'},
+  {cod:'520300',tipo:'Gastos',subtipo:'Gasto de administración y ventas',nombre:'Otras ganancias (pérdidas)'},
+  {cod:'520400',tipo:'Gastos',subtipo:'Gasto de administración y ventas',nombre:'Resultados no Operacionales'},
+  {cod:'520500',tipo:'Gastos',subtipo:'Gastos financieros',nombre:'Costos financieros'},
+  {cod:'530100',tipo:'Gastos',subtipo:'',nombre:'Participación en las ganancias (pérdidas) de asociadas y negocios conjuntos que se contabilicen utilizando el método de la participación'},
+  {cod:'530200',tipo:'Gastos',subtipo:'Gasto de administración y ventas',nombre:'Diferencias de cambio'},
+  {cod:'530300',tipo:'Gastos',subtipo:'',nombre:'Resultados por unidades de reajuste'},
+  {cod:'530400',tipo:'Gastos',subtipo:'',nombre:'Ganancias (pérdidas) que surgen de diferencias entre importes en libros anteriores y el valor razonable de activos financieros reclasificados como medidos al valor razonable'},
+  {cod:'530500',tipo:'Gastos',subtipo:'Impuesto a la Renta',nombre:'Gasto por impuestos a las ganancias'},
+  {cod:'530600',tipo:'Gastos',subtipo:'',nombre:'Ganancia (pérdida) procedente de operaciones discontinuadas'},
+  {cod:'530700',tipo:'Gastos',subtipo:'',nombre:'Ganancia (pérdida) atribuible a participaciones no controladoras'},
+  {cod:'530800',tipo:'Gastos',subtipo:'',nombre:'Resultado Integral atribuible a propietarios controladora'},
+  {cod:'530900',tipo:'Gastos',subtipo:'',nombre:'Resultado Integral atribuible a participaciones no controladora'}
+];
+
+function filtrarSubtiposPlan(tipoPlan){
+  var sel = document.getElementById('mc-subtipo-plan');
+  if(!sel) return;
+  // Obtener subtipos únicos para este tipo
+  var vistos = {};
+  var opts = ['<option value="">— Ninguno —</option>'];
+  SUBTIPO_PLAN_DATA.forEach(function(r){
+    if(r.tipo === tipoPlan && r.subtipo && !vistos[r.subtipo]){
+      vistos[r.subtipo] = true;
+      var s = r.subtipo.replace(/"/g,'&quot;');
+      opts.push('<option value="'+s+'">'+s+'</option>');
+    }
+  });
+  if(opts.length === 1){
+    opts = ['<option value="">— Sin subtipos —</option>'];
+  }
+  sel.innerHTML = opts.join('');
+}
+
+function getNombreSubtipoPlan(cod){
+  var r = SUBTIPO_PLAN_DATA.find(function(x){return x.cod===cod;});
+  return r ? r.nombre : '';
 }
 // ═════════════════════════════════════════════════════════════
 
