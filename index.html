@@ -417,7 +417,7 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
     <div id="msg-cuentas"></div>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Código</th><th>Nombre</th><th>Tipo</th><th>Naturaleza</th><th>Auxiliar</th><th class="num">Saldo Actual</th><th class="no-print"></th></tr></thead>
+        <thead><tr><th>Tipo Plan</th><th>Código</th><th>Cód. SII</th><th>Concepto Partida</th><th>Nombre</th><th>Subtipo Plan</th><th>Subtipo Flujo</th><th>Cta Cobrar</th><th>Cta Pagar</th><th>Disp. Pago</th><th class="num">Saldo</th><th class="no-print"></th></tr></thead>
         <tbody id="tbody-cuentas"></tbody>
       </table>
     </div>
@@ -929,10 +929,10 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
     </div>
     <div class="modal-body">
       <div id="msg-modal-cuenta"></div>
-      <div class="form-grid cols2" style="gap:14px">
-        <div class="field"><label>Código *</label><input id="mc-cod" placeholder="ej: 1.1.01"></div>
-        <div class="field"><label>Tipo *</label>
-          <select id="mc-tipo">
+      <div class="form-grid cols3" style="gap:14px">
+        <div class="field"><label>Tipo Plan *</label>
+          <select id="mc-tipo-plan">
+            <option value="">— Seleccionar —</option>
             <option value="Activo">Activo</option>
             <option value="Pasivo">Pasivo</option>
             <option value="Patrimonio">Patrimonio</option>
@@ -941,13 +941,38 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
             <option value="Costo">Costo</option>
           </select>
         </div>
-        <div class="field span2"><label>Nombre de la cuenta *</label><input id="mc-nom" placeholder="ej: Caja y Bancos"></div>
-        <div class="field span2"><label>Descripción (opcional)</label><input id="mc-desc" placeholder="Descripción adicional"></div>
+        <div class="field"><label>Código *</label><input id="mc-cod" placeholder="ej: 1.1.01"></div>
+        <div class="field"><label>Código SII</label><input id="mc-cod-sii" placeholder="ej: 01-01"></div>
+        <div class="field span3"><label>Concepto Partida</label><input id="mc-concepto" placeholder="Concepto según SII"></div>
+        <div class="field span3"><label>Nombre de la cuenta *</label><input id="mc-nom" placeholder="ej: Caja y Bancos"></div>
+        <div class="field"><label>Subtipo Plan</label>
+          <select id="mc-subtipo-plan">
+            <option value="">— Ninguno —</option>
+            <option value="Corriente">Corriente</option>
+            <option value="No Corriente">No Corriente</option>
+            <option value="Operacional">Operacional</option>
+            <option value="No Operacional">No Operacional</option>
+          </select>
+        </div>
+        <div class="field"><label>Subtipo Flujo</label>
+          <select id="mc-subtipo-flujo">
+            <option value="">— Ninguno —</option>
+            <option value="Operacion">Operación</option>
+            <option value="Inversion">Inversión</option>
+            <option value="Financiamiento">Financiamiento</option>
+          </select>
+        </div>
         <div class="field"><label>Cuenta con auxiliares</label>
           <select id="mc-aux">
             <option value="0">No</option>
-            <option value="1">Sí — permite auxiliares</option>
+            <option value="1">Sí</option>
           </select>
+        </div>
+        <div class="field"><label>Cta. Cobrar (auxiliar)</label><input id="mc-cta-cobrar" placeholder="Cod. cuenta cobrar"></div>
+        <div class="field"><label>Cta. Pagar (auxiliar)</label><input id="mc-cta-pagar" placeholder="Cod. cuenta pagar"></div>
+        <div class="field" style="display:flex;align-items:center;gap:10px;padding-top:22px">
+          <input type="checkbox" id="mc-disp-pago" style="width:16px;height:16px;accent-color:var(--accent)">
+          <label for="mc-disp-pago" style="margin:0;cursor:pointer">Disp. Pago</label>
         </div>
       </div>
     </div>
@@ -1079,7 +1104,12 @@ async function loadDB(){
     var {data:cfg}=await supa.from('empresa_config').select('num_asiento').eq('empresa_id',SESSION.empresaId).maybeSingle();
     DB.numAsiento=cfg?cfg.num_asiento:1;
     var {data:cuentas}=await supa.from('cuentas').select('*').eq('empresa_id',SESSION.empresaId).order('cod');
-    DB.cuentas=(cuentas||[]).map(function(c){return{cod:c.cod,nom:c.nom,tipo:c.tipo,aux:c.aux,desc:c.desc_||''};});
+    DB.cuentas=(cuentas||[]).map(function(c){return{
+      cod:c.cod, nom:c.nom, tipo:c.tipo, aux:c.aux, desc:c.desc_||'',
+      tipo_plan:c.tipo_plan||'', cod_sii:c.cod_sii||'', concepto:c.concepto||'',
+      subtipo_plan:c.subtipo_plan||'', subtipo_flujo:c.subtipo_flujo||'',
+      cta_cobrar:c.cta_cobrar||'', cta_pagar:c.cta_pagar||'', disp_pago:c.disp_pago||false
+    };});
     var {data:asientosSupa}=await supa.from('asientos').select('id,num,fecha,glosa').eq('empresa_id',SESSION.empresaId).order('fecha').order('num');
     var ids=(asientosSupa||[]).map(function(a){return a.id;});
     var lineasMap={};
@@ -1727,28 +1757,40 @@ function nav(id, el){
 // PLAN DE CUENTAS
 // ============================================================
 async function addCuenta(){
-  var cod = document.getElementById('mc-cod').value.trim();
-  var nom = document.getElementById('mc-nom').value.trim();
-  var tipo = document.getElementById('mc-tipo').value;
-  var aux = document.getElementById('mc-aux').value === '1';
-  var desc = document.getElementById('mc-desc').value.trim();
-  if(!cod||!nom){ msgEl('msg-modal-cuenta','err','Complete código y nombre de la cuenta.'); return; }
-  if(DB.cuentas.find(function(c){return c.cod===cod;})){ msgEl('msg-modal-cuenta','err','El código ya existe en el plan de cuentas.'); return; }
+  var cod      = document.getElementById('mc-cod').value.trim();
+  var nom      = document.getElementById('mc-nom').value.trim();
+  var tipo     = document.getElementById('mc-tipo-plan') ? document.getElementById('mc-tipo-plan').value : 'Activo';
+  var aux      = document.getElementById('mc-aux').value==='1';
+  var desc     = '';
+  var tipo_plan    = (document.getElementById('mc-tipo-plan')||{value:''}).value;
+  var cod_sii      = (document.getElementById('mc-cod-sii')||{value:''}).value.trim();
+  var concepto     = (document.getElementById('mc-concepto')||{value:''}).value.trim();
+  var subtipo_plan = (document.getElementById('mc-subtipo-plan')||{value:''}).value;
+  var subtipo_flujo= (document.getElementById('mc-subtipo-flujo')||{value:''}).value;
+  var cta_cobrar   = (document.getElementById('mc-cta-cobrar')||{value:''}).value.trim();
+  var cta_pagar    = (document.getElementById('mc-cta-pagar')||{value:''}).value.trim();
+  var disp_pago    = document.getElementById('mc-disp-pago') ? document.getElementById('mc-disp-pago').checked : false;
+  if(!cod||!nom||!tipo_plan){ msgEl('msg-modal-cuenta','err','Tipo Plan, Código y Nombre son obligatorios.'); return; }
+  if(DB.cuentas.find(function(c){return c.cod===cod;})){ msgEl('msg-modal-cuenta','err','Ya existe una cuenta con ese código.'); return; }
+  var obj = {cod,nom,tipo:tipo_plan,aux,desc,tipo_plan,cod_sii,concepto,subtipo_plan,subtipo_flujo,cta_cobrar,cta_pagar,disp_pago};
   showLoading('Guardando cuenta...');
   try{
-    await saveCuenta({cod:cod,nom:nom,tipo:tipo,aux:aux,desc:desc});
-    DB.cuentas.push({cod:cod,nom:nom,tipo:tipo,aux:aux,desc:desc});
+    await saveCuenta(obj);
+    DB.cuentas.push(obj);
     DB.cuentas.sort(function(a,b){return a.cod.localeCompare(b.cod);});
     closeModal('modal-cuenta');
-  }catch(e){ msgEl('msg-modal-cuenta','err','Error: '+e.message); return; }
+    // Limpiar modal
+    ['mc-cod','mc-nom','mc-cod-sii','mc-concepto','mc-cta-cobrar','mc-cta-pagar'].forEach(function(id){
+      var el=document.getElementById(id); if(el) el.value='';
+    });
+    ['mc-tipo-plan','mc-subtipo-plan','mc-subtipo-flujo'].forEach(function(id){
+      var el=document.getElementById(id); if(el) el.selectedIndex=0;
+    });
+    var dp=document.getElementById('mc-disp-pago'); if(dp) dp.checked=false;
+    renderCuentas(); renderStatsCuentas();
+    msgEl('msg-cuentas','ok','Cuenta agregada correctamente.');
+  }catch(e){ msgEl('msg-modal-cuenta','err','Error: '+e.message); }
   finally{ hideLoading(); }
-  document.getElementById('mc-cod').value='';
-  document.getElementById('mc-nom').value='';
-  document.getElementById('mc-desc').value='';
-  document.getElementById('mc-aux').value='0';
-  renderCuentas();
-  renderStatsCuentas();
-  msgEl('msg-cuentas','ok','Cuenta <b>'+cod+' - '+nom+'</b> agregada correctamente.');
 }
 
 async function delCuenta(cod){
@@ -1776,20 +1818,36 @@ function renderStatsCuentas(){
 
 function renderCuentas(){
   var tb = document.getElementById('tbody-cuentas');
-  if(!DB.cuentas.length){ tb.innerHTML='<tr><td colspan="7"><div class="empty"><svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/></svg><p>Sin cuentas. Agrega la primera cuenta o carga los datos demo.</p></div></td></tr>'; return; }
-  tb.innerHTML = DB.cuentas.map(function(c){
+  if(!DB.cuentas || !DB.cuentas.length){
+    tb.innerHTML='<tr><td colspan="12"><div class="empty"><svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/></svg><p>Sin cuentas. Agrega la primera cuenta.</p></div></td></tr>';
+    return;
+  }
+  var rows = DB.cuentas.map(function(c){
     var s = getSaldo(c.cod);
     var sClass = s>0?'text-green':(s<0?'text-red':'');
-    return '<tr>'
+    var tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td>'+typeBadge(c.tipo_plan||c.tipo)+'</td>'
       +'<td><code>'+c.cod+'</code></td>'
+      +'<td style="font-size:12px">'+(c.cod_sii||'—')+'</td>'
+      +'<td style="font-size:12px;color:var(--text3)">'+(c.concepto||'—')+'</td>'
       +'<td><b>'+c.nom+'</b>'+(c.desc?'<br><span style="font-size:11px;color:var(--text3)">'+c.desc+'</span>':'')+'</td>'
-      +'<td>'+typeBadge(c.tipo)+'</td>'
-      +'<td style="font-size:12px;color:var(--text3)">'+getNaturaleza(c.tipo)+'</td>'
-      +'<td style="font-size:12px">'+(c.aux?'<span class="badge" style="background:#dcfce7;color:#15803d">Sí</span>':'<span style="color:var(--text3)">—</span>')+'</td>'
+      +'<td style="font-size:12px">'+(c.subtipo_plan||'—')+'</td>'
+      +'<td style="font-size:12px">'+(c.subtipo_flujo||'—')+'</td>'
+      +'<td style="font-size:12px">'+(c.cta_cobrar||'—')+'</td>'
+      +'<td style="font-size:12px">'+(c.cta_pagar||'—')+'</td>'
+      +'<td style="text-align:center">'+(c.disp_pago?'<span style="color:#16a34a;font-weight:700">✓</span>':'<span style="color:var(--text3)">—</span>')+'</td>'
       +'<td class="num '+sClass+'">'+(s!==0?fmtM(Math.abs(s)):'—')+'</td>'
-      +'<td class="no-print"><button class="btn btn-danger btn-sm" onclick="delCuenta(\''+c.cod+'\')">Eliminar</button></td>'
-      +'</tr>';
-  }).join('');
+      +'<td class="no-print"></td>';
+    var tdBtn = tr.querySelector('td.no-print');
+    var btn = document.createElement('button');
+    btn.className='btn btn-danger btn-sm'; btn.textContent='Eliminar';
+    btn.onclick = function(){ delCuenta(c.cod); };
+    tdBtn.appendChild(btn);
+    return tr;
+  });
+  tb.innerHTML = '';
+  rows.forEach(function(tr){ tb.appendChild(tr); });
 }
 
 // ============================================================
@@ -3540,7 +3598,22 @@ function hideLoading(){ var el=document.getElementById('loading-overlay'); if(el
 
 
 async function saveCuenta(c){
-  await supa.from('cuentas').upsert({empresa_id:SESSION.empresaId,cod:c.cod,nom:c.nom,tipo:c.tipo,aux:c.aux,desc_:c.desc||''},{onConflict:'empresa_id,cod'});
+  await supa.from('cuentas').upsert({
+    empresa_id:   SESSION.empresaId,
+    cod:          c.cod,
+    nom:          c.nom,
+    tipo:         c.tipo||c.tipo_plan||'Activo',
+    aux:          c.aux,
+    desc_:        c.desc||'',
+    tipo_plan:    c.tipo_plan||'',
+    cod_sii:      c.cod_sii||'',
+    concepto:     c.concepto||'',
+    subtipo_plan: c.subtipo_plan||'',
+    subtipo_flujo:c.subtipo_flujo||'',
+    cta_cobrar:   c.cta_cobrar||'',
+    cta_pagar:    c.cta_pagar||'',
+    disp_pago:    c.disp_pago||false
+  },{onConflict:'empresa_id,cod'});
 }
 async function deleteCuentaSupa(cod){
   await supa.from('cuentas').delete().eq('empresa_id',SESSION.empresaId).eq('cod',cod);
