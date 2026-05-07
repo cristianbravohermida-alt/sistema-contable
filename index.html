@@ -295,29 +295,12 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
     <svg class="icon" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
     Dashboard
   </div>
-  <div class="nav-group" id="grp-config">
-    <div class="nav-group-btn" id="grp-config-btn" onclick="toggleGrp('config')">
-      <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Configuración<svg class="chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+  <div class="nav-group" id="grp-tesoreria">
+    <div class="nav-group-btn" id="grp-tesoreria-btn" onclick="toggleGrp('tesoreria')">
+      <svg class="icon" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Tesorería<svg class="chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
     </div>
-    <div class="nav-sub" id="grp-config-sub">
-      <div class="nav-item" data-sec="config">Configuración Sistema</div>
-      <div class="nav-item" data-sec="sistema">Gestión del Sistema</div>
-    </div>
-  </div>
-  <div class="nav-group" id="grp-admin">
-    <div class="nav-group-btn" id="grp-admin-btn" onclick="toggleGrp('admin')">
-      <svg class="icon" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/></svg>Administración<svg class="chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-    </div>
-    <div class="nav-sub" id="grp-admin-sub">
-      <div class="nav-item" data-sec="cuentas">Plan de Cuentas</div>
-    </div>
-  </div>
-  <div class="nav-group" id="grp-auxiliares">
-    <div class="nav-group-btn" id="grp-auxiliares-btn" onclick="toggleGrp('auxiliares')">
-      <svg class="icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Libros Auxiliares<svg class="chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-    </div>
-    <div class="nav-sub" id="grp-auxiliares-sub">
-      <div class="nav-item" data-sec="auxiliares">Auxiliares / Terceros</div>
+    <div class="nav-sub" id="grp-tesoreria-sub">
+      <div class="nav-item" style="color:var(--text3);cursor:default;font-style:italic"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Próximamente</div>
     </div>
   </div>
   <div class="nav-group" id="grp-ingreso">
@@ -328,11 +311,11 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
       <div class="nav-item" data-sec="diario">Ingreso Comprobante</div>
     </div>
   </div>
-  <div class="nav-group" id="grp-tesoreria">
-    <div class="nav-group-btn" id="grp-tesoreria-btn" onclick="toggleGrp('tesoreria')">
-      <svg class="icon" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Tesorería<svg class="chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+  <div class="nav-group" id="grp-auxiliares">
+    <div class="nav-group-btn" id="grp-auxiliares-btn" onclick="toggleGrp('auxiliares')">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Libros Auxiliares<svg class="chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
     </div>
-    <div class="nav-sub" id="grp-tesoreria-sub">
+    <div class="nav-sub" id="grp-auxiliares-sub">
       <div class="nav-item" style="color:var(--text3);cursor:default;font-style:italic"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Próximamente</div>
     </div>
   </div>
@@ -355,31 +338,35 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
   </div>
   <div class="nav-group" id="grp-informes">
     <div class="nav-group-btn" id="grp-informes-btn" onclick="toggleGrp('informes')">
-      <svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Informes de gestión<svg class="chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      <svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Informes de Gestión<svg class="chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
     </div>
     <div class="nav-sub" id="grp-informes-sub">
       <div class="nav-item" style="color:var(--text3);cursor:default;font-style:italic"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Próximamente</div>
     </div>
   </div>
-  <div class="nav-group" id="grp-comercial">
-    <div class="nav-group-btn" id="grp-comercial-btn" onclick="toggleGrp('comercial')">
-      <svg class="icon" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>Comercial<svg class="chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+  <div class="nav-group" id="grp-admin">
+    <div class="nav-group-btn" id="grp-admin-btn" onclick="toggleGrp('admin')">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/></svg>Administración<svg class="chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
     </div>
-    <div class="nav-sub" id="grp-comercial-sub">
-      <div class="nav-item" style="color:var(--text3);cursor:default;font-style:italic"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Próximamente</div>
+    <div class="nav-sub" id="grp-admin-sub">
+      <div class="nav-item" data-sec="cuentas">Plan de Cuentas</div>
+      <div class="nav-item" data-sec="auxiliares">Auxiliares / Terceros</div>
+      <div class="nav-item" data-sec="subtipo-plan">Sub Tipo Plan</div>
+      <div class="nav-item" data-sec="cod-sii">Códigos SII</div>
+      <div class="nav-item" data-sec="centros-costos">Centros de Costos</div>
     </div>
   </div>
-  <div class="nav-group" id="grp-activos">
-    <div class="nav-group-btn" id="grp-activos-btn" onclick="toggleGrp('activos')">
-      <svg class="icon" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Activos Fijos<svg class="chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+  <div class="nav-group" id="grp-config">
+    <div class="nav-group-btn" id="grp-config-btn" onclick="toggleGrp('config')">
+      <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Configuración<svg class="chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
     </div>
-    <div class="nav-sub" id="grp-activos-sub">
-      <div class="nav-item" style="color:var(--text3);cursor:default;font-style:italic"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Próximamente</div>
+    <div class="nav-sub" id="grp-config-sub">
+      <div class="nav-item" data-sec="config">Configuración Sistema</div>
+      <div class="nav-item" data-sec="sistema">Gestión del Sistema</div>
     </div>
   </div>
   <div id="nav-sec-sistema" style="display:none"></div>
   <div id="nav-sistema" style="display:none"></div>
-
   <div class="sidebar-footer" style="padding:10px 12px">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
       <div id="sb-avatar" style="width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">A</div>
@@ -942,7 +929,11 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
           </select>
         </div>
         <div class="field"><label>Código *</label><input id="mc-cod" placeholder="ej: 1.1.01"></div>
-        <div class="field"><label>Código SII</label><input id="mc-cod-sii" placeholder="ej: 01-01"></div>
+        <div class="field"><label>Código SII</label>
+          <select id="mc-cod-sii">
+            <option value="">— Seleccionar —</option>
+          </select>
+        </div>
         <div class="field span3"><label>Concepto Partida</label><input id="mc-concepto" placeholder="Concepto según SII"></div>
         <div class="field span3"><label>Nombre de la cuenta *</label><input id="mc-nom" placeholder="ej: Caja y Bancos"></div>
         <div class="field"><label>Subtipo Plan</label>
@@ -1043,6 +1034,53 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
       <button class="btn" onclick="closeModal('modal-ver-asiento')">Cerrar</button>
     </div>
   </div>
+
+  <!-- ══ SUB TIPO PLAN ══ -->
+  <div id="sec-subtipo-plan" class="section">
+    <div class="topbar">
+      <div><div class="page-title">Sub Tipo Plan</div><div class="page-sub">Catálogo de subtipos del plan de cuentas</div></div>
+    </div>
+    <div class="content">
+      <div id="subtipo-plan-stats" style="margin-bottom:16px"></div>
+      <div class="card" style="overflow-x:auto">
+        <table class="table">
+          <thead><tr><th>Código</th><th>Tipo</th><th>Sub Tipo</th><th>Nombre</th></tr></thead>
+          <tbody id="tbody-subtipo-plan"><tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text3)">Cargando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CÓDIGOS SII ══ -->
+  <div id="sec-cod-sii" class="section">
+    <div class="topbar">
+      <div><div class="page-title">Códigos SII</div><div class="page-sub">Catálogo códigos SII — Resolución 2, Anexo N°1</div></div>
+    </div>
+    <div class="content">
+      <div id="cod-sii-stats" style="margin-bottom:16px"></div>
+      <div class="card" style="overflow-x:auto">
+        <table class="table">
+          <thead><tr><th>Código</th><th>Cód. Original</th><th>Glosa</th><th>Tipo</th><th>Nivel</th></tr></thead>
+          <tbody id="tbody-cod-sii"><tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text3)">Cargando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CENTROS DE COSTOS ══ -->
+  <div id="sec-centros-costos" class="section">
+    <div class="topbar">
+      <div><div class="page-title">Centros de Costos</div><div class="page-sub">Gestión de centros de costos</div></div>
+    </div>
+    <div class="content">
+      <div class="empty" style="padding:60px 0">
+        <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        <p>Módulo de Centros de Costos — Próximamente</p>
+      </div>
+    </div>
+  </div>
+>
+
 </div>
 
 <script>
@@ -1742,6 +1780,9 @@ function nav(id, el){
   if(id==='eerr'){ initEERRSelects(); toggleEERRModo(); renderEERR(); }
   if(id==='config'){ loadConfigForm(); }
   if(id==='sistema'){ populateMuEmpresas([]); renderEmpresasSistema(); renderUsuariosSistema(); }
+  if(id==='subtipo-plan'){ renderSubtipoPlan(); }
+  if(id==='cod-sii'){ renderCodSII(); }
+  if(id==='centros-costos'){ /* próximamente */ }
 }
 
 // ============================================================
@@ -1771,10 +1812,10 @@ async function addCuenta(){
     DB.cuentas.sort(function(a,b){return a.cod.localeCompare(b.cod);});
     closeModal('modal-cuenta');
     // Limpiar modal
-    ['mc-cod','mc-nom','mc-cod-sii','mc-concepto','mc-cta-cobrar','mc-cta-pagar'].forEach(function(id){
+    ['mc-cod','mc-nom','mc-concepto','mc-cta-cobrar','mc-cta-pagar'].forEach(function(id){
       var el=document.getElementById(id); if(el) el.value='';
     });
-    ['mc-tipo-plan','mc-subtipo-plan','mc-subtipo-flujo'].forEach(function(id){
+    ['mc-tipo-plan','mc-subtipo-plan','mc-subtipo-flujo','mc-cod-sii'].forEach(function(id){
       var el=document.getElementById(id); if(el) el.selectedIndex=0;
     });
     var dp=document.getElementById('mc-disp-pago'); if(dp) dp.checked=false;
@@ -3646,6 +3687,106 @@ function getNombreSubtipoPlan(cod){
 }
 // ═════════════════════════════════════════════════════════════
 
+
+// ══ CATÁLOGO CÓDIGOS SII ══════════════════════════════════════
+var COD_SII_DATA = []; // se carga desde Supabase al iniciar
+
+async function cargarCodSII(){
+  try{
+    var {data} = await supa.from('cod_sii').select('cod_sii,cod_orig,glosa,tipo').order('cod_sii');
+    COD_SII_DATA = data || [];
+    poblarSelectCodSII();
+  }catch(e){ console.warn('cod_sii no cargado:', e.message); }
+}
+
+function poblarSelectCodSII(filtroTipo){
+  var sel = document.getElementById('mc-cod-sii');
+  if(!sel) return;
+  var lista = filtroTipo
+    ? COD_SII_DATA.filter(function(r){ return r.tipo===filtroTipo; })
+    : COD_SII_DATA;
+  sel.innerHTML = '<option value="">— Seleccionar —</option>'
+    + lista.map(function(r){
+        // Mostrar: codigo sin puntos + codigo original + glosa
+        var txt = r.cod_sii + ' (' + (r.cod_orig||r.cod_sii) + ') — ' + r.glosa;
+        return '<option value="'+r.cod_sii+'">'+txt+'</option>';
+      }).join('');
+}
+// ═════════════════════════════════════════════════════════════
+
+
+// ══ RENDER SUB TIPO PLAN ═════════════════════════════════════
+async function renderSubtipoPlan(){
+  var tb = document.getElementById('tbody-subtipo-plan');
+  if(!tb) return;
+  tb.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px"><div style="display:inline-block;width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite"></div></td></tr>';
+  try{
+    var res = await supa.from('subtipo_plan').select('*').order('cod');
+    if(res.error) throw res.error;
+    var data = res.data || [];
+    if(!data.length){
+      tb.innerHTML='<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text3)">Sin datos. Ejecutar SQL subtipo_plan primero.</td></tr>';
+      return;
+    }
+    var rows = data.map(function(r){
+      var tr=document.createElement('tr');
+      tr.innerHTML='<td><code>'+r.cod+'</code></td>'
+        +'<td>'+typeBadge(r.tipo)+'</td>'
+        +'<td style="font-size:12px;color:var(--text3)">'+(r.subtipo||'—')+'</td>'
+        +'<td>'+r.nombre+'</td>';
+      return tr;
+    });
+    tb.innerHTML=''; rows.forEach(function(tr){tb.appendChild(tr);});
+    var stats=document.getElementById('subtipo-plan-stats');
+    if(stats){
+      var tipos={};
+      data.forEach(function(r){tipos[r.tipo]=(tipos[r.tipo]||0)+1;});
+      stats.innerHTML='<div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr))">'
+        +Object.keys(tipos).map(function(t){return '<div class="stat"><div class="stat-label">'+t+'</div><div class="stat-value">'+tipos[t]+'</div></div>';}).join('')
+        +'<div class="stat"><div class="stat-label">Total</div><div class="stat-value">'+data.length+'</div></div></div>';
+    }
+  }catch(e){
+    tb.innerHTML='<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--danger)">Error: '+e.message+'</td></tr>';
+  }
+}
+
+// ══ RENDER CÓDIGOS SII ═══════════════════════════════════════
+async function renderCodSII(){
+  var tb = document.getElementById('tbody-cod-sii');
+  if(!tb) return;
+  tb.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px"><div style="display:inline-block;width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite"></div></td></tr>';
+  try{
+    var res = await supa.from('cod_sii').select('*').order('cod_sii');
+    if(res.error) throw res.error;
+    var data = res.data || [];
+    if(!data.length){
+      tb.innerHTML='<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text3)">Sin datos. Ejecutar SQL cod_sii primero.</td></tr>';
+      return;
+    }
+    var rows = data.map(function(r){
+      var tr=document.createElement('tr');
+      tr.innerHTML='<td><code>'+r.cod_sii+'</code></td>'
+        +'<td style="font-size:12px;color:var(--text3)">'+(r.cod_orig||'—')+'</td>'
+        +'<td>'+r.glosa+'</td>'
+        +'<td>'+typeBadge(r.tipo)+'</td>'
+        +'<td style="text-align:center"><span class="badge" style="background:var(--surface2);font-size:11px">Niv.'+r.nivel+'</span></td>';
+      return tr;
+    });
+    tb.innerHTML=''; rows.forEach(function(tr){tb.appendChild(tr);});
+    var stats=document.getElementById('cod-sii-stats');
+    if(stats){
+      var tipos={};
+      data.forEach(function(r){tipos[r.tipo]=(tipos[r.tipo]||0)+1;});
+      stats.innerHTML='<div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr))">'
+        +Object.keys(tipos).map(function(t){return '<div class="stat"><div class="stat-label">'+t+'</div><div class="stat-value">'+tipos[t]+'</div></div>';}).join('')
+        +'<div class="stat"><div class="stat-label">Total</div><div class="stat-value">'+data.length+'</div></div></div>';
+    }
+  }catch(e){
+    tb.innerHTML='<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--danger)">Error: '+e.message+'</td></tr>';
+  }
+}
+// ═════════════════════════════════════════════════════════════
+
 // ============================================================
 // INIT
 // ============================================================
@@ -3654,6 +3795,7 @@ window.addEventListener('load', async function(){
   await loadSYS();
   await initSistemaSiVacio();
   await loadSYS();
+  await cargarCodSII();
   hideLoading();
   initNavListeners();
   // Intentar recuperar sesión previa
@@ -3890,5 +4032,4 @@ async function actualizarPlanBase(){
 
 
 </script>
-</body>
-</html>
+</body></html>
