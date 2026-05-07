@@ -1006,21 +1006,78 @@ function loadSYS(){
 // ── Primera vez: crear superadmin + plan base
 async function initSistemaSiVacio(){
   if(SYS.usuarios.length > 0) return;
-  SYS.planBase = cargarPlanRobles(true);
-  var t = Date.now();
-  var emp1='e_'+t, emp2='e_'+(t+1);
-  SYS.empresas.push({id:emp1,rut:'76.123.456-7',razon:'Comercial Demo S.A.',
-    giro:'Comercio al por mayor y menor',dir:'Av. Providencia 1234, Santiago',
-    periodo:'Enero – Diciembre 2025'});
-  SYS.empresas.push({id:emp2,rut:'76.987.654-3',razon:'Comercial Las Condes Ltda.',
-    giro:'Retail y distribucion',dir:'Av. Apoquindo 4500, Las Condes',
-    periodo:'Enero – Diciembre 2025'});
-  var hash = await sha256('admin123');
-  SYS.usuarios.push({id:'u_1',nombre:'Administrador',user:'admin',
-    passHash:hash,rol:'admin',empresaIds:[emp1,emp2]});
-  _precargarEmpresa1(emp1);
-  _precargarEmpresa2(emp2);
-  saveSYS();
+  showLoading('Configurando el sistema por primera vez...');
+  try{
+    // 1. Plan base
+    var planBase = cargarPlanRobles(true);
+    if(planBase && planBase.length > 0){
+      var pbRows = planBase.map(function(c){
+        return{cod:c.cod,nom:c.nom,tipo:c.tipo,aux:c.aux,desc_:c.desc||''};
+      });
+      var {error:pbErr} = await supa.from('plan_base').upsert(pbRows,{onConflict:'cod'});
+      if(pbErr) console.warn('plan_base upsert:', pbErr.message);
+      SYS.planBase = planBase;
+    }
+
+    // 2. Empresa 1 — Comercial Demo S.A.
+    var {data:e1, error:err1} = await supa.from('empresas').insert({
+      rut:'76.123.456-7', razon:'Comercial Demo S.A.',
+      giro:'Comercio al por mayor y menor',
+      dir:'Av. Providencia 1234, Santiago',
+      periodo:'Enero - Diciembre 2025'
+    }).select().single();
+    if(err1){ console.error('Error empresa 1:', err1.message); throw new Error(err1.message); }
+
+    // 3. Empresa 2 — Comercial Las Condes
+    var {data:e2, error:err2} = await supa.from('empresas').insert({
+      rut:'76.987.654-3', razon:'Comercial Las Condes Ltda.',
+      giro:'Retail y distribucion',
+      dir:'Av. Apoquindo 4500, Las Condes',
+      periodo:'Enero - Diciembre 2025'
+    }).select().single();
+    if(err2){ console.error('Error empresa 2:', err2.message); throw new Error(err2.message); }
+
+    SYS.empresas = [e1, e2];
+
+    // 4. Usuario admin
+    var hash = await sha256('admin123');
+    var {data:adm, error:errAdm} = await supa.from('usuarios').insert({
+      nombre:'Administrador', user_login:'admin',
+      pass_hash:hash, rol:'admin'
+    }).select().single();
+    if(errAdm){ console.error('Error admin:', errAdm.message); throw new Error(errAdm.message); }
+
+    // 5. Asignar admin a ambas empresas
+    var {error:errUE} = await supa.from('usuario_empresa').insert([
+      {usuario_id:adm.id, empresa_id:e1.id},
+      {usuario_id:adm.id, empresa_id:e2.id}
+    ]);
+    if(errUE) console.warn('usuario_empresa:', errUE.message);
+
+    SYS.usuarios = [{
+      id:adm.id, nombre:'Administrador', user:'admin',
+      passHash:hash, rol:'admin', empresaIds:[e1.id, e2.id]
+    }];
+
+    // 6. Config inicial de asientos para cada empresa
+    await supa.from('empresa_config').insert([
+      {empresa_id:e1.id, num_asiento:1},
+      {empresa_id:e2.id, num_asiento:1}
+    ]);
+
+    // 7. Precargar datos demo en ambas empresas
+    showLoading('Cargando datos de demostración (empresa 1)...');
+    await _precargarEmpresa1Supa(e1.id);
+    showLoading('Cargando datos de demostración (empresa 2)...');
+    await _precargarEmpresa2Supa(e2.id);
+
+  }catch(e){
+    console.error('initSistema error:', e);
+    alert('Error al inicializar el sistema: ' + e.message + 
+          '\n\nSi ya existe un administrador, intenta iniciar sesión con admin / admin123');
+  }finally{
+    hideLoading();
+  }
 }
 
 
@@ -2940,81 +2997,261 @@ async function cambiarEmpresaDesdeSelector(empId){
 
 // ── Precargar datos demo en Supabase (empresa 1 y 2)
 async function _precargarEmpresa1Supa(empId){
-  // Construir datos en memoria usando la función original
-  var prevEmp = SESSION.empresaId;
-  SESSION.empresaId = empId;
-  // Llamar función original para construir DB en memoria
-  _precargarEmpresa1(empId);
-  // Leer lo que se guardó en localStorage y subirlo a Supabase
   try{
-    var raw = localStorage.getItem('sc_e_'+empId);
-    if(!raw) return;
-    var d = JSON.parse(raw);
-    // Cuentas
-    if(d.cuentas && d.cuentas.length){
-      await supa.from('cuentas').insert(d.cuentas.map(function(c){
-        return{empresa_id:empId,cod:c.cod,nom:c.nom,tipo:c.tipo,aux:c.aux,desc_:c.desc||''};
-      }));
-    }
-    // Terceros
-    if(d.terceros && d.terceros.length){
-      await supa.from('terceros').insert(d.terceros.map(function(t){
-        return{empresa_id:empId,rut:t.rut,razon:t.razon,tipo:t.tipo,dir:t.dir||'',email:t.email||'',tel:t.tel||'',notas:t.notas||''};
-      }));
-    }
-    // Asientos (en lotes de 20)
-    if(d.asientos && d.asientos.length){
-      for(var i=0;i<d.asientos.length;i++){
-        var a=d.asientos[i];
-        var {data:ad}=await supa.from('asientos').insert({empresa_id:empId,num:a.num,fecha:a.fecha,glosa:a.glosa}).select().single();
-        if(ad && a.lineas && a.lineas.length){
-          await supa.from('lineas_asiento').insert(a.lineas.map(function(l){
-            return{asiento_id:ad.id,cuenta_cod:l.cuenta,aux_nombre:l.aux||'',debe:l.debe||0,haber:l.haber||0};
-          }));
-        }
+    // Cuentas empresa 1
+    var cuentas=[
+      {cod:'1.1.01',nom:'Caja',tipo:'Activo',aux:false},
+      {cod:'1.1.02',nom:'Banco',tipo:'Activo',aux:true},
+      {cod:'1.1.03',nom:'Clientes',tipo:'Activo',aux:true},
+      {cod:'1.1.04',nom:'Inventario Mercaderias',tipo:'Activo',aux:false},
+      {cod:'1.2.01',nom:'Muebles y Equipos',tipo:'Activo',aux:false},
+      {cod:'2.1.01',nom:'Proveedores',tipo:'Pasivo',aux:true},
+      {cod:'2.1.02',nom:'IVA Debito Fiscal',tipo:'Pasivo',aux:false},
+      {cod:'2.1.03',nom:'Prestamos Bancarios',tipo:'Pasivo',aux:false},
+      {cod:'3.1.01',nom:'Capital',tipo:'Patrimonio',aux:false},
+      {cod:'3.1.02',nom:'Utilidades Acumuladas',tipo:'Patrimonio',aux:false},
+      {cod:'4.1.01',nom:'Ventas',tipo:'Ingreso',aux:false},
+      {cod:'5.1.01',nom:'Costo de Ventas',tipo:'Costo',aux:false},
+      {cod:'6.1.01',nom:'Gastos Administracion',tipo:'Gasto',aux:false},
+      {cod:'6.1.02',nom:'Gastos de Ventas',tipo:'Gasto',aux:false},
+      {cod:'6.1.03',nom:'Gastos Financieros',tipo:'Gasto',aux:false},
+    ];
+    await supa.from('cuentas').insert(cuentas.map(function(c){
+      return{empresa_id:empId,cod:c.cod,nom:c.nom,tipo:c.tipo,aux:c.aux,desc_:''};
+    }));
+
+    // Terceros empresa 1
+    var terceros=[
+      {rut:'76.543.210-K',razon:'Empresa Beta',tipo:'Cliente',dir:'Av. Providencia 1234, Santiago',email:'contacto@empresabeta.cl',tel:'+56 2 2345 6789',notas:'Cliente frecuente'},
+      {rut:'76.111.222-3',razon:'Distribuidora Norte',tipo:'Cliente',dir:'Balmaceda 456, Antofagasta',email:'ventas@distnorte.cl',tel:'+56 55 234 5678',notas:'Cliente zona norte'},
+      {rut:'76.333.444-5',razon:'Comercial Sur',tipo:'Cliente',dir:'Los Carrera 789, Concepcion',email:'info@comercialsur.cl',tel:'+56 41 234 5678',notas:'Cliente zona sur'},
+      {rut:'76.555.666-7',razon:'Retail Express',tipo:'Cliente',dir:'Mall Plaza Local 45, Santiago',email:'compras@retailexpress.cl',tel:'+56 2 3456 7890',notas:'Canal retail'},
+      {rut:'76.777.888-9',razon:'Proveedor Alfa',tipo:'Proveedor',dir:'Parque Industrial 123, Pudahuel',email:'ventas@proveedoralfa.cl',tel:'+56 2 4567 8901',notas:'Proveedor principal'},
+      {rut:'97.006.000-6',razon:'Banco Santander',tipo:'Otro',dir:'Bandera 140, Santiago',email:'empresas@santander.cl',tel:'+56 2 2320 2000',notas:'Banco cuenta corriente'},
+    ];
+    await supa.from('terceros').insert(terceros.map(function(t){
+      return Object.assign({empresa_id:empId},t);
+    }));
+
+    // Asientos enero
+    var asientosEne=[
+      {num:'A-0001',fecha:'2025-01-02',glosa:'Aporte inicial capital',lineas:[{cuenta:'1.1.02',aux:'Banco Santander',debe:8000000,haber:0},{cuenta:'3.1.01',aux:'',debe:0,haber:8000000}]},
+      {num:'A-0002',fecha:'2025-01-05',glosa:'Compra activo fijo',lineas:[{cuenta:'1.2.01',aux:'',debe:450000,haber:0},{cuenta:'1.1.02',aux:'Banco Santander',debe:0,haber:450000}]},
+      {num:'A-0003',fecha:'2025-01-08',glosa:'Compra mercaderias enero',lineas:[{cuenta:'1.1.04',aux:'',debe:2100000,haber:0},{cuenta:'2.1.01',aux:'Proveedor Alfa',debe:0,haber:2100000}]},
+      {num:'A-0004',fecha:'2025-01-12',glosa:'Venta contado enero',lineas:[{cuenta:'1.1.01',aux:'',debe:950000,haber:0},{cuenta:'4.1.01',aux:'',debe:0,haber:950000}]},
+      {num:'A-0005',fecha:'2025-01-12',glosa:'Costo venta contado enero',lineas:[{cuenta:'5.1.01',aux:'',debe:570000,haber:0},{cuenta:'1.1.04',aux:'',debe:0,haber:570000}]},
+      {num:'A-0006',fecha:'2025-01-18',glosa:'Venta credito Empresa Beta',lineas:[{cuenta:'1.1.03',aux:'Empresa Beta',debe:1400000,haber:0},{cuenta:'4.1.01',aux:'',debe:0,haber:1400000}]},
+      {num:'A-0007',fecha:'2025-01-18',glosa:'Costo venta credito enero',lineas:[{cuenta:'5.1.01',aux:'',debe:840000,haber:0},{cuenta:'1.1.04',aux:'',debe:0,haber:840000}]},
+      {num:'A-0008',fecha:'2025-01-25',glosa:'Pago Proveedor Alfa',lineas:[{cuenta:'2.1.01',aux:'Proveedor Alfa',debe:1050000,haber:0},{cuenta:'1.1.02',aux:'Banco Santander',debe:0,haber:1050000}]},
+      {num:'A-0009',fecha:'2025-01-28',glosa:'Cobro Empresa Beta',lineas:[{cuenta:'1.1.02',aux:'Banco Santander',debe:700000,haber:0},{cuenta:'1.1.03',aux:'Empresa Beta',debe:0,haber:700000}]},
+      {num:'A-0010',fecha:'2025-01-31',glosa:'Gastos admin enero',lineas:[{cuenta:'6.1.01',aux:'',debe:180000,haber:0},{cuenta:'1.1.01',aux:'',debe:0,haber:180000}]},
+      {num:'A-0011',fecha:'2025-01-31',glosa:'Gastos ventas enero',lineas:[{cuenta:'6.1.02',aux:'',debe:95000,haber:0},{cuenta:'1.1.01',aux:'',debe:0,haber:95000}]},
+      {num:'A-0012',fecha:'2025-01-31',glosa:'Intereses prestamo enero',lineas:[{cuenta:'6.1.03',aux:'',debe:42000,haber:0},{cuenta:'2.1.03',aux:'',debe:0,haber:42000}]},
+    ];
+
+    // Meses Feb-Dic
+    var meses=[[2,'febrero',1800000,0.60,1500000,185000,98000,42000,'Empresa Beta','Distribuidora Norte'],
+      [3,'marzo',2100000,0.62,2000000,190000,105000,42000,'Comercial Sur','Empresa Beta'],
+      [4,'abril',1950000,0.60,1800000,185000,100000,42000,'Distribuidora Norte','Retail Express'],
+      [5,'mayo',2300000,0.61,2100000,192000,110000,42000,'Empresa Beta','Comercial Sur'],
+      [6,'junio',2150000,0.60,1900000,188000,108000,42000,'Retail Express','Empresa Beta'],
+      [7,'julio',1700000,0.62,1600000,180000,95000,42000,'Comercial Sur','Distribuidora Norte'],
+      [8,'agosto',1900000,0.61,1750000,182000,98000,42000,'Empresa Beta','Retail Express'],
+      [9,'septiembre',2250000,0.60,2050000,190000,108000,42000,'Distribuidora Norte','Comercial Sur'],
+      [10,'octubre',2400000,0.61,2200000,195000,112000,42000,'Empresa Beta','Retail Express'],
+      [11,'noviembre',2800000,0.59,2500000,200000,120000,42000,'Comercial Sur','Distribuidora Norte'],
+      [12,'diciembre',3200000,0.58,2800000,210000,135000,42000,'Empresa Beta','Retail Express']];
+    var numA=13;
+    meses.forEach(function(m){
+      var mes=m[0],nom=m[1],vtas=m[2],marg=m[3],compra=m[4],adm=m[5],vg=m[6],fi=m[7],c1=m[8],c2=m[9];
+      var mm=String(mes).padStart(2,'0');
+      var vc=Math.round(vtas*0.4/1000)*1000,cc=Math.round(vc*marg/1000)*1000;
+      var vcred=vtas-vc,ccred=Math.round(vcred*marg/1000)*1000;
+      var vc1=Math.round(vcred*0.55/1000)*1000,vc2=vcred-vc1;
+      var cobro=Math.round(vc1*0.6/1000)*1000,pago=Math.round(compra*0.7/1000)*1000;
+      function na(){ return 'A-'+String(numA++).padStart(4,'0'); }
+      asientosEne.push({num:na(),fecha:'2025-'+mm+'-05',glosa:'Compra mercaderias '+nom,lineas:[{cuenta:'1.1.04',aux:'',debe:compra,haber:0},{cuenta:'2.1.01',aux:'Proveedor Alfa',debe:0,haber:compra}]});
+      asientosEne.push({num:na(),fecha:'2025-'+mm+'-10',glosa:'Venta contado '+nom,lineas:[{cuenta:'1.1.01',aux:'',debe:vc,haber:0},{cuenta:'4.1.01',aux:'',debe:0,haber:vc}]});
+      asientosEne.push({num:na(),fecha:'2025-'+mm+'-10',glosa:'Costo venta contado '+nom,lineas:[{cuenta:'5.1.01',aux:'',debe:cc,haber:0},{cuenta:'1.1.04',aux:'',debe:0,haber:cc}]});
+      asientosEne.push({num:na(),fecha:'2025-'+mm+'-15',glosa:'Venta credito '+c1,lineas:[{cuenta:'1.1.03',aux:c1,debe:vc1,haber:0},{cuenta:'4.1.01',aux:'',debe:0,haber:vc1}]});
+      asientosEne.push({num:na(),fecha:'2025-'+mm+'-15',glosa:'Venta credito '+c2,lineas:[{cuenta:'1.1.03',aux:c2,debe:vc2,haber:0},{cuenta:'4.1.01',aux:'',debe:0,haber:vc2}]});
+      asientosEne.push({num:na(),fecha:'2025-'+mm+'-15',glosa:'Costo ventas credito '+nom,lineas:[{cuenta:'5.1.01',aux:'',debe:ccred,haber:0},{cuenta:'1.1.04',aux:'',debe:0,haber:ccred}]});
+      asientosEne.push({num:na(),fecha:'2025-'+mm+'-20',glosa:'Cobro '+c1,lineas:[{cuenta:'1.1.02',aux:'Banco Santander',debe:cobro,haber:0},{cuenta:'1.1.03',aux:c1,debe:0,haber:cobro}]});
+      asientosEne.push({num:na(),fecha:'2025-'+mm+'-22',glosa:'Pago Proveedor Alfa '+nom,lineas:[{cuenta:'2.1.01',aux:'Proveedor Alfa',debe:pago,haber:0},{cuenta:'1.1.02',aux:'Banco Santander',debe:0,haber:pago}]});
+      asientosEne.push({num:na(),fecha:'2025-'+mm+'-28',glosa:'Gastos admin '+nom,lineas:[{cuenta:'6.1.01',aux:'',debe:adm,haber:0},{cuenta:'1.1.01',aux:'',debe:0,haber:adm}]});
+      asientosEne.push({num:na(),fecha:'2025-'+mm+'-28',glosa:'Gastos ventas '+nom,lineas:[{cuenta:'6.1.02',aux:'',debe:vg,haber:0},{cuenta:'1.1.01',aux:'',debe:0,haber:vg}]});
+      asientosEne.push({num:na(),fecha:'2025-'+mm+'-28',glosa:'Intereses prestamo '+nom,lineas:[{cuenta:'6.1.03',aux:'',debe:fi,haber:0},{cuenta:'2.1.03',aux:'',debe:0,haber:fi}]});
+    });
+
+    // Insertar asientos en Supabase
+    for(var i=0;i<asientosEne.length;i++){
+      var a=asientosEne[i];
+      var {data:ad,error:aerr}=await supa.from('asientos').insert({
+        empresa_id:empId,num:a.num,fecha:a.fecha,glosa:a.glosa
+      }).select().single();
+      if(aerr){ console.error('asiento error:',aerr.message); continue; }
+      if(ad && a.lineas.length>0){
+        await supa.from('lineas_asiento').insert(a.lineas.map(function(l){
+          return{asiento_id:ad.id,cuenta_cod:l.cuenta,aux_nombre:l.aux||'',debe:l.debe||0,haber:l.haber||0};
+        }));
       }
-      await supa.from('empresa_config').upsert({empresa_id:empId,num_asiento:d.numAsiento||1});
     }
-    localStorage.removeItem('sc_e_'+empId);
-  }catch(e){console.error('_precargarEmpresa1Supa error:',e);}
-  SESSION.empresaId = prevEmp;
+    await supa.from('empresa_config').upsert({empresa_id:empId,num_asiento:numA});
+  }catch(e){ console.error('_precargarEmpresa1Supa:',e); }
 }
 
 async function _precargarEmpresa2Supa(empId){
-  var prevEmp = SESSION.empresaId;
-  SESSION.empresaId = empId;
-  _precargarEmpresa2(empId);
   try{
-    var raw = localStorage.getItem('sc_e_'+empId);
-    if(!raw) return;
-    var d = JSON.parse(raw);
-    if(d.cuentas && d.cuentas.length){
-      await supa.from('cuentas').insert(d.cuentas.map(function(c){
-        return{empresa_id:empId,cod:c.cod,nom:c.nom,tipo:c.tipo,aux:c.aux,desc_:c.desc||''};
-      }));
-    }
-    if(d.terceros && d.terceros.length){
-      await supa.from('terceros').insert(d.terceros.map(function(t){
-        return{empresa_id:empId,rut:t.rut,razon:t.razon,tipo:t.tipo,dir:t.dir||'',email:t.email||'',tel:t.tel||'',notas:t.notas||''};
-      }));
-    }
-    if(d.asientos && d.asientos.length){
-      for(var i=0;i<d.asientos.length;i++){
-        var a=d.asientos[i];
-        var {data:ad}=await supa.from('asientos').insert({empresa_id:empId,num:a.num,fecha:a.fecha,glosa:a.glosa}).select().single();
-        if(ad && a.lineas && a.lineas.length){
-          await supa.from('lineas_asiento').insert(a.lineas.map(function(l){
-            return{asiento_id:ad.id,cuenta_cod:l.cuenta,aux_nombre:l.aux||'',debe:l.debe||0,haber:l.haber||0};
-          }));
-        }
+    var cuentas=[
+      {cod:'1.1.01',nom:'Caja',tipo:'Activo',aux:false},
+      {cod:'1.1.02',nom:'Banco BCI',tipo:'Activo',aux:true},
+      {cod:'1.1.03',nom:'Deudores Comerciales',tipo:'Activo',aux:true},
+      {cod:'1.1.04',nom:'Stock Productos',tipo:'Activo',aux:false},
+      {cod:'1.2.01',nom:'Equipos Computacion',tipo:'Activo',aux:false},
+      {cod:'1.2.02',nom:'Vehiculos',tipo:'Activo',aux:false},
+      {cod:'2.1.01',nom:'Acreedores Comerciales',tipo:'Pasivo',aux:true},
+      {cod:'2.1.02',nom:'IVA por Pagar',tipo:'Pasivo',aux:false},
+      {cod:'2.1.03',nom:'Credito Bancario',tipo:'Pasivo',aux:false},
+      {cod:'3.1.01',nom:'Capital Pagado',tipo:'Patrimonio',aux:false},
+      {cod:'4.1.01',nom:'Ingresos por Ventas',tipo:'Ingreso',aux:false},
+      {cod:'4.1.02',nom:'Ingresos por Servicios',tipo:'Ingreso',aux:false},
+      {cod:'5.1.01',nom:'Costo Mercaderias Vendidas',tipo:'Costo',aux:false},
+      {cod:'6.1.01',nom:'Remuneraciones',tipo:'Gasto',aux:false},
+      {cod:'6.1.02',nom:'Arriendo Oficinas',tipo:'Gasto',aux:false},
+      {cod:'6.1.03',nom:'Servicios Basicos',tipo:'Gasto',aux:false},
+      {cod:'6.1.04',nom:'Marketing y Publicidad',tipo:'Gasto',aux:false},
+      {cod:'6.1.05',nom:'Gastos Financieros',tipo:'Gasto',aux:false},
+    ];
+    await supa.from('cuentas').insert(cuentas.map(function(c){
+      return{empresa_id:empId,cod:c.cod,nom:c.nom,tipo:c.tipo,aux:c.aux,desc_:''};
+    }));
+
+    var terceros=[
+      {rut:'76.200.300-4',razon:'Falabella Retail S.A.',tipo:'Cliente',dir:'Av. Kennedy 9001, Las Condes',email:'proveedores@falabella.cl',tel:'+56 2 2380 2000',notas:'Canal retail'},
+      {rut:'76.400.500-6',razon:'Ripley Corp S.A.',tipo:'Cliente',dir:'Av. Providencia 2155, Santiago',email:'compras@ripley.cl',tel:'+56 2 2330 4000',notas:'Canal retail'},
+      {rut:'76.600.700-8',razon:'Paris Cencosud',tipo:'Cliente',dir:'Av. Kennedy 6800, Vitacura',email:'proveedores@cencosud.cl',tel:'+56 2 2959 0000',notas:'Canal retail'},
+      {rut:'96.500.760-9',razon:'Importadora Asia Ltda.',tipo:'Proveedor',dir:'Puerto San Antonio',email:'ventas@importadoraasia.cl',tel:'+56 35 213 4567',notas:'Proveedor importados'},
+      {rut:'76.800.900-1',razon:'Distribuidora Central',tipo:'Proveedor',dir:'Ruta 5 Norte Km 12, Quilicura',email:'ventas@distcentral.cl',tel:'+56 2 2745 8900',notas:'Proveedor local'},
+      {rut:'97.030.000-7',razon:'Banco BCI',tipo:'Otro',dir:'El Golf 125, Las Condes',email:'empresas@bci.cl',tel:'+56 2 2692 5000',notas:'Banco principal'},
+    ];
+    await supa.from('terceros').insert(terceros.map(function(t){
+      return Object.assign({empresa_id:empId},t);
+    }));
+
+    var asientos=[];
+    var numA=1;
+    function na(){ return 'A-'+String(numA++).padStart(4,'0'); }
+
+    asientos.push({num:na(),fecha:'2025-01-03',glosa:'Aporte inicial socios',lineas:[{cuenta:'1.1.02',aux:'Banco BCI',debe:15000000,haber:0},{cuenta:'3.1.01',aux:'',debe:0,haber:15000000}]});
+    asientos.push({num:na(),fecha:'2025-01-05',glosa:'Compra equipos computacion',lineas:[{cuenta:'1.2.01',aux:'',debe:2800000,haber:0},{cuenta:'1.1.02',aux:'Banco BCI',debe:0,haber:2800000}]});
+    asientos.push({num:na(),fecha:'2025-01-06',glosa:'Compra vehiculo reparto',lineas:[{cuenta:'1.2.02',aux:'',debe:8500000,haber:0},{cuenta:'2.1.03',aux:'',debe:0,haber:8500000}]});
+
+    var mLC=[[1,'enero',4200000,500000,0.55,2100000,1500000,320000,250000,180000,'Falabella Retail S.A.','Ripley Corp S.A.','Importadora Asia Ltda.'],
+      [2,'febrero',3800000,480000,0.55,1900000,1500000,320000,250000,180000,'Ripley Corp S.A.','Paris Cencosud','Distribuidora Central'],
+      [3,'marzo',4500000,520000,0.55,2200000,1500000,320000,280000,180000,'Falabella Retail S.A.','Paris Cencosud','Importadora Asia Ltda.'],
+      [4,'abril',4100000,490000,0.55,2000000,1500000,320000,260000,180000,'Ripley Corp S.A.','Falabella Retail S.A.','Distribuidora Central'],
+      [5,'mayo',4700000,530000,0.55,2300000,1500000,320000,290000,180000,'Paris Cencosud','Falabella Retail S.A.','Importadora Asia Ltda.'],
+      [6,'junio',4300000,510000,0.55,2100000,1500000,320000,270000,180000,'Falabella Retail S.A.','Ripley Corp S.A.','Distribuidora Central'],
+      [7,'julio',3600000,450000,0.55,1800000,1500000,320000,230000,180000,'Paris Cencosud','Distribuidora Central','Importadora Asia Ltda.'],
+      [8,'agosto',3900000,470000,0.55,1950000,1500000,320000,245000,180000,'Ripley Corp S.A.','Falabella Retail S.A.','Distribuidora Central'],
+      [9,'septiembre',4600000,515000,0.55,2250000,1500000,320000,285000,180000,'Falabella Retail S.A.','Paris Cencosud','Importadora Asia Ltda.'],
+      [10,'octubre',5100000,560000,0.55,2500000,1500000,320000,310000,180000,'Ripley Corp S.A.','Falabella Retail S.A.','Distribuidora Central'],
+      [11,'noviembre',6200000,620000,0.55,3000000,1500000,320000,380000,180000,'Falabella Retail S.A.','Paris Cencosud','Importadora Asia Ltda.'],
+      [12,'diciembre',7800000,750000,0.55,3800000,1500000,320000,450000,180000,'Ripley Corp S.A.','Paris Cencosud','Distribuidora Central']];
+
+    mLC.forEach(function(m){
+      var mes=m[0],nom=m[1],vtas=m[2],serv=m[3],marg=m[4],compra=m[5];
+      var rem=m[6],arr=m[7],mkt=m[8],fi=m[9],cl1=m[10],cl2=m[11],prov=m[12];
+      var mm=String(mes).padStart(2,'0');
+      var costo=Math.round(vtas*marg/1000)*1000;
+      var vc1=Math.round(vtas*0.6/1000)*1000,vc2=vtas-vc1;
+      var cobro=Math.round(vc1*0.7/1000)*1000,pago=Math.round(compra*0.75/1000)*1000;
+      asientos.push({num:na(),fecha:'2025-'+mm+'-03',glosa:'Compra stock '+nom,lineas:[{cuenta:'1.1.04',aux:'',debe:compra,haber:0},{cuenta:'2.1.01',aux:prov,debe:0,haber:compra}]});
+      asientos.push({num:na(),fecha:'2025-'+mm+'-10',glosa:'Ventas '+cl1+' '+nom,lineas:[{cuenta:'1.1.03',aux:cl1,debe:vc1,haber:0},{cuenta:'4.1.01',aux:'',debe:0,haber:vc1}]});
+      asientos.push({num:na(),fecha:'2025-'+mm+'-15',glosa:'Ventas '+cl2+' '+nom,lineas:[{cuenta:'1.1.03',aux:cl2,debe:vc2,haber:0},{cuenta:'4.1.01',aux:'',debe:0,haber:vc2}]});
+      asientos.push({num:na(),fecha:'2025-'+mm+'-15',glosa:'Costo mercaderias '+nom,lineas:[{cuenta:'5.1.01',aux:'',debe:costo,haber:0},{cuenta:'1.1.04',aux:'',debe:0,haber:costo}]});
+      asientos.push({num:na(),fecha:'2025-'+mm+'-16',glosa:'Ingresos servicios '+nom,lineas:[{cuenta:'1.1.01',aux:'',debe:serv,haber:0},{cuenta:'4.1.02',aux:'',debe:0,haber:serv}]});
+      asientos.push({num:na(),fecha:'2025-'+mm+'-20',glosa:'Cobro '+cl1+' '+nom,lineas:[{cuenta:'1.1.02',aux:'Banco BCI',debe:cobro,haber:0},{cuenta:'1.1.03',aux:cl1,debe:0,haber:cobro}]});
+      asientos.push({num:na(),fecha:'2025-'+mm+'-22',glosa:'Pago '+prov+' '+nom,lineas:[{cuenta:'2.1.01',aux:prov,debe:pago,haber:0},{cuenta:'1.1.02',aux:'Banco BCI',debe:0,haber:pago}]});
+      asientos.push({num:na(),fecha:'2025-'+mm+'-28',glosa:'Remuneraciones '+nom,lineas:[{cuenta:'6.1.01',aux:'',debe:rem,haber:0},{cuenta:'1.1.01',aux:'',debe:0,haber:rem}]});
+      asientos.push({num:na(),fecha:'2025-'+mm+'-28',glosa:'Arriendo '+nom,lineas:[{cuenta:'6.1.02',aux:'',debe:arr,haber:0},{cuenta:'1.1.02',aux:'Banco BCI',debe:0,haber:arr}]});
+      asientos.push({num:na(),fecha:'2025-'+mm+'-28',glosa:'Marketing '+nom,lineas:[{cuenta:'6.1.04',aux:'',debe:mkt,haber:0},{cuenta:'1.1.02',aux:'Banco BCI',debe:0,haber:mkt}]});
+      asientos.push({num:na(),fecha:'2025-'+mm+'-28',glosa:'Servicios basicos '+nom,lineas:[{cuenta:'6.1.03',aux:'',debe:50000,haber:0},{cuenta:'1.1.01',aux:'',debe:0,haber:50000}]});
+      asientos.push({num:na(),fecha:'2025-'+mm+'-28',glosa:'Gastos financieros '+nom,lineas:[{cuenta:'6.1.05',aux:'',debe:fi,haber:0},{cuenta:'2.1.03',aux:'',debe:0,haber:fi}]});
+    });
+
+    for(var i=0;i<asientos.length;i++){
+      var a=asientos[i];
+      var {data:ad,error:aerr}=await supa.from('asientos').insert({
+        empresa_id:empId,num:a.num,fecha:a.fecha,glosa:a.glosa
+      }).select().single();
+      if(aerr){ console.error('asiento e2:',aerr.message); continue; }
+      if(ad && a.lineas.length>0){
+        await supa.from('lineas_asiento').insert(a.lineas.map(function(l){
+          return{asiento_id:ad.id,cuenta_cod:l.cuenta,aux_nombre:l.aux||'',debe:l.debe||0,haber:l.haber||0};
+        }));
       }
-      await supa.from('empresa_config').upsert({empresa_id:empId,num_asiento:d.numAsiento||1});
     }
-    localStorage.removeItem('sc_e_'+empId);
-  }catch(e){console.error('_precargarEmpresa2Supa error:',e);}
-  SESSION.empresaId = prevEmp;
+    await supa.from('empresa_config').upsert({empresa_id:empId,num_asiento:numA});
+  }catch(e){ console.error('_precargarEmpresa2Supa:',e); }
 }
 
+
+function renderTerceros(){
+  if(!DB.terceros) DB.terceros=[];
+  var buscar=(document.getElementById('terceros-buscar')||{value:''}).value.toLowerCase();
+  var tipo=(document.getElementById('terceros-tipo-filtro')||{value:''}).value;
+  DB.terceros.forEach(function(t,i){t._idx=i;});
+  var lista=DB.terceros.filter(function(t){
+    var matchTipo=!tipo||t.tipo===tipo;
+    var matchBusca=!buscar||(t.rut+t.razon+(t.email||'')+(t.tel||'')).toLowerCase().includes(buscar);
+    return matchTipo&&matchBusca;
+  });
+  var tb=document.getElementById('tbody-terceros');
+  if(!tb) return;
+  if(!lista.length){tb.innerHTML='<tr><td colspan="7"><div class="empty"><p>Sin auxiliares registrados.</p></div></td></tr>'; return;}
+  var tipoBadgeMap={Cliente:'activo',Proveedor:'pasivo',Empleado:'patrimonio',Otro:'gasto'};
+  var rows=lista.map(function(t){
+    var bClass=tipoBadgeMap[t.tipo]||'gasto';
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td><code>'+t.rut+'</code></td>'
+      +'<td><b>'+t.razon+'</b>'+(t.notas?'<br><span style="font-size:11px;color:var(--text3)">'+t.notas+'</span>':'')+'</td>'
+      +'<td><span class="badge badge-'+bClass+'">'+t.tipo+'</span></td>'
+      +'<td style="font-size:12px;color:var(--text2)">'+(t.dir||'—')+'</td>'
+      +'<td style="font-size:12px">'+(t.email?'<a href="mailto:'+t.email+'">'+t.email+'</a>':'—')+'</td>'
+      +'<td style="font-size:12px">'+(t.tel||'—')+'</td>'
+      +'<td class="no-print" style="display:flex;gap:4px"></td>';
+    var tdBtn=tr.querySelector('td.no-print');
+    var btnVer=document.createElement('button'); btnVer.className='btn btn-sm btn-ghost'; btnVer.textContent='Ver';
+    btnVer.onclick=function(){verTercero(t._idx);}; tdBtn.appendChild(btnVer);
+    var btnEdit=document.createElement('button'); btnEdit.className='btn btn-sm btn-ghost'; btnEdit.textContent='Editar';
+    btnEdit.onclick=function(){editTercero(t._idx);}; tdBtn.appendChild(btnEdit);
+    var btnDel=document.createElement('button'); btnDel.className='btn btn-danger btn-sm'; btnDel.textContent='×';
+    btnDel.onclick=function(){delTercero(t._idx);}; tdBtn.appendChild(btnDel);
+    return tr;
+  });
+  tb.innerHTML='';
+  rows.forEach(function(tr){tb.appendChild(tr);});
+}
+
+function renderStatsTerceros(){
+  if(!DB.terceros) DB.terceros=[];
+  var c=0,p=0,e=0,o=0;
+  DB.terceros.forEach(function(t){
+    if(t.tipo==='Cliente') c++;
+    else if(t.tipo==='Proveedor') p++;
+    else if(t.tipo==='Empleado') e++;
+    else o++;
+  });
+  var el=document.getElementById('terceros-stats');
+  if(!el) return;
+  el.innerHTML='<div class="stats-grid" style="grid-template-columns:repeat(4,1fr)">'
+    +'<div class="stat"><div class="stat-label">Total</div><div class="stat-value">'+DB.terceros.length+'</div></div>'
+    +'<div class="stat"><div class="stat-label">Clientes</div><div class="stat-value text-blue">'+c+'</div></div>'
+    +'<div class="stat"><div class="stat-label">Proveedores</div><div class="stat-value text-red">'+p+'</div></div>'
+    +'<div class="stat"><div class="stat-label">Otros</div><div class="stat-value">'+(e+o)+'</div></div>'
+    +'</div>';
+}
 // ============================================================
 // INIT
 // ============================================================
@@ -3051,14 +3288,7 @@ async function sha256(str){
 function showLoading(msg){ var el=document.getElementById('loading-overlay'); if(el){el.querySelector('.loading-msg').textContent=msg||'Cargando...';el.style.display='flex';} }
 function hideLoading(){ var el=document.getElementById('loading-overlay'); if(el) el.style.display='none'; }
 
-async function saveDB(){
-  if(!SESSION.empresaId) return;
-  var emp=SYS.empresas.find(function(e){return e.id===SESSION.empresaId;});
-  if(emp){
-    await supa.from('empresas').update({rut:DB.config.rut||emp.rut,razon:DB.config.empresa||emp.razon,giro:DB.config.giro||'',dir:DB.config.dir||'',periodo:DB.config.periodo||''}).eq('id',SESSION.empresaId);
-  }
-  await supa.from('empresa_config').upsert({empresa_id:SESSION.empresaId,num_asiento:DB.numAsiento});
-}
+
 async function saveCuenta(c){
   await supa.from('cuentas').upsert({empresa_id:SESSION.empresaId,cod:c.cod,nom:c.nom,tipo:c.tipo,aux:c.aux,desc_:c.desc||''},{onConflict:'empresa_id,cod'});
 }
@@ -3085,29 +3315,7 @@ async function deleteTerceroSupa(rut){
   await supa.from('terceros').delete().eq('empresa_id',SESSION.empresaId).eq('rut',rut);
 }
 
-async function loadDB(){
-  if(!SESSION.empresaId) return;
-  showLoading('Cargando datos...');
-  try{
-    var emp=SYS.empresas.find(function(e){return e.id===SESSION.empresaId;});
-    if(emp) DB.config={empresa:emp.razon,rut:emp.rut,giro:emp.giro||'',dir:emp.dir||'',periodo:emp.periodo||''};
-    var {data:cfg}=await supa.from('empresa_config').select('num_asiento').eq('empresa_id',SESSION.empresaId).maybeSingle();
-    DB.numAsiento=cfg?cfg.num_asiento:1;
-    var {data:cuentas}=await supa.from('cuentas').select('*').eq('empresa_id',SESSION.empresaId).order('cod');
-    DB.cuentas=(cuentas||[]).map(function(c){return{cod:c.cod,nom:c.nom,tipo:c.tipo,aux:c.aux,desc:c.desc_||''};}); 
-    var {data:asientosSupa}=await supa.from('asientos').select('id,num,fecha,glosa').eq('empresa_id',SESSION.empresaId).order('fecha').order('num');
-    var ids=(asientosSupa||[]).map(function(a){return a.id;});
-    var lineasMap={};
-    if(ids.length>0){
-      var {data:lineas}=await supa.from('lineas_asiento').select('*').in('asiento_id',ids);
-      (lineas||[]).forEach(function(l){if(!lineasMap[l.asiento_id])lineasMap[l.asiento_id]=[];lineasMap[l.asiento_id].push({cuenta:l.cuenta_cod,aux:l.aux_nombre||'',debe:parseFloat(l.debe)||0,haber:parseFloat(l.haber)||0});});
-    }
-    DB.asientos=(asientosSupa||[]).map(function(a){return{num:a.num,fecha:a.fecha,glosa:a.glosa,lineas:lineasMap[a.id]||[]};}); 
-    var {data:terceros}=await supa.from('terceros').select('*').eq('empresa_id',SESSION.empresaId).order('razon');
-    DB.terceros=(terceros||[]).map(function(t){return{rut:t.rut,razon:t.razon,tipo:t.tipo,dir:t.dir||'',email:t.email||'',tel:t.tel||'',notas:t.notas||''};}); 
-  }catch(e){console.error('loadDB:',e);}
-  finally{hideLoading();}
-}
+
 
 async function loadSYS(){
   try{
@@ -3268,31 +3476,7 @@ async function actualizarPlanBase(){
   finally{hideLoading();}
 }
 
-async function initSistemaSiVacio(){
-  if(SYS.usuarios.length>0) return;
-  showLoading('Configurando el sistema por primera vez...');
-  try{
-    var planBase=cargarPlanRobles(true);
-    if(planBase&&planBase.length>0){
-      await supa.from('plan_base').upsert(planBase.map(function(c){return{cod:c.cod,nom:c.nom,tipo:c.tipo,aux:c.aux,desc_:c.desc||''};}));
-      SYS.planBase=planBase;
-    }
-    var {data:e1}=await supa.from('empresas').insert({rut:'76.123.456-7',razon:'Comercial Demo S.A.',giro:'Comercio al por mayor',dir:'Av. Providencia 1234, Santiago',periodo:'Enero – Diciembre 2025'}).select().single();
-    var {data:e2}=await supa.from('empresas').insert({rut:'76.987.654-3',razon:'Comercial Las Condes Ltda.',giro:'Retail y distribucion',dir:'Av. Apoquindo 4500, Las Condes',periodo:'Enero – Diciembre 2025'}).select().single();
-    SYS.empresas=[e1,e2];
-    var hash=await sha256('admin123');
-    var {data:adm}=await supa.from('usuarios').insert({nombre:'Administrador',user_login:'admin',pass_hash:hash,rol:'admin'}).select().single();
-    await supa.from('usuario_empresa').insert([{usuario_id:adm.id,empresa_id:e1.id},{usuario_id:adm.id,empresa_id:e2.id}]);
-    SYS.usuarios=[{id:adm.id,nombre:'Administrador',user:'admin',passHash:hash,rol:'admin',empresaIds:[e1.id,e2.id]}];
-    // Precargar datos en ambas empresas
-    SESSION.empresaId=e1.id;
-    await _precargarEmpresa1Supa(e1.id);
-    SESSION.empresaId=e2.id;
-    await _precargarEmpresa2Supa(e2.id);
-    SESSION.empresaId=null;
-  }catch(e){console.error('initSistema:',e); alert('Error al inicializar: '+e.message);}
-  finally{hideLoading();}
-}
+
 
 
 </script>
