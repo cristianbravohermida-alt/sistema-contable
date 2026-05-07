@@ -2921,6 +2921,84 @@ async function cambiarEmpresaDesdeSelector(empId){
   setTimeout(function(){msg.remove();},2500);
 }
 
+
+// ── Precargar datos demo en Supabase (empresa 1 y 2)
+async function _precargarEmpresa1Supa(empId){
+  // Construir datos en memoria usando la función original
+  var prevEmp = SESSION.empresaId;
+  SESSION.empresaId = empId;
+  // Llamar función original para construir DB en memoria
+  _precargarEmpresa1(empId);
+  // Leer lo que se guardó en localStorage y subirlo a Supabase
+  try{
+    var raw = localStorage.getItem('sc_e_'+empId);
+    if(!raw) return;
+    var d = JSON.parse(raw);
+    // Cuentas
+    if(d.cuentas && d.cuentas.length){
+      await supa.from('cuentas').insert(d.cuentas.map(function(c){
+        return{empresa_id:empId,cod:c.cod,nom:c.nom,tipo:c.tipo,aux:c.aux,desc_:c.desc||''};
+      }));
+    }
+    // Terceros
+    if(d.terceros && d.terceros.length){
+      await supa.from('terceros').insert(d.terceros.map(function(t){
+        return{empresa_id:empId,rut:t.rut,razon:t.razon,tipo:t.tipo,dir:t.dir||'',email:t.email||'',tel:t.tel||'',notas:t.notas||''};
+      }));
+    }
+    // Asientos (en lotes de 20)
+    if(d.asientos && d.asientos.length){
+      for(var i=0;i<d.asientos.length;i++){
+        var a=d.asientos[i];
+        var {data:ad}=await supa.from('asientos').insert({empresa_id:empId,num:a.num,fecha:a.fecha,glosa:a.glosa}).select().single();
+        if(ad && a.lineas && a.lineas.length){
+          await supa.from('lineas_asiento').insert(a.lineas.map(function(l){
+            return{asiento_id:ad.id,cuenta_cod:l.cuenta,aux_nombre:l.aux||'',debe:l.debe||0,haber:l.haber||0};
+          }));
+        }
+      }
+      await supa.from('empresa_config').upsert({empresa_id:empId,num_asiento:d.numAsiento||1});
+    }
+    localStorage.removeItem('sc_e_'+empId);
+  }catch(e){console.error('_precargarEmpresa1Supa error:',e);}
+  SESSION.empresaId = prevEmp;
+}
+
+async function _precargarEmpresa2Supa(empId){
+  var prevEmp = SESSION.empresaId;
+  SESSION.empresaId = empId;
+  _precargarEmpresa2(empId);
+  try{
+    var raw = localStorage.getItem('sc_e_'+empId);
+    if(!raw) return;
+    var d = JSON.parse(raw);
+    if(d.cuentas && d.cuentas.length){
+      await supa.from('cuentas').insert(d.cuentas.map(function(c){
+        return{empresa_id:empId,cod:c.cod,nom:c.nom,tipo:c.tipo,aux:c.aux,desc_:c.desc||''};
+      }));
+    }
+    if(d.terceros && d.terceros.length){
+      await supa.from('terceros').insert(d.terceros.map(function(t){
+        return{empresa_id:empId,rut:t.rut,razon:t.razon,tipo:t.tipo,dir:t.dir||'',email:t.email||'',tel:t.tel||'',notas:t.notas||''};
+      }));
+    }
+    if(d.asientos && d.asientos.length){
+      for(var i=0;i<d.asientos.length;i++){
+        var a=d.asientos[i];
+        var {data:ad}=await supa.from('asientos').insert({empresa_id:empId,num:a.num,fecha:a.fecha,glosa:a.glosa}).select().single();
+        if(ad && a.lineas && a.lineas.length){
+          await supa.from('lineas_asiento').insert(a.lineas.map(function(l){
+            return{asiento_id:ad.id,cuenta_cod:l.cuenta,aux_nombre:l.aux||'',debe:l.debe||0,haber:l.haber||0};
+          }));
+        }
+      }
+      await supa.from('empresa_config').upsert({empresa_id:empId,num_asiento:d.numAsiento||1});
+    }
+    localStorage.removeItem('sc_e_'+empId);
+  }catch(e){console.error('_precargarEmpresa2Supa error:',e);}
+  SESSION.empresaId = prevEmp;
+}
+
 // ============================================================
 // INIT
 // ============================================================
@@ -3214,9 +3292,9 @@ async function initSistemaSiVacio(){
     SYS.usuarios=[{id:adm.id,nombre:'Administrador',user:'admin',passHash:hash,rol:'admin',empresaIds:[e1.id,e2.id]}];
     // Precargar datos en ambas empresas
     SESSION.empresaId=e1.id;
-    await _precargarEmpresa1Supa(e1.id,planBase);
+    await _precargarEmpresa1Supa(e1.id);
     SESSION.empresaId=e2.id;
-    await _precargarEmpresa2Supa(e2.id,planBase);
+    await _precargarEmpresa2Supa(e2.id);
     SESSION.empresaId=null;
   }catch(e){console.error('initSistema:',e); alert('Error al inicializar: '+e.message);}
   finally{hideLoading();}
