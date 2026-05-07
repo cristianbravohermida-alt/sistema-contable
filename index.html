@@ -982,25 +982,60 @@ async function sha256(str){
 }
 
 // ── Persistencia
-function saveDB(){
+async function saveDB(){
   if(!SESSION.empresaId) return;
-  if(!DB.terceros) DB.terceros=[];
-  try{ localStorage.setItem('sc_e_'+SESSION.empresaId, JSON.stringify(DB)); }catch(e){}
+  try{
+    var emp=SYS.empresas.find(function(e){return e.id===SESSION.empresaId;});
+    if(emp){
+      await supa.from('empresas').update({
+        rut:DB.config.rut||emp.rut, razon:DB.config.empresa||emp.razon,
+        giro:DB.config.giro||'', dir:DB.config.dir||'', periodo:DB.config.periodo||''
+      }).eq('id',SESSION.empresaId);
+    }
+    await supa.from('empresa_config').upsert({empresa_id:SESSION.empresaId, num_asiento:DB.numAsiento});
+  }catch(e){ console.error('saveDB:',e); }
 }
-function loadDB(){
+async function loadDB(){
   if(!SESSION.empresaId) return;
   DB = {config:{empresa:'',rut:'',giro:'',dir:'',periodo:''},cuentas:[],asientos:[],numAsiento:1,terceros:[]};
+  showLoading('Cargando datos de la empresa...');
   try{
-    var s = localStorage.getItem('sc_e_'+SESSION.empresaId);
-    if(s){ var d=JSON.parse(s); DB.config=d.config||DB.config; DB.cuentas=d.cuentas||[]; DB.asientos=d.asientos||[]; DB.numAsiento=d.numAsiento||1; DB.terceros=d.terceros||[]; }
-  }catch(e){}
+    var emp=SYS.empresas.find(function(e){return e.id===SESSION.empresaId;});
+    if(emp) DB.config={empresa:emp.razon,rut:emp.rut,giro:emp.giro||'',dir:emp.dir||'',periodo:emp.periodo||''};
+    var {data:cfg}=await supa.from('empresa_config').select('num_asiento').eq('empresa_id',SESSION.empresaId).maybeSingle();
+    DB.numAsiento=cfg?cfg.num_asiento:1;
+    var {data:cuentas}=await supa.from('cuentas').select('*').eq('empresa_id',SESSION.empresaId).order('cod');
+    DB.cuentas=(cuentas||[]).map(function(c){return{cod:c.cod,nom:c.nom,tipo:c.tipo,aux:c.aux,desc:c.desc_||''};});
+    var {data:asientosSupa}=await supa.from('asientos').select('id,num,fecha,glosa').eq('empresa_id',SESSION.empresaId).order('fecha').order('num');
+    var ids=(asientosSupa||[]).map(function(a){return a.id;});
+    var lineasMap={};
+    if(ids.length>0){
+      var {data:lineas}=await supa.from('lineas_asiento').select('*').in('asiento_id',ids);
+      (lineas||[]).forEach(function(l){
+        if(!lineasMap[l.asiento_id])lineasMap[l.asiento_id]=[];
+        lineasMap[l.asiento_id].push({cuenta:l.cuenta_cod,aux:l.aux_nombre||'',debe:parseFloat(l.debe)||0,haber:parseFloat(l.haber)||0});
+      });
+    }
+    DB.asientos=(asientosSupa||[]).map(function(a){return{num:a.num,fecha:a.fecha,glosa:a.glosa,lineas:lineasMap[a.id]||[]};});
+    var {data:terceros}=await supa.from('terceros').select('*').eq('empresa_id',SESSION.empresaId).order('razon');
+    DB.terceros=(terceros||[]).map(function(t){return{rut:t.rut,razon:t.razon,tipo:t.tipo,dir:t.dir||'',email:t.email||'',tel:t.tel||'',notas:t.notas||''};});
+  }catch(e){ console.error('loadDB:',e); }
+  finally{ hideLoading(); }
 }
-function saveSYS(){ try{ localStorage.setItem(SYS_KEY, JSON.stringify(SYS)); }catch(e){} }
-function loadSYS(){
+async function saveSYS(){}
+async function loadSYS(){
   try{
-    var s = localStorage.getItem(SYS_KEY);
-    if(s){ var d=JSON.parse(s); SYS.planBase=d.planBase||[]; SYS.empresas=d.empresas||[]; SYS.usuarios=d.usuarios||[]; }
-  }catch(e){}
+    var {data:pb}=await supa.from('plan_base').select('*').order('cod');
+    SYS.planBase=(pb||[]).map(function(c){return{cod:c.cod,nom:c.nom,tipo:c.tipo,aux:c.aux,desc:c.desc_||''};});
+    var {data:emps}=await supa.from('empresas').select('*').order('razon');
+    SYS.empresas=emps||[];
+    var {data:usrs}=await supa.from('usuarios').select('*').order('nombre');
+    var {data:ue}=await supa.from('usuario_empresa').select('*');
+    SYS.usuarios=(usrs||[]).map(function(u){
+      var empIds=(ue||[]).filter(function(x){return x.usuario_id===u.id;}).map(function(x){return x.empresa_id;});
+      return{id:u.id,nombre:u.nombre,user:u.user_login,passHash:u.pass_hash,rol:u.rol,empresaIds:empIds};
+    });
+  }catch(e){ console.error('loadSYS:',e); }
 }
 
 // ── Primera vez: crear superadmin + plan base
@@ -3317,21 +3352,8 @@ async function deleteTerceroSupa(rut){
 
 
 
-async function loadSYS(){
-  try{
-    var {data:pb}=await supa.from('plan_base').select('*').order('cod');
-    SYS.planBase=(pb||[]).map(function(c){return{cod:c.cod,nom:c.nom,tipo:c.tipo,aux:c.aux,desc:c.desc_||''};}); 
-    var {data:emps}=await supa.from('empresas').select('*').order('razon');
-    SYS.empresas=emps||[];
-    var {data:usrs}=await supa.from('usuarios').select('*').order('nombre');
-    var {data:ue}=await supa.from('usuario_empresa').select('*');
-    SYS.usuarios=(usrs||[]).map(function(u){
-      var empIds=(ue||[]).filter(function(x){return x.usuario_id===u.id;}).map(function(x){return x.empresa_id;});
-      return{id:u.id,nombre:u.nombre,user:u.user_login,passHash:u.pass_hash,rol:u.rol,empresaIds:empIds};
-    });
-  }catch(e){console.error('loadSYS:',e);}
-}
-async function saveSYS(){}
+
+
 
 async function saveEmpresa(){
   var id=document.getElementById('me-edit-id').value;
