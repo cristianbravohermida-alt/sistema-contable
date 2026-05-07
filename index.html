@@ -1343,7 +1343,7 @@ function initAppPostLogin(){
   document.querySelectorAll('.nav-item').forEach(function(b){b.classList.remove('active');});
   abrirGrupoActivo(id);
   var startSec = SESSION.rol==='lectura' ? 'balance8' : 'cuentas';
-  var startNav = document.querySelector('.nav-item[onclick*="'+startSec+'"]');
+  var startNav = findNavItem(startSec);
   document.getElementById('sec-'+startSec).classList.add('active');
   if(startNav) startNav.classList.add('active');
   if(startSec==='balance8'){ initB8Selects(); toggleB8Modo(); renderBalance8(); }
@@ -1364,11 +1364,11 @@ function applyRoleRestrictions(){
   var navSistema = document.getElementById('nav-sistema');
   if(navSistema) navSistema.style.display = isAdmin ? '' : 'none';
   // Configuración: admin y contador
-  var navConfig = document.querySelector('.nav-item[onclick*="\'config\'"]');
+  var navConfig = findNavItem('config');
   if(navConfig) navConfig.style.display = isLectura ? 'none' : '';
   // Módulos de ingreso (diario, cuentas, auxiliares): ocultos para lectura
   ['cuentas','diario','mayor','auxiliares'].forEach(function(id){
-    var nav = document.querySelector('.nav-item[onclick*="\''+id+'\'"]');
+    var nav = findNavItem(id);
     if(nav) nav.style.display = isLectura ? 'none' : '';
   });
   // Botones de escritura: ocultos para lectura
@@ -3300,6 +3300,16 @@ function renderStatsTerceros(){
     +'</div>';
 }
 
+
+// Helper: buscar nav-item por sección
+function findNavItem(secId){
+  var items = document.querySelectorAll('.nav-item');
+  for(var i=0;i<items.length;i++){
+    var oc = items[i].getAttribute('onclick')||'';
+    if(oc.indexOf("'"+secId+"'") > -1) return items[i];
+  }
+  return null;
+}
 // ── Menú colapsable
 function toggleNavGroup(id){
   var header = document.querySelector('#'+id+' .nav-group-header');
@@ -3318,17 +3328,24 @@ function toggleNavGroup(id){
   }
 }
 
+
 // Abrir el grupo que contiene el nav-item activo
 function abrirGrupoActivo(secId){
-  var item = document.querySelector('.nav-item[onclick*="''+secId+''"]');
-  if(!item) return;
-  var body = item.closest('.nav-group-body');
+  var items = document.querySelectorAll('.nav-group-body .nav-item');
+  var found = null;
+  for(var i=0;i<items.length;i++){
+    var oc = items[i].getAttribute('onclick')||'';
+    if(oc.indexOf("'"+secId+"'") > -1){ found = items[i]; break; }
+  }
+  if(!found) return;
+  var body = found.closest('.nav-group-body');
   if(!body) return;
   var grpId = body.id.replace('-body','');
   var header = document.querySelector('#'+grpId+' .nav-group-header');
   body.classList.add('open');
   if(header) header.classList.add('open');
 }
+
 
 // ============================================================
 // INIT
