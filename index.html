@@ -1281,24 +1281,36 @@ function applyRoleRestrictions(){
 
 // Renderizar tabla de empresas
 function renderEmpresasSistema(){
-  var tb = document.getElementById('tbody-empresas'); if(!tb) return;
-  if(!SYS.empresas.length){
-    tb.innerHTML='<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text3)">Sin empresas registradas.</td></tr>'; return;
-  }
-  tb.innerHTML = SYS.empresas.map(function(e){
-    var esMia   = e.id===SESSION.empresaId;
-    var numUsr  = SYS.usuarios.filter(function(u){ var ids=u.empresaIds||(u.empresaId?[u.empresaId]:[]); return ids.includes(e.id); }).length;
-    return '<tr>'
-      +'<td><code style="font-size:12px">'+e.rut+'</code></td>'
+  var tb=document.getElementById('tbody-empresas'); if(!tb) return;
+  if(!SYS.empresas.length){tb.innerHTML='<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text3)">Sin empresas.</td></tr>'; return;}
+  var rows = SYS.empresas.map(function(e){
+    var esMia=e.id===SESSION.empresaId;
+    var numUsr=SYS.usuarios.filter(function(u){return u.empresaIds&&u.empresaIds.includes(e.id);}).length;
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td><code style="font-size:12px">'+e.rut+'</code></td>'
       +'<td><b>'+e.razon+'</b>'+(esMia?'<span class="badge badge-activo" style="margin-left:6px;font-size:10px">Activa</span>':'')+'</td>'
-      +'<td style="font-size:12px;color:var(--text3)">'+( e.periodo||'—')+'</td>'
-      +'<td style="text-align:center;font-size:13px">'+numUsr+'</td>'
-      +'<td class="no-print" style="display:flex;gap:4px">'
-        +'<button class="btn btn-sm btn-ghost" onclick="editEmpresa('"+e.id+"')">Editar</button>'
-        +(!esMia?'<button class="btn btn-sm btn-ghost" onclick="cambiarEmpresa('"+e.id+"')">Cambiar</button>':'')
-        +'<button class="btn btn-sm btn-danger" onclick="delEmpresa('"+e.id+"')">×</button>'
-      +'</td></tr>';
-  }).join('');
+      +'<td style="font-size:12px;color:var(--text3)">'+(e.periodo||'—')+'</td>'
+      +'<td style="text-align:center">'+numUsr+'</td>'
+      +'<td class="no-print" style="display:flex;gap:4px"></td>';
+    var tdBtn = tr.querySelector('td.no-print');
+    var btnEdit = document.createElement('button');
+    btnEdit.className='btn btn-sm btn-ghost'; btnEdit.textContent='Editar';
+    btnEdit.onclick = function(){ editEmpresa(e.id); };
+    tdBtn.appendChild(btnEdit);
+    if(!esMia){
+      var btnCambiar = document.createElement('button');
+      btnCambiar.className='btn btn-sm btn-ghost'; btnCambiar.textContent='Cambiar';
+      btnCambiar.onclick = function(){ cambiarEmpresa(e.id); };
+      tdBtn.appendChild(btnCambiar);
+    }
+    var btnDel = document.createElement('button');
+    btnDel.className='btn btn-sm btn-danger'; btnDel.textContent='×';
+    btnDel.onclick = function(){ delEmpresa(e.id); };
+    tdBtn.appendChild(btnDel);
+    return tr;
+  });
+  tb.innerHTML='';
+  rows.forEach(function(tr){ tb.appendChild(tr); });
 }
 
 // Guardar empresa (nueva o edición)
@@ -1386,26 +1398,30 @@ function renderUsuariosSistema(){
   var tb=document.getElementById('tbody-usuarios'); if(!tb) return;
   var rolLabels={admin:'Admin',contador:'Contador',lectura:'Solo Lectura'};
   var rolCls={admin:'badge-admin',contador:'badge-contador',lectura:'badge-lectura'};
-  if(!SYS.usuarios.length){
-    tb.innerHTML='<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text3)">Sin usuarios.</td></tr>'; return;
-  }
-  tb.innerHTML = SYS.usuarios.map(function(u,i){
-    // Compatibilidad: normalizar campo
-    if(u.empresaId && !u.empresaIds){ u.empresaIds=[u.empresaId]; }
-    var empIds = u.empresaIds || [];
-    var empNombres = empIds.map(function(id){
-      var e=SYS.empresas.find(function(x){return x.id===id;}); return e?e.razon:id;
-    }).join(', ');
+  if(!SYS.usuarios.length){tb.innerHTML='<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text3)">Sin usuarios.</td></tr>'; return;}
+  var rows = SYS.usuarios.map(function(u){
+    var empNombres=(u.empresaIds||[]).map(function(id){var e=SYS.empresas.find(function(x){return x.id===id;}); return e?e.razon:id;}).join(', ');
     var esMio=u.id===SESSION.userId;
-    return '<tr>'
-      +'<td><b>'+u.nombre+'</b><br><span style="font-size:11px;color:var(--text3)">'+u.user+'</span></td>'
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td><b>'+u.nombre+'</b><br><span style="font-size:11px;color:var(--text3)">'+u.user+'</span></td>'
       +'<td><span class="badge '+(rolCls[u.rol]||'')+'">'+(rolLabels[u.rol]||u.rol)+'</span></td>'
-      +'<td style="font-size:12px">'+( empNombres||'—')+'</td>'
-      +'<td class="no-print" style="display:flex;gap:4px">'
-        +'<button class="btn btn-sm btn-ghost" onclick="editUsuario('"+u.id+"')">Editar</button>'
-        +(!esMio?'<button class="btn btn-sm btn-danger" onclick="delUsuario('"+u.id+"')">×</button>':'')
-      +'</td></tr>';
-  }).join('');
+      +'<td style="font-size:12px">'+(empNombres||'—')+'</td>'
+      +'<td class="no-print" style="display:flex;gap:4px"></td>';
+    var tdBtn=tr.querySelector('td.no-print');
+    var btnEdit=document.createElement('button');
+    btnEdit.className='btn btn-sm btn-ghost'; btnEdit.textContent='Editar';
+    btnEdit.onclick=function(){ editUsuario(u.id); };
+    tdBtn.appendChild(btnEdit);
+    if(!esMio){
+      var btnDel=document.createElement('button');
+      btnDel.className='btn btn-danger btn-sm'; btnDel.textContent='×';
+      btnDel.onclick=function(){ delUsuario(u.id); };
+      tdBtn.appendChild(btnDel);
+    }
+    return tr;
+  });
+  tb.innerHTML='';
+  rows.forEach(function(tr){ tb.appendChild(tr); });
 }
 
 // Poblar selector empresa en modal usuario
@@ -3176,16 +3192,7 @@ async function cambiarEmpresa(empId){
   msgEl('msg-sistema','ok','Empresa activa cambiada a: '+(emp?emp.razon:empId));
 }
 
-function renderEmpresasSistema(){
-  var tb=document.getElementById('tbody-empresas'); if(!tb) return;
-  if(!SYS.empresas.length){tb.innerHTML='<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text3)">Sin empresas.</td></tr>'; return;}
-  tb.innerHTML=SYS.empresas.map(function(e){
-    var esMia=e.id===SESSION.empresaId;
-    var numUsr=SYS.usuarios.filter(function(u){return u.empresaIds&&u.empresaIds.includes(e.id);}).length;
-    return '<tr><td><code style="font-size:12px">'+e.rut+'</code></td><td><b>'+e.razon+'</b>'+(esMia?'<span class="badge badge-activo" style="margin-left:6px;font-size:10px">Activa</span>':'')+'</td><td style="font-size:12px;color:var(--text3)">'+(e.periodo||'—')+'</td><td style="text-align:center">'+numUsr+'</td>'
-      +'<td class="no-print" style="display:flex;gap:4px"><button class="btn btn-sm btn-ghost" onclick="editEmpresa('"+e.id+"')">Editar</button>'+(!esMia?'<button class="btn btn-sm btn-ghost" onclick="cambiarEmpresa('"+e.id+"')">Cambiar</button>':'')+'<button class="btn btn-sm btn-danger" onclick="delEmpresa('"+e.id+"')">×</button></td></tr>';
-  }).join('');
-}
+
 
 async function saveUsuario(){
   var id=document.getElementById('mu-edit-id').value;
@@ -3247,20 +3254,7 @@ async function delUsuario(id){
   finally{hideLoading();}
 }
 
-function renderUsuariosSistema(){
-  var tb=document.getElementById('tbody-usuarios'); if(!tb) return;
-  var rolLabels={admin:'Admin',contador:'Contador',lectura:'Solo Lectura'};
-  var rolCls={admin:'badge-admin',contador:'badge-contador',lectura:'badge-lectura'};
-  if(!SYS.usuarios.length){tb.innerHTML='<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text3)">Sin usuarios.</td></tr>'; return;}
-  tb.innerHTML=SYS.usuarios.map(function(u){
-    var empNombres=(u.empresaIds||[]).map(function(id){var e=SYS.empresas.find(function(x){return x.id===id;}); return e?e.razon:id;}).join(', ');
-    var esMio=u.id===SESSION.userId;
-    return '<tr><td><b>'+u.nombre+'</b><br><span style="font-size:11px;color:var(--text3)">'+u.user+'</span></td>'
-      +'<td><span class="badge '+(rolCls[u.rol]||'')+'">'+(rolLabels[u.rol]||u.rol)+'</span></td>'
-      +'<td style="font-size:12px">'+(empNombres||'—')+'</td>'
-      +'<td class="no-print" style="display:flex;gap:4px"><button class="btn btn-sm btn-ghost" onclick="editUsuario('"+u.id+"')">Editar</button>'+(!esMio?'<button class="btn btn-danger btn-sm" onclick="delUsuario('"+u.id+"')">×</button>':'')+'</td></tr>';
-  }).join('');
-}
+
 
 function populateMuEmpresa(){ populateMuEmpresas([]); }
 
