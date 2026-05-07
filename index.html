@@ -1363,7 +1363,7 @@ async function doLogin(){
   if(usr.empresaId && !usr.empresaIds){ usr.empresaIds=[usr.empresaId]; delete usr.empresaId; saveSYS(); }
   if(!usr.empresaIds || !usr.empresaIds.length){ alert('Este usuario no tiene empresas asignadas.'); return; }
   SESSION = { userId:usr.id, empresaId:usr.empresaIds[0], rol:usr.rol, nombre:usr.nombre };
-  loadDB();
+  await loadDB();
   // Si empresa no tiene cuentas → copiar plan base
   if(DB.cuentas.length === 0){
     var emp = SYS.empresas.find(function(e){return e.id===SESSION.empresaId;});
@@ -1374,11 +1374,15 @@ async function doLogin(){
   document.getElementById('login-screen').classList.remove('show');
   document.getElementById('app-layout').style.display = 'flex';
   document.getElementById('li-pass').value = '';
+  guardarSesion();
+  iniciarWatchdogSesion();
   initAppPostLogin();
 }
 
 // ── LOGOUT
 function doLogout(){
+  detenerWatchdogSesion();
+  limpiarSesion();
   SESSION = {userId:null,empresaId:null,rol:null,nombre:null};
   DB = {config:{empresa:'',rut:'',giro:'',dir:'',periodo:''},cuentas:[],asientos:[],numAsiento:1,terceros:[]};
   document.getElementById('app-layout').style.display = 'none';
@@ -3412,6 +3416,78 @@ function initNavListeners(){
 }
 // ═════════════════════════════════════════════════════════════
 
+
+// ══ SESIÓN PERSISTENTE (sessionStorage + timeout 20 min) ═════
+var SESSION_KEY = 'sc_session';
+var INACTIVITY_MS = 1200000;
+var _inactivityTimer = null;
+
+function guardarSesion(){
+  try{
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify({
+      userId:    SESSION.userId,
+      empresaId: SESSION.empresaId,
+      rol:       SESSION.rol,
+      nombre:    SESSION.nombre,
+      ts:        Date.now()
+    }));
+  }catch(e){}
+}
+
+function limpiarSesion(){
+  try{ sessionStorage.removeItem(SESSION_KEY); }catch(e){}
+}
+
+function recuperarSesion(){
+  try{
+    var raw = sessionStorage.getItem(SESSION_KEY);
+    if(!raw) return null;
+    var s = JSON.parse(raw);
+    if(!s || !s.userId) return null;
+    // Verificar que no haya expirado
+    if(Date.now() - s.ts > INACTIVITY_MS){
+      limpiarSesion();
+      return null;
+    }
+    return s;
+  }catch(e){ return null; }
+}
+
+function resetInactivityTimer(){
+  if(_inactivityTimer) clearTimeout(_inactivityTimer);
+  guardarSesion(); // actualizar timestamp en cada actividad
+  _inactivityTimer = setTimeout(function(){
+    if(!SESSION.userId) return;
+    mostrarToast('Sesión cerrada por inactividad', 'warn');
+    setTimeout(function(){ doLogout(); }, 1500);
+  }, INACTIVITY_MS);
+}
+
+function iniciarWatchdogSesion(){
+  // Escuchar eventos de actividad del usuario
+  ['click','keydown','mousemove','touchstart','scroll'].forEach(function(ev){
+    document.addEventListener(ev, resetInactivityTimer, {passive:true});
+  });
+  resetInactivityTimer(); // iniciar el primer timer
+}
+
+function detenerWatchdogSesion(){
+  if(_inactivityTimer) clearTimeout(_inactivityTimer);
+  ['click','keydown','mousemove','touchstart','scroll'].forEach(function(ev){
+    document.removeEventListener(ev, resetInactivityTimer);
+  });
+}
+
+function mostrarToast(msg, tipo){
+  var t = document.createElement('div');
+  var bg = tipo==='warn' ? '#f59e0b' : tipo==='err' ? '#ef4444' : 'var(--text)';
+  t.style.cssText = 'position:fixed;bottom:20px;right:20px;background:'+bg+';color:#fff;padding:12px 18px;border-radius:8px;font-size:13px;font-weight:500;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.25);transition:opacity .4s';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(function(){ t.style.opacity='0'; setTimeout(function(){ t.remove(); },400); }, 3000);
+}
+// ═════════════════════════════════════════════════════════════
+
 // ============================================================
 // INIT
 // ============================================================
@@ -3419,10 +3495,23 @@ window.addEventListener('load', async function(){
   showLoading('Conectando con la base de datos...');
   await loadSYS();
   await initSistemaSiVacio();
-  await loadSYS(); // recargar después de init
+  await loadSYS();
   hideLoading();
-  document.getElementById('login-screen').classList.add('show');
   initNavListeners();
+  // Intentar recuperar sesión previa
+  var sesion = recuperarSesion();
+  if(sesion && SYS.usuarios.find(function(u){ return u.id===sesion.userId; })){
+    SESSION = { userId:sesion.userId, empresaId:sesion.empresaId, rol:sesion.rol, nombre:sesion.nombre };
+    showLoading('Restaurando sesión...');
+    await loadDB();
+    hideLoading();
+    document.getElementById('login-screen').classList.remove('show');
+    document.getElementById('app-layout').style.display = 'flex';
+    iniciarWatchdogSesion();
+    initAppPostLogin();
+  } else {
+    document.getElementById('login-screen').classList.add('show');
+  }
   if(SYS.usuarios.length===1){ document.getElementById('li-user').value=SYS.usuarios[0].user; }
 });
 
