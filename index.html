@@ -27,44 +27,30 @@ a{color:var(--accent);text-decoration:none}
 .main{margin-left:220px;flex:1;display:flex;flex-direction:column;min-height:100vh}
 
 /* SIDEBAR */
-.sidebar-brand{padding:18px 16px 14px;border-bottom:1px solid rgba(255,255,255,.08)}
-.brand-icon{width:32px;height:32px;background:var(--accent);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;margin-bottom:8px}
-.brand-icon svg{color:#fff;fill:none;stroke:currentColor;stroke-width:2}
-.brand-name{font-size:13px;font-weight:600;color:var(--text)}
-.brand-sub{font-size:11px;color:rgba(255,255,255,.5);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.nav-section{padding:12px 8px 4px;font-size:10px;font-weight:600;color:var(--text3);letter-spacing:.06em;text-transform:uppercase}
-.nav-item{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:var(--radius);margin:1px 8px;cursor:pointer;font-size:13px;color:rgba(255,255,255,.75);transition:all .12s;user-select:none}
-.nav-item:hover{background:rgba(255,255,255,.08);color:#fff}
-.nav-item.active{background:rgba(37,99,235,.35);color:#93c5fd;font-weight:500}
-.nav-item svg{width:16px;height:16px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:2}
-.nav-group-btn{display:flex;align-items:center;gap:9px;padding:8px 10px;margin:1px 8px;border-radius:var(--radius);cursor:pointer;font-size:13px;font-weight:500;color:rgba(255,255,255,.75);transition:all .12s;user-select:none}
-.nav-group-btn:hover{background:rgba(255,255,255,.08);color:#fff}
-.nav-group-btn svg.icon{width:16px;height:16px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:2}
-.nav-group-btn .chev{width:13px;height:13px;margin-left:auto;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:2;transition:transform .2s}
-.nav-group-btn.open .chev{transform:rotate(90deg)}
-.nav-group-btn.open{color:#fff}
-.nav-sub{display:none;padding-left:6px}
-.nav-sub.open{display:block}
-.nav-sub .nav-item{font-size:12.5px;padding:6px 10px;margin:1px 4px;color:rgba(255,255,255,.6)}
-.nav-sub .nav-item:hover{background:rgba(255,255,255,.08);color:#fff}
-.nav-sub .nav-item.active{background:rgba(37,99,235,.35);color:#93c5fd;font-weight:500}
-/* Scrollbar sidebar */
 .sidebar-scroll{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:8px}
 .sidebar-scroll::-webkit-scrollbar{width:4px}
 .sidebar-scroll::-webkit-scrollbar-track{background:transparent}
-.sidebar-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:4px}
-.sidebar-scroll::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.3)}
-/* Menú colapsable */
-.nav-group{}
-.nav-group-header{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:var(--radius);margin:1px 8px;cursor:pointer;font-size:13px;color:var(--text2);transition:all .12s;user-select:none;font-weight:500}
-.nav-group-header:hover{background:var(--surface2);color:var(--text)}
-.nav-group-header.open{color:var(--accent)}
-.nav-group-header svg{width:16px;height:16px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:2}
-.nav-group-header .chevron{width:12px;height:12px;margin-left:auto;transition:transform .2s;flex-shrink:0}
-.nav-group-header.open .chevron{transform:rotate(90deg)}
-.nav-group-body{display:none;padding-left:8px}
-.nav-group-body.open{display:block}
-.nav-group-body .nav-item{font-size:12.5px;padding:6px 10px;margin:1px 4px}
+.sidebar-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2);border-radius:2px}
+.nav-group-btn{display:flex;align-items:center;gap:9px;padding:8px 10px;margin:1px 8px;border-radius:var(--radius);cursor:pointer;font-size:13px;font-weight:500;color:#94a3b8;transition:all .12s;user-select:none}
+.nav-group-btn:hover{background:rgba(255,255,255,.08);color:#e2e8f0}
+.nav-group-btn.open{color:#e2e8f0}
+.nav-group-btn svg.icon{width:16px;height:16px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:2}
+.nav-group-btn .chev{width:13px;height:13px;margin-left:auto;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:2;transition:transform .2s}
+.nav-group-btn.open .chev{transform:rotate(90deg)}
+.nav-sub{display:none;padding-left:6px}
+.nav-sub.open{display:block}
+.nav-sub .nav-item{font-size:12.5px;padding:6px 10px;margin:1px 4px;color:#94a3b8}
+.nav-sub .nav-item.active{background:rgba(59,130,246,.18);color:#60a5fa}
+.sidebar-brand{padding:18px 16px 14px;border-bottom:1px solid var(--border)}
+.brand-icon{width:32px;height:32px;background:var(--accent);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;margin-bottom:8px}
+.brand-icon svg{color:#fff;fill:none;stroke:currentColor;stroke-width:2}
+.brand-name{font-size:13px;font-weight:600;color:var(--text)}
+.brand-sub{font-size:11px;color:var(--text3);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nav-section{padding:12px 8px 4px;font-size:10px;font-weight:600;color:var(--text3);letter-spacing:.06em;text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:var(--radius);margin:1px 8px;cursor:pointer;font-size:13px;color:var(--text2);transition:all .12s;user-select:none}
+.nav-item:hover{background:rgba(255,255,255,.08);color:#e2e8f0}
+.nav-item.active{background:rgba(59,130,246,.18);color:#60a5fa;font-weight:600}
+.nav-item svg{width:16px;height:16px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:2}
 .sidebar-footer{margin-top:auto;padding:12px;border-top:1px solid var(--border);font-size:11px;color:var(--text3);text-align:center}
 
 /* TOPBAR */
@@ -249,60 +235,20 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-<!-- LOADING OVERLAY -->
-<div id="loading-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;align-items:center;justify-content:center;flex-direction:column;gap:12px">
-  <div style="background:var(--surface);border-radius:var(--radius-lg);padding:24px 32px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3)">
-    <div style="width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px"></div>
-    <div class="loading-msg" style="font-size:13px;color:var(--text2)">Cargando...</div>
-  </div>
-</div>
-<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
-
 <!-- ===== LOGIN ===== -->
 <div class="login-screen" id="login-screen">
   <div class="login-box">
     <div class="login-logo">
       <svg viewBox="0 0 24 24"><path d="M4 4h16v2H4zM4 9h16v2H4zM4 14h10v2H4zM4 19h7v2H4z"/></svg>
     </div>
-    <div class="login-title">SistemaContable</div>
-    <div class="login-sub">Ingresa tus credenciales</div>
-    <div class="login-err" id="login-err">Usuario o contraseña incorrectos.</div>
-    <div class="login-field"><label>Usuario</label><input id="li-user" type="text" placeholder="usuario@empresa.cl" autocomplete="username"></div>
-    <div class="login-field"><label>Contraseña</label><input id="li-pass" type="password" placeholder="••••••••" autocomplete="current-password"></div>
-    <button class="login-btn" onclick="doLogin()">Ingresar</button>
-    
-  </div>
-</div>
-
-<div class="layout" id="app-layout" style="display:none">
-
-<!-- SIDEBAR -->
-<aside class="sidebar">
-  <div class="sidebar-brand">
-    <div class="brand-icon">
-      <svg viewBox="0 0 24 24" width="18" height="18"><path d="M4 4h16v2H4zM4 9h16v2H4zM4 14h10v2H4zM4 19h7v2H4z"/></svg>
-    </div>
-    <div class="brand-name">SistemaContable</div>
-    <div class="brand-sub" id="sidebar-empresa">Mi Empresa S.A.</div>
-  </div>
-
-  <!-- Selector empresa: visible solo cuando tiene >1 empresa -->
-  <div id="sb-empresa-nav" style="display:none;padding:6px 8px;border-bottom:1px solid var(--border);margin-bottom:4px">
-    <div style="font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;padding:0 4px;margin-bottom:4px">Empresa activa</div>
-    <select id="sb-empresa-sel" onchange="cambiarEmpresaDesdeSelector(this.value)"
-      style="width:100%;font-size:12px;font-weight:500;padding:6px 8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--accent-bg);color:var(--accent);cursor:pointer">
-    </select>
-  </div>
-
-  <!-- ══ INICIO ══ -->
+  <div class="sidebar-scroll">
   <div class="nav-item active" data-sec="inicio" style="margin:4px 8px;font-weight:600;color:#94a3b8">
     <svg class="icon" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
     Inicio
   </div>
-  <div class="sidebar-scroll">
   <div class="nav-group" id="grp-tesoreria">
     <div class="nav-group-btn" id="grp-tesoreria-btn" onclick="toggleGrp('tesoreria')">
       <svg class="icon" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Tesorería<svg class="chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
@@ -376,6 +322,7 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
   <div id="nav-sec-sistema" style="display:none"></div>
   <div id="nav-sistema" style="display:none"></div>
   </div>
+
   <div class="sidebar-footer" style="padding:10px 12px">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
       <div id="sb-avatar" style="width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">A</div>
@@ -396,13 +343,9 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
 <div class="main">
 
 <!-- ===== PLAN DE CUENTAS ===== -->
-
-  <div id="sec-inicio" class="section">
+<div id="sec-inicio" class="section active">
     <div class="topbar">
-      <div>
-        <div class="page-title">Inicio</div>
-        <div class="page-sub" id="inicio-fecha"></div>
-      </div>
+      <div><div class="page-title">Inicio</div><div class="page-sub" id="inicio-fecha"></div></div>
       <div class="topbar-actions">
         <button class="btn btn-sm" onclick="renderInicio()">
           <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
@@ -411,49 +354,35 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
       </div>
     </div>
     <div class="content">
-
-      <!-- Indicadores -->
       <div style="margin-bottom:24px">
         <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">Indicadores Económicos</div>
         <div id="inicio-indicadores" class="stats-grid" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px"></div>
       </div>
-
-      <!-- Noticias en 3 columnas -->
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px">
-
-        <!-- Tributarias -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px">
         <div class="card" style="padding:16px">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border)">
-            <span style="font-size:18px">🏛️</span>
-            <div style="font-size:13px;font-weight:700;color:var(--text)">Noticias Tributarias</div>
-            <div style="margin-left:auto;font-size:10px;color:var(--text3)">SII</div>
+            <span style="font-size:18px">🏢</span><div style="font-size:13px;font-weight:700;color:var(--text)">Resumen Empresa Activa</div>
           </div>
-          <div id="inicio-noticias-tributarias"></div>
+          <div id="inicio-resumen-empresa"></div>
         </div>
-
-        <!-- Laborales -->
         <div class="card" style="padding:16px">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border)">
-            <span style="font-size:18px">👷</span>
-            <div style="font-size:13px;font-weight:700;color:var(--text)">Noticias Laborales</div>
-            <div style="margin-left:auto;font-size:10px;color:var(--text3)">DT</div>
+            <span style="font-size:18px">📅</span><div style="font-size:13px;font-weight:700;color:var(--text)">Vencimientos del Mes</div>
+            <div style="margin-left:auto;font-size:10px;color:var(--text3)">SII Chile</div>
           </div>
-          <div id="inicio-noticias-laborales"></div>
+          <div id="inicio-calendario"></div>
         </div>
-
-        <!-- Financieras -->
-        <div class="card" style="padding:16px">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border)">
-            <span style="font-size:18px">📰</span>
-            <div style="font-size:13px;font-weight:700;color:var(--text)">Noticias Financieras</div>
-            <div style="margin-left:auto;font-size:10px;color:var(--text3)">DF</div>
-          </div>
-          <div id="inicio-noticias-financieras"></div>
+      </div>
+      <div class="card" style="padding:16px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border)">
+          <span style="font-size:18px">🔗</span><div style="font-size:13px;font-weight:700;color:var(--text)">Accesos Rápidos</div>
         </div>
-
+        <div id="inicio-links" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px"></div>
       </div>
     </div>
-<div id="sec-cuentas" class="section">
+  </div>
+
+  <div id="sec-cuentas" class="section">
   <div class="topbar">
     <div><div class="page-title">Plan de Cuentas</div><div class="page-sub">Gestión del catálogo de cuentas contables</div></div>
     <div class="topbar-actions">
@@ -478,7 +407,6 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
 </div>
 
 <!-- ===== LIBRO DIARIO ===== -->
-
 <div id="sec-diario" class="section">
   <div class="topbar">
     <div><div class="page-title">Libro Diario</div><div class="page-sub">Registro de asientos contables</div></div>
@@ -500,7 +428,6 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
 </div>
 
 <!-- ===== LIBRO MAYOR ===== -->
-
 <div id="sec-mayor" class="section">
   <div class="topbar">
     <div><div class="page-title">Libro Mayor</div><div class="page-sub">Movimientos por cuenta contable</div></div>
@@ -519,7 +446,6 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
 </div>
 
 <!-- ===== TERCEROS ===== -->
-
 <div id="sec-auxiliares" class="section">
   <div class="topbar">
     <div><div class="page-title">Directorio de Auxiliares</div><div class="page-sub">Clientes, proveedores y otras contrapartes</div></div>
@@ -631,7 +557,6 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
 </div>
 
 <!-- ===== BALANCE 8 COLUMNAS ===== -->
-
 <div id="sec-balance8" class="section">
   <div class="topbar">
     <div><div class="page-title">Balance de Comprobación — 8 Columnas</div><div class="page-sub">Informe de sumas, saldos y clasificación</div></div>
@@ -723,7 +648,6 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
 </div>
 
 <!-- ===== ESTADO DE RESULTADO ===== -->
-
 <div id="sec-eerr" class="section">
   <div class="topbar">
     <div><div class="page-title">Estado de Resultado</div><div class="page-sub">Ingresos, costos y gastos del período</div></div>
@@ -786,7 +710,6 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
 </div>
 
 <!-- ===== GESTIÓN DEL SISTEMA ===== -->
-
 <div id="sec-sistema" class="section">
   <div class="topbar">
     <div><div class="page-title">Gestión del Sistema</div><div class="page-sub">Empresas y usuarios</div></div>
@@ -894,7 +817,6 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
 </div>
 
 <!-- ===== CONFIGURACIÓN ===== -->
-
 <div id="sec-config" class="section">
   <div class="topbar">
     <div><div class="page-title">Configuración</div><div class="page-sub">Datos de la empresa y opciones del sistema</div></div>
@@ -1082,58 +1004,45 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
       <button class="btn" onclick="closeModal('modal-ver-asiento')">Cerrar</button>
     </div>
   </div>
-</div>
-
-
-  <!-- ══ SUB TIPO PLAN ══ -->
+  <!-- SUB TIPO PLAN -->
   <div id="sec-subtipo-plan" class="section">
-    <div class="topbar">
-      <div><div class="page-title">Sub Tipo Plan</div><div class="page-sub">Catálogo de subtipos del plan de cuentas</div></div>
-    </div>
-    <div class="content">
-      <div id="subtipo-plan-stats" style="margin-bottom:16px"></div>
-      <div class="card" style="overflow-x:auto">
-        <table class="table">
-          <thead><tr><th>Código</th><th>Tipo</th><th>Sub Tipo</th><th>Nombre</th></tr></thead>
-          <tbody id="tbody-subtipo-plan"><tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text3)">Cargando...</td></tr></tbody>
-        </table>
-      </div>
-    </div>
+    <div class="topbar"><div><div class="page-title">Sub Tipo Plan</div><div class="page-sub">Catálogo de subtipos del plan de cuentas</div></div></div>
+    <div class="content"><div id="subtipo-plan-stats" style="margin-bottom:16px"></div>
+      <div class="card" style="overflow-x:auto"><table class="table">
+        <thead><tr><th>Código</th><th>Tipo</th><th>Sub Tipo</th><th>Nombre</th></tr></thead>
+        <tbody id="tbody-subtipo-plan"><tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text3)">Cargando...</td></tr></tbody>
+      </table></div></div>
   </div>
 
-  <!-- ══ CÓDIGOS SII ══ -->
+  <!-- CÓDIGOS SII -->
   <div id="sec-cod-sii" class="section">
-    <div class="topbar">
-      <div><div class="page-title">Códigos SII</div><div class="page-sub">Catálogo códigos SII — Resolución 2, Anexo N°1</div></div>
-    </div>
-    <div class="content">
-      <div id="cod-sii-stats" style="margin-bottom:16px"></div>
-      <div class="card" style="overflow-x:auto">
-        <table class="table">
-          <thead><tr><th>Código</th><th>Cód. Original</th><th>Glosa</th><th>Tipo</th><th>Nivel</th></tr></thead>
-          <tbody id="tbody-cod-sii"><tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text3)">Cargando...</td></tr></tbody>
-        </table>
-      </div>
-    </div>
+    <div class="topbar"><div><div class="page-title">Códigos SII</div><div class="page-sub">Catálogo Resolución 2, Anexo N°1</div></div></div>
+    <div class="content"><div id="cod-sii-stats" style="margin-bottom:16px"></div>
+      <div class="card" style="overflow-x:auto"><table class="table">
+        <thead><tr><th>Código</th><th>Cód. Original</th><th>Glosa</th><th>Tipo</th><th>Nivel</th></tr></thead>
+        <tbody id="tbody-cod-sii"><tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text3)">Cargando...</td></tr></tbody>
+      </table></div></div>
   </div>
 
-  <!-- ══ CENTROS DE COSTOS ══ -->
+  <!-- CENTROS DE COSTOS -->
   <div id="sec-centros-costos" class="section">
-    <div class="topbar">
-      <div><div class="page-title">Centros de Costos</div><div class="page-sub">Gestión de centros de costos</div></div>
-    </div>
-    <div class="content">
-      <div class="empty" style="padding:60px 0">
-        <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
-        <p>Módulo de Centros de Costos — Próximamente</p>
-      </div>
-    </div>
+    <div class="topbar"><div><div class="page-title">Centros de Costos</div><div class="page-sub">Gestión de centros de costos</div></div></div>
+    <div class="content"><div class="empty" style="padding:60px 0">
+      <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+      <p>Módulo Centros de Costos — Próximamente</p>
+    </div></div>
   </div>
->
-
 </div>
 
 <script>
+// ============================================================
+// SUPABASE
+// ============================================================
+const SUPA_URL = 'https://hovsffdialeigpxvuojg.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvdnNmZmRpYWxlaWdweHZ1b2pnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwODg4NDUsImV4cCI6MjA5MzY2NDg0NX0.44ZUShF1OwbJFreO8pGidoIGE3mmeNPr0v2-I4jAwws';
+const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
+
+
 // ============================================================
 // ============================================================
 // SISTEMA MULTI-EMPRESA / MULTI-USUARIO
@@ -1165,142 +1074,29 @@ async function sha256(str){
 }
 
 // ── Persistencia
-async function saveDB(){
-  if(!SESSION.empresaId) return;
-  try{
-    var emp=SYS.empresas.find(function(e){return e.id===SESSION.empresaId;});
-    if(emp){
-      await supa.from('empresas').update({
-        rut:DB.config.rut||emp.rut, razon:DB.config.empresa||emp.razon,
-        giro:DB.config.giro||'', dir:DB.config.dir||'', periodo:DB.config.periodo||''
-      }).eq('id',SESSION.empresaId);
-    }
-    await supa.from('empresa_config').upsert({empresa_id:SESSION.empresaId, num_asiento:DB.numAsiento});
-  }catch(e){ console.error('saveDB:',e); }
-}
-async function loadDB(){
-  if(!SESSION.empresaId) return;
-  DB = {config:{empresa:'',rut:'',giro:'',dir:'',periodo:''},cuentas:[],asientos:[],numAsiento:1,terceros:[]};
-  showLoading('Cargando datos de la empresa...');
-  try{
-    var emp=SYS.empresas.find(function(e){return e.id===SESSION.empresaId;});
-    if(emp) DB.config={empresa:emp.razon,rut:emp.rut,giro:emp.giro||'',dir:emp.dir||'',periodo:emp.periodo||''};
-    var {data:cfg}=await supa.from('empresa_config').select('num_asiento').eq('empresa_id',SESSION.empresaId).maybeSingle();
-    DB.numAsiento=cfg?cfg.num_asiento:1;
-    var {data:cuentas}=await supa.from('cuentas').select('*').eq('empresa_id',SESSION.empresaId).order('cod');
-    DB.cuentas=(cuentas||[]).map(function(c){return{
-      cod:c.cod, nom:c.nom, tipo:c.tipo, aux:c.aux, desc:c.desc_||'',
-      tipo_plan:c.tipo_plan||'', cod_sii:c.cod_sii||'', concepto:c.concepto||'',
-      subtipo_plan:c.subtipo_plan||'', subtipo_flujo:c.subtipo_flujo||'',
-      cta_cobrar:c.cta_cobrar||'', cta_pagar:c.cta_pagar||'', disp_pago:c.disp_pago||false
-    };});
-    var {data:asientosSupa}=await supa.from('asientos').select('id,num,fecha,glosa').eq('empresa_id',SESSION.empresaId).order('fecha').order('num');
-    var ids=(asientosSupa||[]).map(function(a){return a.id;});
-    var lineasMap={};
-    if(ids.length>0){
-      var {data:lineas}=await supa.from('lineas_asiento').select('*').in('asiento_id',ids);
-      (lineas||[]).forEach(function(l){
-        if(!lineasMap[l.asiento_id])lineasMap[l.asiento_id]=[];
-        lineasMap[l.asiento_id].push({cuenta:l.cuenta_cod,aux:l.aux_nombre||'',debe:parseFloat(l.debe)||0,haber:parseFloat(l.haber)||0});
-      });
-    }
-    DB.asientos=(asientosSupa||[]).map(function(a){return{num:a.num,fecha:a.fecha,glosa:a.glosa,lineas:lineasMap[a.id]||[]};});
-    var {data:terceros}=await supa.from('terceros').select('*').eq('empresa_id',SESSION.empresaId).order('razon');
-    DB.terceros=(terceros||[]).map(function(t){return{rut:t.rut,razon:t.razon,tipo:t.tipo,dir:t.dir||'',email:t.email||'',tel:t.tel||'',notas:t.notas||''};});
-  }catch(e){ console.error('loadDB:',e); }
-  finally{ hideLoading(); }
-}
-async function saveSYS(){}
-async function loadSYS(){
-  try{
-    var {data:pb}=await supa.from('plan_base').select('*').order('cod');
-    SYS.planBase=(pb||[]).map(function(c){return{cod:c.cod,nom:c.nom,tipo:c.tipo,aux:c.aux,desc:c.desc_||''};});
-    var {data:emps}=await supa.from('empresas').select('*').order('razon');
-    SYS.empresas=emps||[];
-    var {data:usrs}=await supa.from('usuarios').select('*').order('nombre');
-    var {data:ue}=await supa.from('usuario_empresa').select('*');
-    SYS.usuarios=(usrs||[]).map(function(u){
-      var empIds=(ue||[]).filter(function(x){return x.usuario_id===u.id;}).map(function(x){return x.empresa_id;});
-      return{id:u.id,nombre:u.nombre,user:u.user_login,passHash:u.pass_hash,rol:u.rol,empresaIds:empIds};
-    });
-  }catch(e){ console.error('loadSYS:',e); }
-}
+
+
+function saveSYS(){ try{ localStorage.setItem(SYS_KEY, JSON.stringify(SYS)); }catch(e){} }
+
 
 // ── Primera vez: crear superadmin + plan base
 async function initSistemaSiVacio(){
   if(SYS.usuarios.length > 0) return;
-  showLoading('Configurando el sistema por primera vez...');
-  try{
-    // 1. Plan base
-    var planBase = cargarPlanRobles(true);
-    if(planBase && planBase.length > 0){
-      var pbRows = planBase.map(function(c){
-        return{cod:c.cod,nom:c.nom,tipo:c.tipo,aux:c.aux,desc_:c.desc||''};
-      });
-      var {error:pbErr} = await supa.from('plan_base').upsert(pbRows,{onConflict:'cod'});
-      if(pbErr) console.warn('plan_base upsert:', pbErr.message);
-      SYS.planBase = planBase;
-    }
-
-    // 2. Empresa 1 — Comercial Demo S.A.
-    var {data:e1, error:err1} = await supa.from('empresas').insert({
-      rut:'76.123.456-7', razon:'Comercial Demo S.A.',
-      giro:'Comercio al por mayor y menor',
-      dir:'Av. Providencia 1234, Santiago',
-      periodo:'Enero - Diciembre 2025'
-    }).select().single();
-    if(err1){ console.error('Error empresa 1:', err1.message); throw new Error(err1.message); }
-
-    // 3. Empresa 2 — Comercial Las Condes
-    var {data:e2, error:err2} = await supa.from('empresas').insert({
-      rut:'76.987.654-3', razon:'Comercial Las Condes Ltda.',
-      giro:'Retail y distribucion',
-      dir:'Av. Apoquindo 4500, Las Condes',
-      periodo:'Enero - Diciembre 2025'
-    }).select().single();
-    if(err2){ console.error('Error empresa 2:', err2.message); throw new Error(err2.message); }
-
-    SYS.empresas = [e1, e2];
-
-    // 4. Usuario admin
-    var hash = await sha256('admin123');
-    var {data:adm, error:errAdm} = await supa.from('usuarios').insert({
-      nombre:'Administrador', user_login:'admin',
-      pass_hash:hash, rol:'admin'
-    }).select().single();
-    if(errAdm){ console.error('Error admin:', errAdm.message); throw new Error(errAdm.message); }
-
-    // 5. Asignar admin a ambas empresas
-    var {error:errUE} = await supa.from('usuario_empresa').insert([
-      {usuario_id:adm.id, empresa_id:e1.id},
-      {usuario_id:adm.id, empresa_id:e2.id}
-    ]);
-    if(errUE) console.warn('usuario_empresa:', errUE.message);
-
-    SYS.usuarios = [{
-      id:adm.id, nombre:'Administrador', user:'admin',
-      passHash:hash, rol:'admin', empresaIds:[e1.id, e2.id]
-    }];
-
-    // 6. Config inicial de asientos para cada empresa
-    await supa.from('empresa_config').insert([
-      {empresa_id:e1.id, num_asiento:1},
-      {empresa_id:e2.id, num_asiento:1}
-    ]);
-
-    // 7. Precargar datos demo en ambas empresas
-    showLoading('Cargando datos de demostración (empresa 1)...');
-    await _precargarEmpresa1Supa(e1.id);
-    showLoading('Cargando datos de demostración (empresa 2)...');
-    await _precargarEmpresa2Supa(e2.id);
-
-  }catch(e){
-    console.error('initSistema error:', e);
-    alert('Error al inicializar el sistema: ' + e.message + 
-          '\n\nSi ya existe un administrador, intenta iniciar sesión con admin / admin123');
-  }finally{
-    hideLoading();
-  }
+  SYS.planBase = cargarPlanRobles(true);
+  var t = Date.now();
+  var emp1='e_'+t, emp2='e_'+(t+1);
+  SYS.empresas.push({id:emp1,rut:'76.123.456-7',razon:'Comercial Demo S.A.',
+    giro:'Comercio al por mayor y menor',dir:'Av. Providencia 1234, Santiago',
+    periodo:'Enero – Diciembre 2025'});
+  SYS.empresas.push({id:emp2,rut:'76.987.654-3',razon:'Comercial Las Condes Ltda.',
+    giro:'Retail y distribucion',dir:'Av. Apoquindo 4500, Las Condes',
+    periodo:'Enero – Diciembre 2025'});
+  var hash = await sha256('admin123');
+  SYS.usuarios.push({id:'u_1',nombre:'Administrador',user:'admin',
+    passHash:hash,rol:'admin',empresaIds:[emp1,emp2]});
+  _precargarEmpresa1(emp1);
+  _precargarEmpresa2(emp2);
+  saveSYS();
 }
 
 
@@ -1477,8 +1273,8 @@ async function doLogin(){
   if(usr.empresaId && !usr.empresaIds){ usr.empresaIds=[usr.empresaId]; delete usr.empresaId; saveSYS(); }
   if(!usr.empresaIds || !usr.empresaIds.length){ alert('Este usuario no tiene empresas asignadas.'); return; }
   SESSION = { userId:usr.id, empresaId:usr.empresaIds[0], rol:usr.rol, nombre:usr.nombre };
-  await loadDB();
-  // Si empresa no tiene cuentas, no sobreescribir — las cuentas se cargan desde Supabase
+  loadDB();
+  // Cuentas se cargan desde Supabase via loadDB()
   document.getElementById('login-screen').classList.remove('show');
   document.getElementById('app-layout').style.display = 'flex';
   document.getElementById('li-pass').value = '';
@@ -1496,7 +1292,6 @@ function doLogout(){
   DB = {config:{empresa:'',rut:'',giro:'',dir:'',periodo:''},cuentas:[],asientos:[],numAsiento:1,terceros:[]};
   document.getElementById('app-layout').style.display = 'none';
   document.getElementById('login-screen').classList.add('show');
-  initNavListeners();
   document.getElementById('li-user').value='';
   document.getElementById('li-pass').value='';
   document.getElementById('login-err').classList.remove('show');
@@ -1520,9 +1315,12 @@ function initAppPostLogin(){
   document.querySelectorAll('.nav-item').forEach(function(b){b.classList.remove('active');});
   var startSec = 'inicio';
   var startNav = findNavItem(startSec);
-  if(startNav) startNav.classList.add('active');
   document.getElementById('sec-'+startSec).classList.add('active');
-  iniciarAutoRefreshInicio(); // carga y programa refresh cada hora
+  if(startNav) startNav.classList.add('active');
+  abrirGrupoActivo(startSec);
+  if(startSec==='inicio'){ iniciarAutoRefreshInicio(); }
+  else if(startSec==='balance8'){ initB8Selects(); toggleB8Modo(); renderBalance8(); }
+  else { renderCuentas(); renderStatsCuentas(); renderDiario(); loadConfigForm(); }
 }
 
 // ── Restricciones de rol
@@ -1536,14 +1334,15 @@ function applyRoleRestrictions(){
   var isLectura  = rol==='lectura';
 
   // Gestión del sistema: solo admin
-  var navSistema = findNavItem('sistema');
+  var navSistema = document.getElementById('nav-sistema');
   if(navSistema) navSistema.style.display = isAdmin ? '' : 'none';
-  var grpConfig = document.getElementById('grp-config-btn');
-  if(grpConfig) grpConfig.style.display = isLectura ? 'none' : '';
-  // Módulos de ingreso: ocultos para lectura
-  ['cuentas','diario','mayor','auxiliares'].forEach(function(secId){
-    var el = findNavItem(secId);
-    if(el) el.style.display = isLectura ? 'none' : '';
+  // Configuración: admin y contador
+  var navConfig = findNavItem('config');
+  if(navConfig) navConfig.style.display = isLectura ? 'none' : '';
+  // Módulos de ingreso (diario, cuentas, auxiliares): ocultos para lectura
+  ['cuentas','diario','mayor','auxiliares'].forEach(function(id){
+  var nav = findNavItem(id);
+    if(nav) nav.style.display = isLectura ? 'none' : '';
   });
   // Botones de escritura: ocultos para lectura
   document.querySelectorAll('.role-escritura').forEach(function(el){
@@ -1559,36 +1358,24 @@ function applyRoleRestrictions(){
 
 // Renderizar tabla de empresas
 function renderEmpresasSistema(){
-  var tb=document.getElementById('tbody-empresas'); if(!tb) return;
-  if(!SYS.empresas.length){tb.innerHTML='<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text3)">Sin empresas.</td></tr>'; return;}
-  var rows = SYS.empresas.map(function(e){
-    var esMia=e.id===SESSION.empresaId;
-    var numUsr=SYS.usuarios.filter(function(u){return u.empresaIds&&u.empresaIds.includes(e.id);}).length;
-    var tr = document.createElement('tr');
-    tr.innerHTML = '<td><code style="font-size:12px">'+e.rut+'</code></td>'
+  var tb = document.getElementById('tbody-empresas'); if(!tb) return;
+  if(!SYS.empresas.length){
+    tb.innerHTML='<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text3)">Sin empresas registradas.</td></tr>'; return;
+  }
+  tb.innerHTML = SYS.empresas.map(function(e){
+    var esMia   = e.id===SESSION.empresaId;
+    var numUsr  = SYS.usuarios.filter(function(u){ var ids=u.empresaIds||(u.empresaId?[u.empresaId]:[]); return ids.includes(e.id); }).length;
+    return '<tr>'
+      +'<td><code style="font-size:12px">'+e.rut+'</code></td>'
       +'<td><b>'+e.razon+'</b>'+(esMia?'<span class="badge badge-activo" style="margin-left:6px;font-size:10px">Activa</span>':'')+'</td>'
-      +'<td style="font-size:12px;color:var(--text3)">'+(e.periodo||'—')+'</td>'
-      +'<td style="text-align:center">'+numUsr+'</td>'
-      +'<td class="no-print" style="display:flex;gap:4px"></td>';
-    var tdBtn = tr.querySelector('td.no-print');
-    var btnEdit = document.createElement('button');
-    btnEdit.className='btn btn-sm btn-ghost'; btnEdit.textContent='Editar';
-    btnEdit.onclick = function(){ editEmpresa(e.id); };
-    tdBtn.appendChild(btnEdit);
-    if(!esMia){
-      var btnCambiar = document.createElement('button');
-      btnCambiar.className='btn btn-sm btn-ghost'; btnCambiar.textContent='Cambiar';
-      btnCambiar.onclick = function(){ cambiarEmpresa(e.id); };
-      tdBtn.appendChild(btnCambiar);
-    }
-    var btnDel = document.createElement('button');
-    btnDel.className='btn btn-sm btn-danger'; btnDel.textContent='×';
-    btnDel.onclick = function(){ delEmpresa(e.id); };
-    tdBtn.appendChild(btnDel);
-    return tr;
-  });
-  tb.innerHTML='';
-  rows.forEach(function(tr){ tb.appendChild(tr); });
+      +'<td style="font-size:12px;color:var(--text3)">'+( e.periodo||'—')+'</td>'
+      +'<td style="text-align:center;font-size:13px">'+numUsr+'</td>'
+      +'<td class="no-print" style="display:flex;gap:4px">'
+        +'<button class="btn btn-sm btn-ghost" onclick="editEmpresa(\''+e.id+'\')">Editar</button>'
+        +(!esMia?'<button class="btn btn-sm btn-ghost" onclick="cambiarEmpresa(\''+e.id+'\')">Cambiar</button>':'')
+        +'<button class="btn btn-sm btn-danger" onclick="delEmpresa(\''+e.id+'\')">×</button>'
+      +'</td></tr>';
+  }).join('');
 }
 
 // Guardar empresa (nueva o edición)
@@ -1676,30 +1463,26 @@ function renderUsuariosSistema(){
   var tb=document.getElementById('tbody-usuarios'); if(!tb) return;
   var rolLabels={admin:'Admin',contador:'Contador',lectura:'Solo Lectura'};
   var rolCls={admin:'badge-admin',contador:'badge-contador',lectura:'badge-lectura'};
-  if(!SYS.usuarios.length){tb.innerHTML='<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text3)">Sin usuarios.</td></tr>'; return;}
-  var rows = SYS.usuarios.map(function(u){
-    var empNombres=(u.empresaIds||[]).map(function(id){var e=SYS.empresas.find(function(x){return x.id===id;}); return e?e.razon:id;}).join(', ');
+  if(!SYS.usuarios.length){
+    tb.innerHTML='<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text3)">Sin usuarios.</td></tr>'; return;
+  }
+  tb.innerHTML = SYS.usuarios.map(function(u,i){
+    // Compatibilidad: normalizar campo
+    if(u.empresaId && !u.empresaIds){ u.empresaIds=[u.empresaId]; }
+    var empIds = u.empresaIds || [];
+    var empNombres = empIds.map(function(id){
+      var e=SYS.empresas.find(function(x){return x.id===id;}); return e?e.razon:id;
+    }).join(', ');
     var esMio=u.id===SESSION.userId;
-    var tr=document.createElement('tr');
-    tr.innerHTML='<td><b>'+u.nombre+'</b><br><span style="font-size:11px;color:var(--text3)">'+u.user+'</span></td>'
+    return '<tr>'
+      +'<td><b>'+u.nombre+'</b><br><span style="font-size:11px;color:var(--text3)">'+u.user+'</span></td>'
       +'<td><span class="badge '+(rolCls[u.rol]||'')+'">'+(rolLabels[u.rol]||u.rol)+'</span></td>'
-      +'<td style="font-size:12px">'+(empNombres||'—')+'</td>'
-      +'<td class="no-print" style="display:flex;gap:4px"></td>';
-    var tdBtn=tr.querySelector('td.no-print');
-    var btnEdit=document.createElement('button');
-    btnEdit.className='btn btn-sm btn-ghost'; btnEdit.textContent='Editar';
-    btnEdit.onclick=function(){ editUsuario(u.id); };
-    tdBtn.appendChild(btnEdit);
-    if(!esMio){
-      var btnDel=document.createElement('button');
-      btnDel.className='btn btn-danger btn-sm'; btnDel.textContent='×';
-      btnDel.onclick=function(){ delUsuario(u.id); };
-      tdBtn.appendChild(btnDel);
-    }
-    return tr;
-  });
-  tb.innerHTML='';
-  rows.forEach(function(tr){ tb.appendChild(tr); });
+      +'<td style="font-size:12px">'+( empNombres||'—')+'</td>'
+      +'<td class="no-print" style="display:flex;gap:4px">'
+        +'<button class="btn btn-sm btn-ghost" onclick="editUsuario(\''+u.id+'\')">Editar</button>'
+        +(!esMio?'<button class="btn btn-sm btn-danger" onclick="delUsuario(\''+u.id+'\')">×</button>':'')
+      +'</td></tr>';
+  }).join('');
 }
 
 // Poblar selector empresa en modal usuario
@@ -1820,8 +1603,6 @@ function nav(id, el){
   document.querySelectorAll('.nav-item').forEach(function(b){b.classList.remove('active');});
   document.getElementById('sec-'+id).classList.add('active');
   if(el) el.classList.add('active');
-  abrirGrupoActivo(id);
-  if(id==='inicio'){ iniciarAutoRefreshInicio(); } else { detenerAutoRefreshInicio(); }
   if(id==='cuentas'){ renderCuentas(); renderStatsCuentas(); }
   if(id==='diario'){ renderDiario(); }
   if(id==='mayor'){ populateMayorSel(); renderMayor(); }
@@ -1833,59 +1614,39 @@ function nav(id, el){
   if(id==='subtipo-plan'){ renderSubtipoPlan(); }
   if(id==='cod-sii'){ renderCodSII(); }
   if(id==='centros-costos'){ /* próximamente */ }
+  if(id==='inicio'){ iniciarAutoRefreshInicio(); } else { detenerAutoRefreshInicio(); }
 }
 
 // ============================================================
 // PLAN DE CUENTAS
 // ============================================================
-async function addCuenta(){
-  var cod      = document.getElementById('mc-cod').value.trim();
-  var nom      = document.getElementById('mc-nom').value.trim();
-  var tipo     = document.getElementById('mc-tipo-plan') ? document.getElementById('mc-tipo-plan').value : 'Activo';
-  var aux      = document.getElementById('mc-aux').value==='1';
-  var desc     = '';
-  var tipo_plan    = (document.getElementById('mc-tipo-plan')||{value:''}).value;
-  var cod_sii      = (document.getElementById('mc-cod-sii')||{value:''}).value.trim();
-  var concepto     = (document.getElementById('mc-concepto')||{value:''}).value.trim();
-  var subtipo_plan = (document.getElementById('mc-subtipo-plan')||{value:''}).value;
-  var subtipo_flujo= (document.getElementById('mc-subtipo-flujo')||{value:''}).value;
-  var cta_cobrar   = (document.getElementById('mc-cta-cobrar')||{value:''}).value.trim();
-  var cta_pagar    = (document.getElementById('mc-cta-pagar')||{value:''}).value.trim();
-  var disp_pago    = document.getElementById('mc-disp-pago') ? document.getElementById('mc-disp-pago').checked : false;
-  if(!cod||!nom||!tipo_plan){ msgEl('msg-modal-cuenta','err','Tipo Plan, Código y Nombre son obligatorios.'); return; }
-  if(DB.cuentas.find(function(c){return c.cod===cod;})){ msgEl('msg-modal-cuenta','err','Ya existe una cuenta con ese código.'); return; }
-  var obj = {cod,nom,tipo:tipo_plan,aux,desc,tipo_plan,cod_sii,concepto,subtipo_plan,subtipo_flujo,cta_cobrar,cta_pagar,disp_pago};
-  showLoading('Guardando cuenta...');
-  try{
-    await saveCuenta(obj);
-    DB.cuentas.push(obj);
-    DB.cuentas.sort(function(a,b){return a.cod.localeCompare(b.cod);});
-    closeModal('modal-cuenta');
-    // Limpiar modal
-    ['mc-cod','mc-nom','mc-concepto','mc-cta-cobrar','mc-cta-pagar'].forEach(function(id){
-      var el=document.getElementById(id); if(el) el.value='';
-    });
-    ['mc-tipo-plan','mc-subtipo-plan','mc-subtipo-flujo','mc-cod-sii'].forEach(function(id){
-      var el=document.getElementById(id); if(el) el.selectedIndex=0;
-    });
-    var dp=document.getElementById('mc-disp-pago'); if(dp) dp.checked=false;
-    renderCuentas(); renderStatsCuentas();
-    msgEl('msg-cuentas','ok','Cuenta agregada correctamente.');
-  }catch(e){ msgEl('msg-modal-cuenta','err','Error: '+e.message); }
-  finally{ hideLoading(); }
+function addCuenta(){
+  var cod = document.getElementById('mc-cod').value.trim();
+  var nom = document.getElementById('mc-nom').value.trim();
+  var tipo = document.getElementById('mc-tipo').value;
+  var aux = document.getElementById('mc-aux').value === '1';
+  var desc = document.getElementById('mc-desc').value.trim();
+  if(!cod||!nom){ msgEl('msg-modal-cuenta','err','Complete código y nombre de la cuenta.'); return; }
+  if(DB.cuentas.find(function(c){return c.cod===cod;})){ msgEl('msg-modal-cuenta','err','El código ya existe en el plan de cuentas.'); return; }
+  DB.cuentas.push({cod:cod,nom:nom,tipo:tipo,aux:aux,desc:desc});
+  DB.cuentas.sort(function(a,b){return a.cod.localeCompare(b.cod);});
+  saveDB();
+  closeModal('modal-cuenta');
+  document.getElementById('mc-cod').value='';
+  document.getElementById('mc-nom').value='';
+  document.getElementById('mc-desc').value='';
+  document.getElementById('mc-aux').value='0';
+  renderCuentas();
+  renderStatsCuentas();
+  msgEl('msg-cuentas','ok','Cuenta <b>'+cod+' - '+nom+'</b> agregada correctamente.');
 }
 
-async function delCuenta(cod){
+function delCuenta(cod){
   var enUso = DB.asientos.some(function(a){return a.lineas.some(function(l){return l.cuenta===cod;});});
   if(enUso){ alert('No se puede eliminar: la cuenta tiene movimientos registrados.'); return; }
   if(!confirm('¿Eliminar la cuenta '+cod+'?')) return;
-  showLoading('Eliminando...');
-  try{
-    await deleteCuentaSupa(cod);
-    DB.cuentas = DB.cuentas.filter(function(c){return c.cod!==cod;});
-    renderCuentas(); renderStatsCuentas();
-  }catch(e){ alert('Error: '+e.message); }
-  finally{ hideLoading(); }
+  DB.cuentas = DB.cuentas.filter(function(c){return c.cod!==cod;});
+  saveDB(); renderCuentas(); renderStatsCuentas();
 }
 
 function renderStatsCuentas(){
@@ -1900,36 +1661,20 @@ function renderStatsCuentas(){
 
 function renderCuentas(){
   var tb = document.getElementById('tbody-cuentas');
-  if(!DB.cuentas || !DB.cuentas.length){
-    tb.innerHTML='<tr><td colspan="12"><div class="empty"><svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/></svg><p>Sin cuentas. Agrega la primera cuenta.</p></div></td></tr>';
-    return;
-  }
-  var rows = DB.cuentas.map(function(c){
+  if(!DB.cuentas.length){ tb.innerHTML='<tr><td colspan="7"><div class="empty"><svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/></svg><p>Sin cuentas. Agrega la primera cuenta o carga los datos demo.</p></div></td></tr>'; return; }
+  tb.innerHTML = DB.cuentas.map(function(c){
     var s = getSaldo(c.cod);
     var sClass = s>0?'text-green':(s<0?'text-red':'');
-    var tr = document.createElement('tr');
-    tr.innerHTML =
-      '<td>'+typeBadge(c.tipo_plan||c.tipo)+'</td>'
+    return '<tr>'
       +'<td><code>'+c.cod+'</code></td>'
-      +'<td style="font-size:12px">'+(c.cod_sii||'—')+'</td>'
-      +'<td style="font-size:12px;color:var(--text3)">'+(c.concepto||'—')+'</td>'
       +'<td><b>'+c.nom+'</b>'+(c.desc?'<br><span style="font-size:11px;color:var(--text3)">'+c.desc+'</span>':'')+'</td>'
-      +'<td style="font-size:12px">'+(c.subtipo_plan||'—')+'</td>'
-      +'<td style="font-size:12px">'+(c.subtipo_flujo||'—')+'</td>'
-      +'<td style="font-size:12px">'+(c.cta_cobrar||'—')+'</td>'
-      +'<td style="font-size:12px">'+(c.cta_pagar||'—')+'</td>'
-      +'<td style="text-align:center">'+(c.disp_pago?'<span style="color:#16a34a;font-weight:700">✓</span>':'<span style="color:var(--text3)">—</span>')+'</td>'
+      +'<td>'+typeBadge(c.tipo)+'</td>'
+      +'<td style="font-size:12px;color:var(--text3)">'+getNaturaleza(c.tipo)+'</td>'
+      +'<td style="font-size:12px">'+(c.aux?'<span class="badge" style="background:#dcfce7;color:#15803d">Sí</span>':'<span style="color:var(--text3)">—</span>')+'</td>'
       +'<td class="num '+sClass+'">'+(s!==0?fmtM(Math.abs(s)):'—')+'</td>'
-      +'<td class="no-print"></td>';
-    var tdBtn = tr.querySelector('td.no-print');
-    var btn = document.createElement('button');
-    btn.className='btn btn-danger btn-sm'; btn.textContent='Eliminar';
-    btn.onclick = function(){ delCuenta(c.cod); };
-    tdBtn.appendChild(btn);
-    return tr;
-  });
-  tb.innerHTML = '';
-  rows.forEach(function(tr){ tb.appendChild(tr); });
+      +'<td class="no-print"><button class="btn btn-danger btn-sm" onclick="delCuenta(\''+c.cod+'\')">Eliminar</button></td>'
+      +'</tr>';
+  }).join('');
 }
 
 // ============================================================
@@ -2014,7 +1759,7 @@ function recalcCuadre(){
   }
 }
 
-async function guardarAsiento(){
+function guardarAsiento(){
   var fecha = document.getElementById('ma-fecha').value;
   var glosa = document.getElementById('ma-glosa').value.trim();
   // recolectar desde DOM
@@ -2039,19 +1784,13 @@ async function guardarAsiento(){
   if(Math.abs(totD-totH)>0.01){ msgEl('msg-modal-asiento','err','El asiento no está cuadrado. Debe='+fmtM(totD)+' Haber='+fmtM(totH)); return; }
 
   var num = 'A-'+String(DB.numAsiento).padStart(4,'0');
-  var asiento = {num:num, fecha:fecha, glosa:glosa, lineas:lineas};
-  showLoading('Guardando asiento...');
-  try{
-    await saveAsiento(asiento);
-    DB.asientos.push(asiento);
-    DB.numAsiento++;
-    closeModal('modal-asiento');
-    renderDiario();
-    renderCuentas();
-    msgEl('msg-diario','ok','Asiento <b>'+num+'</b> registrado correctamente.');
-  }catch(e){
-    msgEl('msg-modal-asiento','err','Error al guardar: '+e.message);
-  }finally{hideLoading();}
+  DB.asientos.push({num:num, fecha:fecha, glosa:glosa, lineas:lineas});
+  DB.numAsiento++;
+  saveDB();
+  closeModal('modal-asiento');
+  renderDiario();
+  renderCuentas();
+  msgEl('msg-diario','ok','Asiento <b>'+num+'</b> registrado correctamente.');
 }
 
 function renderDiario(){
@@ -2104,15 +1843,10 @@ function verAsiento(num){
   openModal('modal-ver-asiento');
 }
 
-async function delAsiento(num){
+function delAsiento(num){
   if(!confirm('¿Eliminar el asiento '+num+'? Esta acción no se puede deshacer.')) return;
-  showLoading('Eliminando asiento...');
-  try{
-    await deleteAsientoSupa(num);
-    DB.asientos = DB.asientos.filter(function(a){return a.num!==num;});
-    renderDiario(); renderCuentas();
-  }catch(e){ alert('Error al eliminar: '+e.message); }
-  finally{ hideLoading(); }
+  DB.asientos = DB.asientos.filter(function(a){return a.num!==num;});
+  saveDB(); renderDiario(); renderCuentas();
 }
 
 // ============================================================
@@ -2192,7 +1926,7 @@ function formatRut(input){
 }
 
 // ── guardar / editar tercero
-async function saveTercero(){
+function saveTercero(){
   var rut    = document.getElementById('mt-rut').value.trim();
   var razon  = document.getElementById('mt-razon').value.trim();
   var tipo   = document.getElementById('mt-tipo').value;
@@ -2217,12 +1951,8 @@ async function saveTercero(){
     DB.terceros.push(obj);
   }
   DB.terceros.sort(function(a,b){ return a.razon.localeCompare(b.razon,'es'); });
-  showLoading('Guardando auxiliar...');
-  try{
-    await saveTerceroSupa(obj);
-    closeModal('modal-tercero');
-  }catch(e){ msgEl('msg-modal-tercero','err','Error: '+e.message); return; }
-  finally{ hideLoading(); }
+  saveDB();
+  closeModal('modal-tercero');
   resetModalTercero();
   renderAuxiliares();
   renderStatsAuxiliares();
@@ -2256,7 +1986,7 @@ function editTercero(idx){
   openModal('modal-tercero');
 }
 
-async function delTercero(idx){
+function delTercero(idx){
   var t = DB.terceros[idx];
   if(!t) return;
   if(!confirm('¿Eliminar a '+t.razon+'?')) return;
@@ -2859,22 +2589,15 @@ function loadConfigForm(){
   document.getElementById('cfg-dir').value = DB.config.dir||'';
   document.getElementById('cfg-periodo').value = DB.config.periodo||'';
 }
-async function saveConfig(){
+function saveConfig(){
   DB.config.empresa = document.getElementById('cfg-empresa').value||'Mi Empresa S.A.';
   DB.config.rut = document.getElementById('cfg-rut').value;
   DB.config.giro = document.getElementById('cfg-giro').value;
   DB.config.dir = document.getElementById('cfg-dir').value;
   DB.config.periodo = document.getElementById('cfg-periodo').value;
   document.getElementById('sidebar-empresa').textContent = DB.config.empresa;
-  showLoading('Guardando configuración...');
-  try{
-    // Actualizar empresa en SYS cache
-    var emp=SYS.empresas.find(function(e){return e.id===SESSION.empresaId;});
-    if(emp){emp.razon=DB.config.empresa;emp.rut=DB.config.rut;emp.periodo=DB.config.periodo;}
-    await saveDB();
-    alert('Configuración guardada.');
-  }catch(e){alert('Error: '+e.message);}
-  finally{hideLoading();}
+  saveDB();
+  alert('Configuración guardada.');
 }
 
 // ============================================================
@@ -2984,7 +2707,7 @@ function limpiarDatos(){
   saveDB(); renderCuentas(); renderStatsCuentas(); renderDiario();
 }
 
-async function cargarDemo(){
+function cargarDemo(){
   if(!confirm('¿Cargar datos de demostración? Se reemplazarán los datos actuales.')) return;
   DB.cuentas=[]; DB.asientos=[]; DB.numAsiento=1;
   DB.config.empresa='Comercial Demo S.A.';
@@ -3157,36 +2880,11 @@ async function cargarDemo(){
   a('2025-12-28','Gastos administración diciembre',[{cuenta:'6.1.01',aux:'',debe:210000,haber:0},{cuenta:'1.1.01',aux:'',debe:0,haber:210000}]);
   a('2025-12-28','Gastos de ventas diciembre',[{cuenta:'6.1.02',aux:'',debe:135000,haber:0},{cuenta:'1.1.01',aux:'',debe:0,haber:135000}]);
   a('2025-12-28','Intereses préstamo diciembre',[{cuenta:'6.1.03',aux:'',debe:42000,haber:0},{cuenta:'2.1.03',aux:'',debe:0,haber:42000}]);
-  showLoading('Cargando datos demo en Supabase...');
-  try{
-    // Guardar config
-    var emp=SYS.empresas.find(function(e){return e.id===SESSION.empresaId;});
-    if(emp){emp.razon=DB.config.empresa;emp.rut=DB.config.rut;emp.periodo=DB.config.periodo;}
-    await supa.from('empresas').update({rut:DB.config.rut,razon:DB.config.empresa,giro:DB.config.giro,periodo:DB.config.periodo}).eq('id',SESSION.empresaId);
-    // Borrar datos previos
-    await supa.from('asientos').delete().eq('empresa_id',SESSION.empresaId);
-    await supa.from('cuentas').delete().eq('empresa_id',SESSION.empresaId);
-    await supa.from('terceros').delete().eq('empresa_id',SESSION.empresaId);
-    // Insertar cuentas en lotes
-    var cBatch=DB.cuentas.map(function(c){return{empresa_id:SESSION.empresaId,cod:c.cod,nom:c.nom,tipo:c.tipo,aux:c.aux,desc_:c.desc||''};});
-    await supa.from('cuentas').insert(cBatch);
-    // Insertar terceros
-    var tBatch=DB.terceros.map(function(t){return{empresa_id:SESSION.empresaId,rut:t.rut,razon:t.razon,tipo:t.tipo,dir:t.dir||'',email:t.email||'',tel:t.tel||'',notas:t.notas||''};});
-    await supa.from('terceros').insert(tBatch);
-    // Insertar asientos en lotes de 10
-    for(var ai=0;ai<DB.asientos.length;ai++){
-      var a=DB.asientos[ai];
-      var {data:ad}=await supa.from('asientos').insert({empresa_id:SESSION.empresaId,num:a.num,fecha:a.fecha,glosa:a.glosa}).select().single();
-      if(ad&&a.lineas.length>0){
-        await supa.from('lineas_asiento').insert(a.lineas.map(function(l){return{asiento_id:ad.id,cuenta_cod:l.cuenta,aux_nombre:l.aux||'',debe:l.debe||0,haber:l.haber||0};}));
-      }
-    }
-    await supa.from('empresa_config').upsert({empresa_id:SESSION.empresaId,num_asiento:DB.numAsiento});
-    renderCuentas(); renderStatsCuentas(); renderDiario(); loadConfigForm();
-    document.getElementById('sidebar-empresa').textContent=DB.config.empresa;
-    alert('✓ Datos cargados en Supabase: '+DB.cuentas.length+' cuentas, '+DB.asientos.length+' asientos, '+DB.terceros.length+' auxiliares.');
-  }catch(e){alert('Error al cargar demo: '+e.message);}
-  finally{hideLoading();}
+  saveDB();
+  renderCuentas(); renderStatsCuentas(); renderDiario();
+  loadConfigForm();
+  var totalAsientos = DB.asientos.length;
+  alert('✓ Datos de demostración cargados. 15 cuentas, ' + totalAsientos + ' asientos y ' + DB.terceros.length + ' auxiliares (enero–diciembre 2025).');
 }
 
 // ============================================================
@@ -3226,11 +2924,11 @@ function actualizarSelectorEmpresas(){
   }).join('');
 }
 
-async function cambiarEmpresaDesdeSelector(empId){
+function cambiarEmpresaDesdeSelector(empId){
   if(!empId || empId===SESSION.empresaId) return;
   saveDB();
   SESSION.empresaId = empId;
-  await loadDB();
+  loadDB();
   var emp=SYS.empresas.find(function(e){return e.id===empId;});
   if(emp && DB.cuentas.length===0){
     DB.cuentas=SYS.planBase.map(function(c){return Object.assign({},c);});
@@ -3239,17 +2937,7 @@ async function cambiarEmpresaDesdeSelector(empId){
   }
   document.getElementById('sidebar-empresa').textContent = emp?emp.razon:'';
   // Re-renderizar todo
-  // Re-renderizar sección activa
-  var secActiva = document.querySelector('.section.active');
-  var secId = secActiva ? secActiva.id.replace('sec-','') : 'cuentas';
-  if(secId==='cuentas'){ renderCuentas(); renderStatsCuentas(); }
-  else if(secId==='diario'){ renderDiario(); }
-  else if(secId==='mayor'){ populateMayorSel(); renderMayor(); }
-  else if(secId==='auxiliares'){ renderTerceros(); renderStatsTerceros(); }
-  else if(secId==='balance8'){ initB8Selects(); toggleB8Modo(); renderBalance8(); }
-  else if(secId==='eerr'){ initEERRSelects(); toggleEERRModo(); renderEERR(); }
-  else { renderCuentas(); renderStatsCuentas(); }
-  loadConfigForm();
+  renderCuentas(); renderStatsCuentas(); renderDiario(); loadConfigForm();
   // Avisar brevemente
   var msg = document.createElement('div');
   msg.style.cssText='position:fixed;bottom:16px;right:16px;background:var(--text);color:var(--surface);padding:10px 16px;border-radius:var(--radius);font-size:13px;z-index:999;box-shadow:var(--shadow)';
@@ -3258,808 +2946,27 @@ async function cambiarEmpresaDesdeSelector(empId){
   setTimeout(function(){msg.remove();},2500);
 }
 
-
-// ── Precargar datos demo en Supabase (empresa 1 y 2)
-async function _precargarEmpresa1Supa(empId){
-  try{
-    // Cuentas empresa 1
-    var cuentas=[
-      {cod:'1.1.01',nom:'Caja',tipo:'Activo',aux:false},
-      {cod:'1.1.02',nom:'Banco',tipo:'Activo',aux:true},
-      {cod:'1.1.03',nom:'Clientes',tipo:'Activo',aux:true},
-      {cod:'1.1.04',nom:'Inventario Mercaderias',tipo:'Activo',aux:false},
-      {cod:'1.2.01',nom:'Muebles y Equipos',tipo:'Activo',aux:false},
-      {cod:'2.1.01',nom:'Proveedores',tipo:'Pasivo',aux:true},
-      {cod:'2.1.02',nom:'IVA Debito Fiscal',tipo:'Pasivo',aux:false},
-      {cod:'2.1.03',nom:'Prestamos Bancarios',tipo:'Pasivo',aux:false},
-      {cod:'3.1.01',nom:'Capital',tipo:'Patrimonio',aux:false},
-      {cod:'3.1.02',nom:'Utilidades Acumuladas',tipo:'Patrimonio',aux:false},
-      {cod:'4.1.01',nom:'Ventas',tipo:'Ingreso',aux:false},
-      {cod:'5.1.01',nom:'Costo de Ventas',tipo:'Costo',aux:false},
-      {cod:'6.1.01',nom:'Gastos Administracion',tipo:'Gasto',aux:false},
-      {cod:'6.1.02',nom:'Gastos de Ventas',tipo:'Gasto',aux:false},
-      {cod:'6.1.03',nom:'Gastos Financieros',tipo:'Gasto',aux:false},
-    ];
-    await supa.from('cuentas').insert(cuentas.map(function(c){
-      return{empresa_id:empId,cod:c.cod,nom:c.nom,tipo:c.tipo,aux:c.aux,desc_:''};
-    }));
-
-    // Terceros empresa 1
-    var terceros=[
-      {rut:'76.543.210-K',razon:'Empresa Beta',tipo:'Cliente',dir:'Av. Providencia 1234, Santiago',email:'contacto@empresabeta.cl',tel:'+56 2 2345 6789',notas:'Cliente frecuente'},
-      {rut:'76.111.222-3',razon:'Distribuidora Norte',tipo:'Cliente',dir:'Balmaceda 456, Antofagasta',email:'ventas@distnorte.cl',tel:'+56 55 234 5678',notas:'Cliente zona norte'},
-      {rut:'76.333.444-5',razon:'Comercial Sur',tipo:'Cliente',dir:'Los Carrera 789, Concepcion',email:'info@comercialsur.cl',tel:'+56 41 234 5678',notas:'Cliente zona sur'},
-      {rut:'76.555.666-7',razon:'Retail Express',tipo:'Cliente',dir:'Mall Plaza Local 45, Santiago',email:'compras@retailexpress.cl',tel:'+56 2 3456 7890',notas:'Canal retail'},
-      {rut:'76.777.888-9',razon:'Proveedor Alfa',tipo:'Proveedor',dir:'Parque Industrial 123, Pudahuel',email:'ventas@proveedoralfa.cl',tel:'+56 2 4567 8901',notas:'Proveedor principal'},
-      {rut:'97.006.000-6',razon:'Banco Santander',tipo:'Otro',dir:'Bandera 140, Santiago',email:'empresas@santander.cl',tel:'+56 2 2320 2000',notas:'Banco cuenta corriente'},
-    ];
-    await supa.from('terceros').insert(terceros.map(function(t){
-      return Object.assign({empresa_id:empId},t);
-    }));
-
-    // Asientos enero
-    var asientosEne=[
-      {num:'A-0001',fecha:'2025-01-02',glosa:'Aporte inicial capital',lineas:[{cuenta:'1.1.02',aux:'Banco Santander',debe:8000000,haber:0},{cuenta:'3.1.01',aux:'',debe:0,haber:8000000}]},
-      {num:'A-0002',fecha:'2025-01-05',glosa:'Compra activo fijo',lineas:[{cuenta:'1.2.01',aux:'',debe:450000,haber:0},{cuenta:'1.1.02',aux:'Banco Santander',debe:0,haber:450000}]},
-      {num:'A-0003',fecha:'2025-01-08',glosa:'Compra mercaderias enero',lineas:[{cuenta:'1.1.04',aux:'',debe:2100000,haber:0},{cuenta:'2.1.01',aux:'Proveedor Alfa',debe:0,haber:2100000}]},
-      {num:'A-0004',fecha:'2025-01-12',glosa:'Venta contado enero',lineas:[{cuenta:'1.1.01',aux:'',debe:950000,haber:0},{cuenta:'4.1.01',aux:'',debe:0,haber:950000}]},
-      {num:'A-0005',fecha:'2025-01-12',glosa:'Costo venta contado enero',lineas:[{cuenta:'5.1.01',aux:'',debe:570000,haber:0},{cuenta:'1.1.04',aux:'',debe:0,haber:570000}]},
-      {num:'A-0006',fecha:'2025-01-18',glosa:'Venta credito Empresa Beta',lineas:[{cuenta:'1.1.03',aux:'Empresa Beta',debe:1400000,haber:0},{cuenta:'4.1.01',aux:'',debe:0,haber:1400000}]},
-      {num:'A-0007',fecha:'2025-01-18',glosa:'Costo venta credito enero',lineas:[{cuenta:'5.1.01',aux:'',debe:840000,haber:0},{cuenta:'1.1.04',aux:'',debe:0,haber:840000}]},
-      {num:'A-0008',fecha:'2025-01-25',glosa:'Pago Proveedor Alfa',lineas:[{cuenta:'2.1.01',aux:'Proveedor Alfa',debe:1050000,haber:0},{cuenta:'1.1.02',aux:'Banco Santander',debe:0,haber:1050000}]},
-      {num:'A-0009',fecha:'2025-01-28',glosa:'Cobro Empresa Beta',lineas:[{cuenta:'1.1.02',aux:'Banco Santander',debe:700000,haber:0},{cuenta:'1.1.03',aux:'Empresa Beta',debe:0,haber:700000}]},
-      {num:'A-0010',fecha:'2025-01-31',glosa:'Gastos admin enero',lineas:[{cuenta:'6.1.01',aux:'',debe:180000,haber:0},{cuenta:'1.1.01',aux:'',debe:0,haber:180000}]},
-      {num:'A-0011',fecha:'2025-01-31',glosa:'Gastos ventas enero',lineas:[{cuenta:'6.1.02',aux:'',debe:95000,haber:0},{cuenta:'1.1.01',aux:'',debe:0,haber:95000}]},
-      {num:'A-0012',fecha:'2025-01-31',glosa:'Intereses prestamo enero',lineas:[{cuenta:'6.1.03',aux:'',debe:42000,haber:0},{cuenta:'2.1.03',aux:'',debe:0,haber:42000}]},
-    ];
-
-    // Meses Feb-Dic
-    var meses=[[2,'febrero',1800000,0.60,1500000,185000,98000,42000,'Empresa Beta','Distribuidora Norte'],
-      [3,'marzo',2100000,0.62,2000000,190000,105000,42000,'Comercial Sur','Empresa Beta'],
-      [4,'abril',1950000,0.60,1800000,185000,100000,42000,'Distribuidora Norte','Retail Express'],
-      [5,'mayo',2300000,0.61,2100000,192000,110000,42000,'Empresa Beta','Comercial Sur'],
-      [6,'junio',2150000,0.60,1900000,188000,108000,42000,'Retail Express','Empresa Beta'],
-      [7,'julio',1700000,0.62,1600000,180000,95000,42000,'Comercial Sur','Distribuidora Norte'],
-      [8,'agosto',1900000,0.61,1750000,182000,98000,42000,'Empresa Beta','Retail Express'],
-      [9,'septiembre',2250000,0.60,2050000,190000,108000,42000,'Distribuidora Norte','Comercial Sur'],
-      [10,'octubre',2400000,0.61,2200000,195000,112000,42000,'Empresa Beta','Retail Express'],
-      [11,'noviembre',2800000,0.59,2500000,200000,120000,42000,'Comercial Sur','Distribuidora Norte'],
-      [12,'diciembre',3200000,0.58,2800000,210000,135000,42000,'Empresa Beta','Retail Express']];
-    var numA=13;
-    meses.forEach(function(m){
-      var mes=m[0],nom=m[1],vtas=m[2],marg=m[3],compra=m[4],adm=m[5],vg=m[6],fi=m[7],c1=m[8],c2=m[9];
-      var mm=String(mes).padStart(2,'0');
-      var vc=Math.round(vtas*0.4/1000)*1000,cc=Math.round(vc*marg/1000)*1000;
-      var vcred=vtas-vc,ccred=Math.round(vcred*marg/1000)*1000;
-      var vc1=Math.round(vcred*0.55/1000)*1000,vc2=vcred-vc1;
-      var cobro=Math.round(vc1*0.6/1000)*1000,pago=Math.round(compra*0.7/1000)*1000;
-      function na(){ return 'A-'+String(numA++).padStart(4,'0'); }
-      asientosEne.push({num:na(),fecha:'2025-'+mm+'-05',glosa:'Compra mercaderias '+nom,lineas:[{cuenta:'1.1.04',aux:'',debe:compra,haber:0},{cuenta:'2.1.01',aux:'Proveedor Alfa',debe:0,haber:compra}]});
-      asientosEne.push({num:na(),fecha:'2025-'+mm+'-10',glosa:'Venta contado '+nom,lineas:[{cuenta:'1.1.01',aux:'',debe:vc,haber:0},{cuenta:'4.1.01',aux:'',debe:0,haber:vc}]});
-      asientosEne.push({num:na(),fecha:'2025-'+mm+'-10',glosa:'Costo venta contado '+nom,lineas:[{cuenta:'5.1.01',aux:'',debe:cc,haber:0},{cuenta:'1.1.04',aux:'',debe:0,haber:cc}]});
-      asientosEne.push({num:na(),fecha:'2025-'+mm+'-15',glosa:'Venta credito '+c1,lineas:[{cuenta:'1.1.03',aux:c1,debe:vc1,haber:0},{cuenta:'4.1.01',aux:'',debe:0,haber:vc1}]});
-      asientosEne.push({num:na(),fecha:'2025-'+mm+'-15',glosa:'Venta credito '+c2,lineas:[{cuenta:'1.1.03',aux:c2,debe:vc2,haber:0},{cuenta:'4.1.01',aux:'',debe:0,haber:vc2}]});
-      asientosEne.push({num:na(),fecha:'2025-'+mm+'-15',glosa:'Costo ventas credito '+nom,lineas:[{cuenta:'5.1.01',aux:'',debe:ccred,haber:0},{cuenta:'1.1.04',aux:'',debe:0,haber:ccred}]});
-      asientosEne.push({num:na(),fecha:'2025-'+mm+'-20',glosa:'Cobro '+c1,lineas:[{cuenta:'1.1.02',aux:'Banco Santander',debe:cobro,haber:0},{cuenta:'1.1.03',aux:c1,debe:0,haber:cobro}]});
-      asientosEne.push({num:na(),fecha:'2025-'+mm+'-22',glosa:'Pago Proveedor Alfa '+nom,lineas:[{cuenta:'2.1.01',aux:'Proveedor Alfa',debe:pago,haber:0},{cuenta:'1.1.02',aux:'Banco Santander',debe:0,haber:pago}]});
-      asientosEne.push({num:na(),fecha:'2025-'+mm+'-28',glosa:'Gastos admin '+nom,lineas:[{cuenta:'6.1.01',aux:'',debe:adm,haber:0},{cuenta:'1.1.01',aux:'',debe:0,haber:adm}]});
-      asientosEne.push({num:na(),fecha:'2025-'+mm+'-28',glosa:'Gastos ventas '+nom,lineas:[{cuenta:'6.1.02',aux:'',debe:vg,haber:0},{cuenta:'1.1.01',aux:'',debe:0,haber:vg}]});
-      asientosEne.push({num:na(),fecha:'2025-'+mm+'-28',glosa:'Intereses prestamo '+nom,lineas:[{cuenta:'6.1.03',aux:'',debe:fi,haber:0},{cuenta:'2.1.03',aux:'',debe:0,haber:fi}]});
-    });
-
-    // Insertar asientos en Supabase
-    for(var i=0;i<asientosEne.length;i++){
-      var a=asientosEne[i];
-      var {data:ad,error:aerr}=await supa.from('asientos').insert({
-        empresa_id:empId,num:a.num,fecha:a.fecha,glosa:a.glosa
-      }).select().single();
-      if(aerr){ console.error('asiento error:',aerr.message); continue; }
-      if(ad && a.lineas.length>0){
-        await supa.from('lineas_asiento').insert(a.lineas.map(function(l){
-          return{asiento_id:ad.id,cuenta_cod:l.cuenta,aux_nombre:l.aux||'',debe:l.debe||0,haber:l.haber||0};
-        }));
-      }
-    }
-    await supa.from('empresa_config').upsert({empresa_id:empId,num_asiento:numA});
-  }catch(e){ console.error('_precargarEmpresa1Supa:',e); }
-}
-
-async function _precargarEmpresa2Supa(empId){
-  try{
-    var cuentas=[
-      {cod:'1.1.01',nom:'Caja',tipo:'Activo',aux:false},
-      {cod:'1.1.02',nom:'Banco BCI',tipo:'Activo',aux:true},
-      {cod:'1.1.03',nom:'Deudores Comerciales',tipo:'Activo',aux:true},
-      {cod:'1.1.04',nom:'Stock Productos',tipo:'Activo',aux:false},
-      {cod:'1.2.01',nom:'Equipos Computacion',tipo:'Activo',aux:false},
-      {cod:'1.2.02',nom:'Vehiculos',tipo:'Activo',aux:false},
-      {cod:'2.1.01',nom:'Acreedores Comerciales',tipo:'Pasivo',aux:true},
-      {cod:'2.1.02',nom:'IVA por Pagar',tipo:'Pasivo',aux:false},
-      {cod:'2.1.03',nom:'Credito Bancario',tipo:'Pasivo',aux:false},
-      {cod:'3.1.01',nom:'Capital Pagado',tipo:'Patrimonio',aux:false},
-      {cod:'4.1.01',nom:'Ingresos por Ventas',tipo:'Ingreso',aux:false},
-      {cod:'4.1.02',nom:'Ingresos por Servicios',tipo:'Ingreso',aux:false},
-      {cod:'5.1.01',nom:'Costo Mercaderias Vendidas',tipo:'Costo',aux:false},
-      {cod:'6.1.01',nom:'Remuneraciones',tipo:'Gasto',aux:false},
-      {cod:'6.1.02',nom:'Arriendo Oficinas',tipo:'Gasto',aux:false},
-      {cod:'6.1.03',nom:'Servicios Basicos',tipo:'Gasto',aux:false},
-      {cod:'6.1.04',nom:'Marketing y Publicidad',tipo:'Gasto',aux:false},
-      {cod:'6.1.05',nom:'Gastos Financieros',tipo:'Gasto',aux:false},
-    ];
-    await supa.from('cuentas').insert(cuentas.map(function(c){
-      return{empresa_id:empId,cod:c.cod,nom:c.nom,tipo:c.tipo,aux:c.aux,desc_:''};
-    }));
-
-    var terceros=[
-      {rut:'76.200.300-4',razon:'Falabella Retail S.A.',tipo:'Cliente',dir:'Av. Kennedy 9001, Las Condes',email:'proveedores@falabella.cl',tel:'+56 2 2380 2000',notas:'Canal retail'},
-      {rut:'76.400.500-6',razon:'Ripley Corp S.A.',tipo:'Cliente',dir:'Av. Providencia 2155, Santiago',email:'compras@ripley.cl',tel:'+56 2 2330 4000',notas:'Canal retail'},
-      {rut:'76.600.700-8',razon:'Paris Cencosud',tipo:'Cliente',dir:'Av. Kennedy 6800, Vitacura',email:'proveedores@cencosud.cl',tel:'+56 2 2959 0000',notas:'Canal retail'},
-      {rut:'96.500.760-9',razon:'Importadora Asia Ltda.',tipo:'Proveedor',dir:'Puerto San Antonio',email:'ventas@importadoraasia.cl',tel:'+56 35 213 4567',notas:'Proveedor importados'},
-      {rut:'76.800.900-1',razon:'Distribuidora Central',tipo:'Proveedor',dir:'Ruta 5 Norte Km 12, Quilicura',email:'ventas@distcentral.cl',tel:'+56 2 2745 8900',notas:'Proveedor local'},
-      {rut:'97.030.000-7',razon:'Banco BCI',tipo:'Otro',dir:'El Golf 125, Las Condes',email:'empresas@bci.cl',tel:'+56 2 2692 5000',notas:'Banco principal'},
-    ];
-    await supa.from('terceros').insert(terceros.map(function(t){
-      return Object.assign({empresa_id:empId},t);
-    }));
-
-    var asientos=[];
-    var numA=1;
-    function na(){ return 'A-'+String(numA++).padStart(4,'0'); }
-
-    asientos.push({num:na(),fecha:'2025-01-03',glosa:'Aporte inicial socios',lineas:[{cuenta:'1.1.02',aux:'Banco BCI',debe:15000000,haber:0},{cuenta:'3.1.01',aux:'',debe:0,haber:15000000}]});
-    asientos.push({num:na(),fecha:'2025-01-05',glosa:'Compra equipos computacion',lineas:[{cuenta:'1.2.01',aux:'',debe:2800000,haber:0},{cuenta:'1.1.02',aux:'Banco BCI',debe:0,haber:2800000}]});
-    asientos.push({num:na(),fecha:'2025-01-06',glosa:'Compra vehiculo reparto',lineas:[{cuenta:'1.2.02',aux:'',debe:8500000,haber:0},{cuenta:'2.1.03',aux:'',debe:0,haber:8500000}]});
-
-    var mLC=[[1,'enero',4200000,500000,0.55,2100000,1500000,320000,250000,180000,'Falabella Retail S.A.','Ripley Corp S.A.','Importadora Asia Ltda.'],
-      [2,'febrero',3800000,480000,0.55,1900000,1500000,320000,250000,180000,'Ripley Corp S.A.','Paris Cencosud','Distribuidora Central'],
-      [3,'marzo',4500000,520000,0.55,2200000,1500000,320000,280000,180000,'Falabella Retail S.A.','Paris Cencosud','Importadora Asia Ltda.'],
-      [4,'abril',4100000,490000,0.55,2000000,1500000,320000,260000,180000,'Ripley Corp S.A.','Falabella Retail S.A.','Distribuidora Central'],
-      [5,'mayo',4700000,530000,0.55,2300000,1500000,320000,290000,180000,'Paris Cencosud','Falabella Retail S.A.','Importadora Asia Ltda.'],
-      [6,'junio',4300000,510000,0.55,2100000,1500000,320000,270000,180000,'Falabella Retail S.A.','Ripley Corp S.A.','Distribuidora Central'],
-      [7,'julio',3600000,450000,0.55,1800000,1500000,320000,230000,180000,'Paris Cencosud','Distribuidora Central','Importadora Asia Ltda.'],
-      [8,'agosto',3900000,470000,0.55,1950000,1500000,320000,245000,180000,'Ripley Corp S.A.','Falabella Retail S.A.','Distribuidora Central'],
-      [9,'septiembre',4600000,515000,0.55,2250000,1500000,320000,285000,180000,'Falabella Retail S.A.','Paris Cencosud','Importadora Asia Ltda.'],
-      [10,'octubre',5100000,560000,0.55,2500000,1500000,320000,310000,180000,'Ripley Corp S.A.','Falabella Retail S.A.','Distribuidora Central'],
-      [11,'noviembre',6200000,620000,0.55,3000000,1500000,320000,380000,180000,'Falabella Retail S.A.','Paris Cencosud','Importadora Asia Ltda.'],
-      [12,'diciembre',7800000,750000,0.55,3800000,1500000,320000,450000,180000,'Ripley Corp S.A.','Paris Cencosud','Distribuidora Central']];
-
-    mLC.forEach(function(m){
-      var mes=m[0],nom=m[1],vtas=m[2],serv=m[3],marg=m[4],compra=m[5];
-      var rem=m[6],arr=m[7],mkt=m[8],fi=m[9],cl1=m[10],cl2=m[11],prov=m[12];
-      var mm=String(mes).padStart(2,'0');
-      var costo=Math.round(vtas*marg/1000)*1000;
-      var vc1=Math.round(vtas*0.6/1000)*1000,vc2=vtas-vc1;
-      var cobro=Math.round(vc1*0.7/1000)*1000,pago=Math.round(compra*0.75/1000)*1000;
-      asientos.push({num:na(),fecha:'2025-'+mm+'-03',glosa:'Compra stock '+nom,lineas:[{cuenta:'1.1.04',aux:'',debe:compra,haber:0},{cuenta:'2.1.01',aux:prov,debe:0,haber:compra}]});
-      asientos.push({num:na(),fecha:'2025-'+mm+'-10',glosa:'Ventas '+cl1+' '+nom,lineas:[{cuenta:'1.1.03',aux:cl1,debe:vc1,haber:0},{cuenta:'4.1.01',aux:'',debe:0,haber:vc1}]});
-      asientos.push({num:na(),fecha:'2025-'+mm+'-15',glosa:'Ventas '+cl2+' '+nom,lineas:[{cuenta:'1.1.03',aux:cl2,debe:vc2,haber:0},{cuenta:'4.1.01',aux:'',debe:0,haber:vc2}]});
-      asientos.push({num:na(),fecha:'2025-'+mm+'-15',glosa:'Costo mercaderias '+nom,lineas:[{cuenta:'5.1.01',aux:'',debe:costo,haber:0},{cuenta:'1.1.04',aux:'',debe:0,haber:costo}]});
-      asientos.push({num:na(),fecha:'2025-'+mm+'-16',glosa:'Ingresos servicios '+nom,lineas:[{cuenta:'1.1.01',aux:'',debe:serv,haber:0},{cuenta:'4.1.02',aux:'',debe:0,haber:serv}]});
-      asientos.push({num:na(),fecha:'2025-'+mm+'-20',glosa:'Cobro '+cl1+' '+nom,lineas:[{cuenta:'1.1.02',aux:'Banco BCI',debe:cobro,haber:0},{cuenta:'1.1.03',aux:cl1,debe:0,haber:cobro}]});
-      asientos.push({num:na(),fecha:'2025-'+mm+'-22',glosa:'Pago '+prov+' '+nom,lineas:[{cuenta:'2.1.01',aux:prov,debe:pago,haber:0},{cuenta:'1.1.02',aux:'Banco BCI',debe:0,haber:pago}]});
-      asientos.push({num:na(),fecha:'2025-'+mm+'-28',glosa:'Remuneraciones '+nom,lineas:[{cuenta:'6.1.01',aux:'',debe:rem,haber:0},{cuenta:'1.1.01',aux:'',debe:0,haber:rem}]});
-      asientos.push({num:na(),fecha:'2025-'+mm+'-28',glosa:'Arriendo '+nom,lineas:[{cuenta:'6.1.02',aux:'',debe:arr,haber:0},{cuenta:'1.1.02',aux:'Banco BCI',debe:0,haber:arr}]});
-      asientos.push({num:na(),fecha:'2025-'+mm+'-28',glosa:'Marketing '+nom,lineas:[{cuenta:'6.1.04',aux:'',debe:mkt,haber:0},{cuenta:'1.1.02',aux:'Banco BCI',debe:0,haber:mkt}]});
-      asientos.push({num:na(),fecha:'2025-'+mm+'-28',glosa:'Servicios basicos '+nom,lineas:[{cuenta:'6.1.03',aux:'',debe:50000,haber:0},{cuenta:'1.1.01',aux:'',debe:0,haber:50000}]});
-      asientos.push({num:na(),fecha:'2025-'+mm+'-28',glosa:'Gastos financieros '+nom,lineas:[{cuenta:'6.1.05',aux:'',debe:fi,haber:0},{cuenta:'2.1.03',aux:'',debe:0,haber:fi}]});
-    });
-
-    for(var i=0;i<asientos.length;i++){
-      var a=asientos[i];
-      var {data:ad,error:aerr}=await supa.from('asientos').insert({
-        empresa_id:empId,num:a.num,fecha:a.fecha,glosa:a.glosa
-      }).select().single();
-      if(aerr){ console.error('asiento e2:',aerr.message); continue; }
-      if(ad && a.lineas.length>0){
-        await supa.from('lineas_asiento').insert(a.lineas.map(function(l){
-          return{asiento_id:ad.id,cuenta_cod:l.cuenta,aux_nombre:l.aux||'',debe:l.debe||0,haber:l.haber||0};
-        }));
-      }
-    }
-    await supa.from('empresa_config').upsert({empresa_id:empId,num_asiento:numA});
-  }catch(e){ console.error('_precargarEmpresa2Supa:',e); }
-}
-
-
-function renderTerceros(){
-  if(!DB.terceros) DB.terceros=[];
-  var buscar=(document.getElementById('terceros-buscar')||{value:''}).value.toLowerCase();
-  var tipo=(document.getElementById('terceros-tipo-filtro')||{value:''}).value;
-  DB.terceros.forEach(function(t,i){t._idx=i;});
-  var lista=DB.terceros.filter(function(t){
-    var matchTipo=!tipo||t.tipo===tipo;
-    var matchBusca=!buscar||(t.rut+t.razon+(t.email||'')+(t.tel||'')).toLowerCase().includes(buscar);
-    return matchTipo&&matchBusca;
-  });
-  var tb=document.getElementById('tbody-terceros');
-  if(!tb) return;
-  if(!lista.length){tb.innerHTML='<tr><td colspan="7"><div class="empty"><p>Sin auxiliares registrados.</p></div></td></tr>'; return;}
-  var tipoBadgeMap={Cliente:'activo',Proveedor:'pasivo',Empleado:'patrimonio',Otro:'gasto'};
-  var rows=lista.map(function(t){
-    var bClass=tipoBadgeMap[t.tipo]||'gasto';
-    var tr=document.createElement('tr');
-    tr.innerHTML='<td><code>'+t.rut+'</code></td>'
-      +'<td><b>'+t.razon+'</b>'+(t.notas?'<br><span style="font-size:11px;color:var(--text3)">'+t.notas+'</span>':'')+'</td>'
-      +'<td><span class="badge badge-'+bClass+'">'+t.tipo+'</span></td>'
-      +'<td style="font-size:12px;color:var(--text2)">'+(t.dir||'—')+'</td>'
-      +'<td style="font-size:12px">'+(t.email?'<a href="mailto:'+t.email+'">'+t.email+'</a>':'—')+'</td>'
-      +'<td style="font-size:12px">'+(t.tel||'—')+'</td>'
-      +'<td class="no-print" style="display:flex;gap:4px"></td>';
-    var tdBtn=tr.querySelector('td.no-print');
-    var btnVer=document.createElement('button'); btnVer.className='btn btn-sm btn-ghost'; btnVer.textContent='Ver';
-    btnVer.onclick=function(){verTercero(t._idx);}; tdBtn.appendChild(btnVer);
-    var btnEdit=document.createElement('button'); btnEdit.className='btn btn-sm btn-ghost'; btnEdit.textContent='Editar';
-    btnEdit.onclick=function(){editTercero(t._idx);}; tdBtn.appendChild(btnEdit);
-    var btnDel=document.createElement('button'); btnDel.className='btn btn-danger btn-sm'; btnDel.textContent='×';
-    btnDel.onclick=function(){delTercero(t._idx);}; tdBtn.appendChild(btnDel);
-    return tr;
-  });
-  tb.innerHTML='';
-  rows.forEach(function(tr){tb.appendChild(tr);});
-}
-
-function renderStatsTerceros(){
-  if(!DB.terceros) DB.terceros=[];
-  var c=0,p=0,e=0,o=0;
-  DB.terceros.forEach(function(t){
-    if(t.tipo==='Cliente') c++;
-    else if(t.tipo==='Proveedor') p++;
-    else if(t.tipo==='Empleado') e++;
-    else o++;
-  });
-  var el=document.getElementById('terceros-stats');
-  if(!el) return;
-  el.innerHTML='<div class="stats-grid" style="grid-template-columns:repeat(4,1fr)">'
-    +'<div class="stat"><div class="stat-label">Total</div><div class="stat-value">'+DB.terceros.length+'</div></div>'
-    +'<div class="stat"><div class="stat-label">Clientes</div><div class="stat-value text-blue">'+c+'</div></div>'
-    +'<div class="stat"><div class="stat-label">Proveedores</div><div class="stat-value text-red">'+p+'</div></div>'
-    +'<div class="stat"><div class="stat-label">Otros</div><div class="stat-value">'+(e+o)+'</div></div>'
-    +'</div>';
-}
-
-
-// Helper: buscar nav-item por sección
-
-// ── Menú colapsable
-
-
-
-// Abrir el grupo que contiene el nav-item activo
-
-
-
-
-// ══ MENÚ COLAPSABLE ══════════════════════════════════════════
-function toggleGrp(gid){
-  var btn = document.getElementById('grp-'+gid+'-btn');
-  var sub = document.getElementById('grp-'+gid+'-sub');
-  if(!btn||!sub) return;
-  var open = sub.classList.contains('open');
-  if(open){ sub.classList.remove('open'); btn.classList.remove('open'); }
-  else     { sub.classList.add('open');   btn.classList.add('open');    }
-}
-
-function findNavItem(secId){
-  return document.querySelector('.nav-item[data-sec="'+secId+'"]');
-}
-
-function abrirGrupoActivo(secId){
-  var item = findNavItem(secId);
-  if(!item) return;
-  var sub = item.closest('.nav-sub');
-  if(!sub) return;
-  sub.classList.add('open');
-  var grpId = sub.id.replace('-sub','').replace('grp-','');
-  var btn = document.getElementById('grp-'+grpId+'-btn');
-  if(btn) btn.classList.add('open');
-}
-
-// Registrar clicks en nav-items con data-sec (evita onclick inline)
-function initNavListeners(){
-  document.querySelectorAll('.nav-item[data-sec]').forEach(function(el){
-    el.addEventListener('click', function(){
-      var secId = el.getAttribute('data-sec');
-      if(!secId || el.style.cursor==='default') return;
-      nav(secId, el);
-    });
-  });
-}
-// ═════════════════════════════════════════════════════════════
-
-
-// ══ SESIÓN PERSISTENTE (sessionStorage + timeout 20 min) ═════
-var SESSION_KEY = 'sc_session';
-var INACTIVITY_MS = 1200000;
-var _inactivityTimer = null;
-
-function guardarSesion(){
-  try{
-    sessionStorage.setItem(SESSION_KEY, JSON.stringify({
-      userId:    SESSION.userId,
-      empresaId: SESSION.empresaId,
-      rol:       SESSION.rol,
-      nombre:    SESSION.nombre,
-      ts:        Date.now()
-    }));
-  }catch(e){}
-}
-
-function limpiarSesion(){
-  try{ sessionStorage.removeItem(SESSION_KEY); }catch(e){}
-}
-
-function recuperarSesion(){
-  try{
-    var raw = sessionStorage.getItem(SESSION_KEY);
-    if(!raw) return null;
-    var s = JSON.parse(raw);
-    if(!s || !s.userId) return null;
-    // Verificar que no haya expirado
-    if(Date.now() - s.ts > INACTIVITY_MS){
-      limpiarSesion();
-      return null;
-    }
-    return s;
-  }catch(e){ return null; }
-}
-
-function resetInactivityTimer(){
-  if(_inactivityTimer) clearTimeout(_inactivityTimer);
-  guardarSesion(); // actualizar timestamp en cada actividad
-  _inactivityTimer = setTimeout(function(){
-    if(!SESSION.userId) return;
-    mostrarToast('Sesión cerrada por inactividad', 'warn');
-    setTimeout(function(){ doLogout(); }, 1500);
-  }, INACTIVITY_MS);
-}
-
-function iniciarWatchdogSesion(){
-  // Escuchar eventos de actividad del usuario
-  ['click','keydown','mousemove','touchstart','scroll'].forEach(function(ev){
-    document.addEventListener(ev, resetInactivityTimer, {passive:true});
-  });
-  resetInactivityTimer(); // iniciar el primer timer
-}
-
-function detenerWatchdogSesion(){
-  if(_inactivityTimer) clearTimeout(_inactivityTimer);
-  ['click','keydown','mousemove','touchstart','scroll'].forEach(function(ev){
-    document.removeEventListener(ev, resetInactivityTimer);
-  });
-}
-
-function mostrarToast(msg, tipo){
-  var t = document.createElement('div');
-  var bg = tipo==='warn' ? '#f59e0b' : tipo==='err' ? '#ef4444' : tipo==='ok' ? '#16a34a' : 'var(--text)';
-  t.style.cssText = 'position:fixed;bottom:20px;right:20px;background:'+bg+';color:#fff;padding:12px 18px;border-radius:8px;font-size:13px;font-weight:500;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.25);transition:opacity .4s';
-  t.textContent = msg;
-  document.body.appendChild(t);
-  setTimeout(function(){ t.style.opacity='0'; setTimeout(function(){ t.remove(); },400); }, 3000);
-}
-// ═════════════════════════════════════════════════════════════
-
-
-// ══ CATÁLOGO SUBTIPO PLAN ══════════════════════════════════════
-var SUBTIPO_PLAN_DATA = [
-  {cod:'110100',tipo:'Activo',subtipo:'Efectivo y efectivo equivalente',nombre:'Efectivo y efectivo equivalente'},
-  {cod:'110200',tipo:'Activo',subtipo:'Activos corrientes',nombre:'Otros activos financieros corrientes'},
-  {cod:'110300',tipo:'Activo',subtipo:'Activos corrientes',nombre:'Otros activos corrientes'},
-  {cod:'110400',tipo:'Activo',subtipo:'Activos corrientes',nombre:'Deudores Comerciales'},
-  {cod:'110500',tipo:'Activo',subtipo:'Activos corrientes',nombre:'Cuentas por cobrar a entidades relacionadas, corrientes'},
-  {cod:'110600',tipo:'Activo',subtipo:'Activos corrientes',nombre:'Inventarios corrientes'},
-  {cod:'110700',tipo:'Activo',subtipo:'Activos corrientes',nombre:'Activos biológicos corrientes'},
-  {cod:'110800',tipo:'Activo',subtipo:'Activos corrientes',nombre:'Impuestos por recuperar'},
-  {cod:'110900',tipo:'Activo',subtipo:'Activos corrientes',nombre:'Otros Activos Corrientes'},
-  {cod:'111000',tipo:'Activo',subtipo:'Activos corrientes',nombre:'Activos no corrientes o grupos de activos para su disposición clasificados como mantenidos para la venta o como mantenidos para distribuir a los propietarios'},
-  {cod:'111100',tipo:'Activo',subtipo:'Activos corrientes',nombre:'Otros activos financieros no corrientes'},
-  {cod:'111200',tipo:'Activo',subtipo:'Activos no corrientes',nombre:'Activos Financieros No Corrientes'},
-  {cod:'111300',tipo:'Activo',subtipo:'Activos corrientes',nombre:'Cuentas por cobrar no corrientes'},
-  {cod:'111400',tipo:'Activo',subtipo:'Activos corrientes',nombre:'Inventarios no corrientes'},
-  {cod:'111500',tipo:'Activo',subtipo:'Activos corrientes',nombre:'Cuentas por Cobrar EE.RR.'},
-  {cod:'111600',tipo:'Activo',subtipo:'Activos corrientes',nombre:'Participación Empresas Relacionadas'},
-  {cod:'120100',tipo:'Activo',subtipo:'Activos no corrientes',nombre:'Propiedad planta y equipos'},
-  {cod:'120200',tipo:'Activo',subtipo:'Activos no corrientes',nombre:'Plusvalía'},
-  {cod:'120300',tipo:'Activo',subtipo:'Activos no corrientes',nombre:'Activos biológicos no corrientes'},
-  {cod:'120400',tipo:'Activo',subtipo:'Activos no corrientes',nombre:'Propiedad de Inversión'},
-  {cod:'120500',tipo:'Activo',subtipo:'Activos no corrientes',nombre:'Activos por impuestos corrientes, no corrientes'},
-  {cod:'120600',tipo:'Activo',subtipo:'Activos no corrientes',nombre:'Activos por impuestos diferidos'},
-  {cod:'120700',tipo:'Activo',subtipo:'Activos no corrientes',nombre:'Otros Activos No Corrientes'},
-  {cod:'120800',tipo:'Activo',subtipo:'Activos no corrientes',nombre:'Intangibles'},
-  {cod:'210100',tipo:'Pasivo',subtipo:'Pasivos corrientes',nombre:'Pasivos Financieros Corrientes'},
-  {cod:'210200',tipo:'Pasivo',subtipo:'Pasivos corrientes',nombre:'Facturas y Cuentas por pagar'},
-  {cod:'210300',tipo:'Pasivo',subtipo:'Pasivos corrientes',nombre:'Cuentas por pagar a entidades relacionadas, corrientes'},
-  {cod:'210400',tipo:'Pasivo',subtipo:'Pasivos corrientes',nombre:'Otras Provisiones Corto Plazo'},
-  {cod:'210500',tipo:'Pasivo',subtipo:'Pasivos corrientes',nombre:'Pasivos por impuestos corrientes, corrientes'},
-  {cod:'210600',tipo:'Pasivo',subtipo:'Pasivos corrientes',nombre:'Provisiones corrientes por beneficios a los empleados'},
-  {cod:'220100',tipo:'Pasivo',subtipo:'Pasivos corrientes',nombre:'Otros pasivos no financieros corrientes'},
-  {cod:'220200',tipo:'Pasivo',subtipo:'Pasivos no corrientes',nombre:'Pasivos incluidos en grupos de activos para su disposición clasificados como mantenidos para la venta'},
-  {cod:'220300',tipo:'Pasivo',subtipo:'Pasivos no corrientes',nombre:'Otros pasivos financieros no corrientes'},
-  {cod:'220400',tipo:'Pasivo',subtipo:'Pasivos no corrientes',nombre:'Cuentas por pagar no corrientes'},
-  {cod:'220500',tipo:'Pasivo',subtipo:'Pasivos no corrientes',nombre:'Cuentas Por Pagar Entidades Relacionadas no corrientes'},
-  {cod:'220600',tipo:'Pasivo',subtipo:'Pasivos no corrientes',nombre:'Otras Provisiones a Largo Plazo'},
-  {cod:'220700',tipo:'Pasivo',subtipo:'Pasivos no corrientes',nombre:'Pasivo por impuestos diferidos'},
-  {cod:'220800',tipo:'Pasivo',subtipo:'Pasivos no corrientes',nombre:'Pasivos por impuestos corrientes, no corrientes'},
-  {cod:'220900',tipo:'Pasivo',subtipo:'Pasivos no corrientes',nombre:'Provisiones no corrientes por beneficio a empleados'},
-  {cod:'221000',tipo:'Pasivo',subtipo:'Pasivos no corrientes',nombre:'Otros pasivos no financieros no corrientes'},
-  {cod:'310100',tipo:'Patrimonio',subtipo:'',nombre:'Capital emitido'},
-  {cod:'310200',tipo:'Patrimonio',subtipo:'',nombre:'Ganancias (pérdidas) acumuladas'},
-  {cod:'310300',tipo:'Patrimonio',subtipo:'',nombre:'Prima de emisión'},
-  {cod:'310400',tipo:'Patrimonio',subtipo:'',nombre:'Acciones propias en cartera'},
-  {cod:'310500',tipo:'Patrimonio',subtipo:'',nombre:'Otras participaciones en patrimonio'},
-  {cod:'310600',tipo:'Patrimonio',subtipo:'',nombre:'Otras reservas'},
-  {cod:'310700',tipo:'Patrimonio',subtipo:'',nombre:'Patrimonio atribuible a los propietarios de la controladora'},
-  {cod:'310800',tipo:'Patrimonio',subtipo:'',nombre:'Participaciones no controladoras'},
-  {cod:'310900',tipo:'Patrimonio',subtipo:'',nombre:'Utilidad/Perdida Ejercicio'},
-  {cod:'311000',tipo:'Patrimonio',subtipo:'',nombre:'Capital no pagado'},
-  {cod:'410100',tipo:'Ingresos',subtipo:'Ingreso por venta',nombre:'Ingresos de la Operación'},
-  {cod:'420100',tipo:'Ingresos',subtipo:'Otros ingresos no operacionales',nombre:'Otros ingresos'},
-  {cod:'420200',tipo:'Ingresos',subtipo:'Ingresos Financieros',nombre:'Ingresos financieros'},
-  {cod:'510100',tipo:'Costos',subtipo:'Costo de venta',nombre:'Costo de ventas'},
-  {cod:'510200',tipo:'Costos',subtipo:'Costo de venta',nombre:'Costos de distribución'},
-  {cod:'520100',tipo:'Gastos',subtipo:'Gasto de administración y ventas',nombre:'Gastos de administración'},
-  {cod:'520200',tipo:'Gastos',subtipo:'Gasto de administración y ventas',nombre:'Otros gastos, por función'},
-  {cod:'520300',tipo:'Gastos',subtipo:'Gasto de administración y ventas',nombre:'Otras ganancias (pérdidas)'},
-  {cod:'520400',tipo:'Gastos',subtipo:'Gasto de administración y ventas',nombre:'Resultados no Operacionales'},
-  {cod:'520500',tipo:'Gastos',subtipo:'Gastos financieros',nombre:'Costos financieros'},
-  {cod:'530100',tipo:'Gastos',subtipo:'',nombre:'Participación en las ganancias (pérdidas) de asociadas y negocios conjuntos que se contabilicen utilizando el método de la participación'},
-  {cod:'530200',tipo:'Gastos',subtipo:'Gasto de administración y ventas',nombre:'Diferencias de cambio'},
-  {cod:'530300',tipo:'Gastos',subtipo:'',nombre:'Resultados por unidades de reajuste'},
-  {cod:'530400',tipo:'Gastos',subtipo:'',nombre:'Ganancias (pérdidas) que surgen de diferencias entre importes en libros anteriores y el valor razonable de activos financieros reclasificados como medidos al valor razonable'},
-  {cod:'530500',tipo:'Gastos',subtipo:'Impuesto a la Renta',nombre:'Gasto por impuestos a las ganancias'},
-  {cod:'530600',tipo:'Gastos',subtipo:'',nombre:'Ganancia (pérdida) procedente de operaciones discontinuadas'},
-  {cod:'530700',tipo:'Gastos',subtipo:'',nombre:'Ganancia (pérdida) atribuible a participaciones no controladoras'},
-  {cod:'530800',tipo:'Gastos',subtipo:'',nombre:'Resultado Integral atribuible a propietarios controladora'},
-  {cod:'530900',tipo:'Gastos',subtipo:'',nombre:'Resultado Integral atribuible a participaciones no controladora'}
-];
-
-function filtrarSubtiposPlan(tipoPlan){
-  var sel = document.getElementById('mc-subtipo-plan');
-  if(!sel) return;
-  // Obtener subtipos únicos para este tipo
-  var vistos = {};
-  var opts = ['<option value="">— Ninguno —</option>'];
-  SUBTIPO_PLAN_DATA.forEach(function(r){
-    if(r.tipo === tipoPlan && r.subtipo && !vistos[r.subtipo]){
-      vistos[r.subtipo] = true;
-      var s = r.subtipo.replace(/"/g,'&quot;');
-      opts.push('<option value="'+s+'">'+s+'</option>');
-    }
-  });
-  if(opts.length === 1){
-    opts = ['<option value="">— Sin subtipos —</option>'];
-  }
-  sel.innerHTML = opts.join('');
-}
-
-function getNombreSubtipoPlan(cod){
-  var r = SUBTIPO_PLAN_DATA.find(function(x){return x.cod===cod;});
-  return r ? r.nombre : '';
-}
-// ═════════════════════════════════════════════════════════════
-
-
-// ══ CATÁLOGO CÓDIGOS SII ══════════════════════════════════════
-var COD_SII_DATA = []; // se carga desde Supabase al iniciar
-
-async function cargarCodSII(){
-  try{
-    var {data} = await supa.from('cod_sii').select('cod_sii,cod_orig,glosa,tipo').order('cod_sii');
-    COD_SII_DATA = data || [];
-    poblarSelectCodSII();
-  }catch(e){ console.warn('cod_sii no cargado:', e.message); }
-}
-
-function poblarSelectCodSII(filtroTipo){
-  var sel = document.getElementById('mc-cod-sii');
-  if(!sel) return;
-  var lista = filtroTipo
-    ? COD_SII_DATA.filter(function(r){ return r.tipo===filtroTipo; })
-    : COD_SII_DATA;
-  sel.innerHTML = '<option value="">— Seleccionar —</option>'
-    + lista.map(function(r){
-        // Mostrar: codigo sin puntos + codigo original + glosa
-        var txt = r.cod_sii + ' (' + (r.cod_orig||r.cod_sii) + ') — ' + r.glosa;
-        return '<option value="'+r.cod_sii+'">'+txt+'</option>';
-      }).join('');
-}
-// ═════════════════════════════════════════════════════════════
-
-
-// ══ RENDER SUB TIPO PLAN ═════════════════════════════════════
-async function renderSubtipoPlan(){
-  var tb = document.getElementById('tbody-subtipo-plan');
-  if(!tb) return;
-  tb.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px"><div style="display:inline-block;width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite"></div></td></tr>';
-  try{
-    var res = await supa.from('subtipo_plan').select('*').order('cod');
-    if(res.error) throw res.error;
-    var data = res.data || [];
-    if(!data.length){
-      tb.innerHTML='<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text3)">Sin datos. Ejecutar SQL subtipo_plan primero.</td></tr>';
-      return;
-    }
-    var rows = data.map(function(r){
-      var tr=document.createElement('tr');
-      tr.innerHTML='<td><code>'+r.cod+'</code></td>'
-        +'<td>'+typeBadge(r.tipo)+'</td>'
-        +'<td style="font-size:12px;color:var(--text3)">'+(r.subtipo||'—')+'</td>'
-        +'<td>'+r.nombre+'</td>';
-      return tr;
-    });
-    tb.innerHTML=''; rows.forEach(function(tr){tb.appendChild(tr);});
-    var stats=document.getElementById('subtipo-plan-stats');
-    if(stats){
-      var tipos={};
-      data.forEach(function(r){tipos[r.tipo]=(tipos[r.tipo]||0)+1;});
-      stats.innerHTML='<div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr))">'
-        +Object.keys(tipos).map(function(t){return '<div class="stat"><div class="stat-label">'+t+'</div><div class="stat-value">'+tipos[t]+'</div></div>';}).join('')
-        +'<div class="stat"><div class="stat-label">Total</div><div class="stat-value">'+data.length+'</div></div></div>';
-    }
-  }catch(e){
-    tb.innerHTML='<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--danger)">Error: '+e.message+'</td></tr>';
-  }
-}
-
-// ══ RENDER CÓDIGOS SII ═══════════════════════════════════════
-async function renderCodSII(){
-  var tb = document.getElementById('tbody-cod-sii');
-  if(!tb) return;
-  tb.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px"><div style="display:inline-block;width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite"></div></td></tr>';
-  try{
-    var res = await supa.from('cod_sii').select('*').order('cod_sii');
-    if(res.error) throw res.error;
-    var data = res.data || [];
-    if(!data.length){
-      tb.innerHTML='<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text3)">Sin datos. Ejecutar SQL cod_sii primero.</td></tr>';
-      return;
-    }
-    var rows = data.map(function(r){
-      var tr=document.createElement('tr');
-      tr.innerHTML='<td><code>'+r.cod_sii+'</code></td>'
-        +'<td style="font-size:12px;color:var(--text3)">'+(r.cod_orig||'—')+'</td>'
-        +'<td>'+r.glosa+'</td>'
-        +'<td>'+typeBadge(r.tipo)+'</td>'
-        +'<td style="text-align:center"><span class="badge" style="background:var(--surface2);font-size:11px">Niv.'+r.nivel+'</span></td>';
-      return tr;
-    });
-    tb.innerHTML=''; rows.forEach(function(tr){tb.appendChild(tr);});
-    var stats=document.getElementById('cod-sii-stats');
-    if(stats){
-      var tipos={};
-      data.forEach(function(r){tipos[r.tipo]=(tipos[r.tipo]||0)+1;});
-      stats.innerHTML='<div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr))">'
-        +Object.keys(tipos).map(function(t){return '<div class="stat"><div class="stat-label">'+t+'</div><div class="stat-value">'+tipos[t]+'</div></div>';}).join('')
-        +'<div class="stat"><div class="stat-label">Total</div><div class="stat-value">'+data.length+'</div></div></div>';
-    }
-  }catch(e){
-    tb.innerHTML='<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--danger)">Error: '+e.message+'</td></tr>';
-  }
-}
-// ═════════════════════════════════════════════════════════════
-
-
-// == INICIO - INDICADORES Y NOTICIAS ========================
-async function renderInicio(){
-  // ── Fecha
-  var fechaEl=document.getElementById('inicio-fecha');
-  if(fechaEl){
-    var ahora=new Date();
-    fechaEl.textContent=ahora.toLocaleDateString('es-CL',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-  }
-
-  // ── Indicadores económicos (mindicador.cl — sin CORS issues)
-  var indEl=document.getElementById('inicio-indicadores');
-  if(indEl){
-    indEl.innerHTML='<div class="stat" style="border:1px solid var(--border)"><div class="stat-label">Cargando...</div><div class="stat-value">--</div></div>'.repeat(6);
-    try{
-      var inds=[
-        {key:'uf',          label:'UF',         icon:'📊'},
-        {key:'dolar',       label:'Dólar USD',  icon:'🇺🇸'},
-        {key:'euro',        label:'Euro',       icon:'🇪🇺'},
-        {key:'utm',         label:'UTM',        icon:'📋'},
-        {key:'ipc',         label:'IPC',        icon:'📈'},
-        {key:'libra_cobre', label:'Cobre (lb)', icon:'🔶'},
-      ];
-      var results=await Promise.allSettled(inds.map(function(ind){
-        return fetch('https://mindicador.cl/api/'+ind.key)
-          .then(function(r){return r.json();})
-          .then(function(d){
-            return{label:ind.label,icon:ind.icon,
-              valor:d.serie&&d.serie[0]?d.serie[0].valor:null,
-              fecha:d.serie&&d.serie[0]?d.serie[0].fecha:null,
-              unidad:d.unidad_medida||''};
-          });
-      }));
-      indEl.innerHTML=results.map(function(res){
-        if(res.status==='fulfilled'&&res.value.valor!==null){
-          var v=res.value.valor;
-          var esPorc=res.value.unidad&&res.value.unidad.toLowerCase().includes('porcentaje');
-          var fmt=esPorc?v.toFixed(2)+'%':'$'+v.toLocaleString('es-CL',{minimumFractionDigits:2,maximumFractionDigits:2});
-          var fecha=res.value.fecha?new Date(res.value.fecha).toLocaleDateString('es-CL',{day:'2-digit',month:'2-digit',year:'numeric'}):'';
-          return '<div class="stat" style="border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px">'
-            +'<div class="stat-label" style="display:flex;align-items:center;gap:5px"><span>'+res.value.icon+'</span>'+res.value.label+'</div>'
-            +'<div class="stat-value text-blue" style="font-size:20px;margin:4px 0">'+fmt+'</div>'
-            +(fecha?'<div style="font-size:10px;color:var(--text3)">'+fecha+'</div>':'')
-            +'</div>';
-        }
-        return '<div class="stat" style="border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px">'
-          +'<div class="stat-label">'+res.value.label+'</div>'
-          +'<div class="stat-value" style="color:var(--text3)">N/D</div></div>';
-      }).join('');
-    }catch(e){
-      indEl.innerHTML='<div style="color:var(--text3);padding:12px;font-size:13px">No se pudieron cargar los indicadores.</div>';
-    }
-  }
-
-  // ── Noticias: intentar múltiples proxies CORS + parsear XML en el browser
-  var FEEDS={
-    'inicio-noticias-tributarias':{
-      label:'Tributarias', urls:[
-        'https://www.sii.cl/rss/novedades.rss',
-      ]
-    },
-    'inicio-noticias-laborales':{
-      label:'Laborales', urls:[
-        'https://www.dt.gob.cl/portal/1629/propertyvalue-22929.xml',
-      ]
-    },
-    'inicio-noticias-financieras':{
-      label:'Financieras', urls:[
-        'https://www.latercera.com/categoria/negocios/feed/',
-        'https://www.biobiochile.cl/lista/categorias/economia/feed',
-      ]
-    },
-  };
-
-  // Proxies CORS públicos (se intentan en orden hasta que uno funcione)
-  var PROXIES=[
-    function(url){ return 'https://corsproxy.io/?url='+encodeURIComponent(url); },
-    function(url){ return 'https://api.allorigins.win/raw?url='+encodeURIComponent(url); },
-    function(url){ return 'https://api.rss2json.com/v1/api.json?count=8&rss_url='+encodeURIComponent(url); },
-  ];
-
-  // Parsear XML RSS/Atom → array de items
-  function parseRSS(text, isJson){
-    if(isJson){
-      try{
-        var d=JSON.parse(text);
-        if(d.items&&d.items.length) return d.items.map(function(i){
-          return{title:i.title,link:i.link,pubDate:i.pubDate,description:i.description||''};
-        });
-      }catch(e){}
-      return [];
-    }
-    try{
-      var parser=new DOMParser();
-      var doc=parser.parseFromString(text,'text/xml');
-      var items=Array.from(doc.querySelectorAll('item, entry'));
-      return items.map(function(item){
-        var title=(item.querySelector('title')||{textContent:''}).textContent.trim();
-        var link=item.querySelector('link')?
-          (item.querySelector('link').textContent||item.querySelector('link').getAttribute('href')||''):'';
-        var pubDate=(item.querySelector('pubDate,published,updated')||{textContent:''}).textContent;
-        var desc=(item.querySelector('description,summary,content')||{textContent:''}).textContent;
-        return{title:title,link:link,pubDate:pubDate,description:desc};
-      }).filter(function(i){return i.title;});
-    }catch(e){ return []; }
-  }
-
-  // Intentar cargar un feed con múltiples proxies
-  async function fetchFeedConProxy(urls){
-    for(var ui=0;ui<urls.length;ui++){
-      var feedUrl=urls[ui];
-      for(var pi=0;pi<PROXIES.length;pi++){
-        try{
-          var proxyUrl=PROXIES[pi](feedUrl);
-          var isRss2json=proxyUrl.includes('rss2json');
-          var res=await fetch(proxyUrl,{signal:AbortSignal.timeout(6000)});
-          if(!res.ok) continue;
-          var text=await res.text();
-          if(!text||text.length<50) continue;
-          var items=parseRSS(text, isRss2json);
-          if(items.length>0) return items;
-        }catch(e){ /* siguiente proxy */ }
-      }
-    }
-    return [];
-  }
-
-  // Renderizar items en el DOM
-  function mostrarItems(id, items){
-    var el=document.getElementById(id); if(!el) return;
-    if(!items||!items.length){
-      el.innerHTML='<div style="color:var(--text3);font-size:13px;padding:8px;line-height:1.8">'
-        +'Sin noticias disponibles.<br>'
-        +'<a href="https://www.sii.cl" target="_blank" rel="noopener" style="color:var(--accent)">SII</a> · '
-        +'<a href="https://www.dt.gob.cl" target="_blank" rel="noopener" style="color:var(--accent)">DT</a> · '
-        +'<a href="https://www.df.cl" target="_blank" rel="noopener" style="color:var(--accent)">DF</a>'
-        +'</div>';
-      return;
-    }
-    el.innerHTML=items.slice(0,6).map(function(item){
-      var fecha='';
-      try{ if(item.pubDate) fecha=new Date(item.pubDate).toLocaleDateString('es-CL',{day:'2-digit',month:'2-digit',year:'numeric'}); }catch(e){}
-      var desc=(item.description||'').replace(/<[^>]+>/g,'').trim();
-      if(desc.length>130) desc=desc.substring(0,130)+'...';
-      return '<div style="padding:10px 0;border-bottom:1px solid var(--border)">'
-        +(item.link
-          ?'<a href="'+item.link+'" target="_blank" rel="noopener" style="font-size:13px;font-weight:600;color:var(--accent);text-decoration:none;display:block;margin-bottom:4px;line-height:1.4">'+item.title+'</a>'
-          :'<div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px;line-height:1.4">'+item.title+'</div>')
-        +(desc?'<div style="font-size:11px;color:var(--text2);line-height:1.5;margin-bottom:3px">'+desc+'</div>':'')
-        +(fecha?'<div style="font-size:10px;color:var(--text3)">'+fecha+'</div>':'')
-        +'</div>';
-    }).join('');
-  }
-
-  // Cargar cada sección de noticias en paralelo
-  Object.keys(FEEDS).forEach(function(id){
-    var cfg=FEEDS[id];
-    var el=document.getElementById(id);
-    if(el) el.innerHTML='<div style="text-align:center;padding:20px;color:var(--text3)"><div style="display:inline-block;width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite"></div></div>';
-    fetchFeedConProxy(cfg.urls)
-      .then(function(items){ mostrarItems(id, items); })
-      .catch(function(){ mostrarItems(id, []); });
-  });
-}
-
-// ===========================================================
-
-
-// ══ AUTO-REFRESH NOTICIAS (cada 1 hora) ══════════════════════
-var _inicioRefreshTimer = null;
-var _INICIO_REFRESH_MS  = 60 * 60 * 1000; // 1 hora en ms
-
-function iniciarAutoRefreshInicio(){
-  // Evitar timers duplicados
-  detenerAutoRefreshInicio();
-  renderInicio(); // carga inmediata
-  _inicioRefreshTimer = setInterval(function(){
-    // Solo actualizar si sec-inicio está activa
-    var sec = document.getElementById('sec-inicio');
-    if(sec && sec.classList.contains('active')){
-      renderInicio();
-      // Toast discreto de actualización
-      mostrarToast('Indicadores y noticias actualizados', 'ok');
-    }
-  }, _INICIO_REFRESH_MS);
-  console.log('Auto-refresh Inicio iniciado (cada 1 hora)');
-}
-
-function detenerAutoRefreshInicio(){
-  if(_inicioRefreshTimer){
-    clearInterval(_inicioRefreshTimer);
-    _inicioRefreshTimer = null;
-    console.log('Auto-refresh Inicio detenido');
-  }
-}
-// ═════════════════════════════════════════════════════════════
-
 // ============================================================
 // INIT
 // ============================================================
 window.addEventListener('load', async function(){
-  showLoading('Conectando con la base de datos...');
-  await loadSYS();
+  loadSYS();
   await initSistemaSiVacio();
-  await loadSYS();
-  await cargarCodSII();
-  hideLoading();
+    await cargarCodSII();
   initNavListeners();
-  // Intentar recuperar sesión previa
-  var sesion = recuperarSesion();
-  if(sesion && SYS.usuarios.find(function(u){ return u.id===sesion.userId; })){
-    SESSION = { userId:sesion.userId, empresaId:sesion.empresaId, rol:sesion.rol, nombre:sesion.nombre };
+  var sesion=recuperarSesion();
+  if(sesion&&SYS.usuarios.find(function(u){return u.id===sesion.userId;})){
+    SESSION={userId:sesion.userId,empresaId:sesion.empresaId,rol:sesion.rol,nombre:sesion.nombre};
     showLoading('Restaurando sesión...');
     await loadDB();
     hideLoading();
     document.getElementById('login-screen').classList.remove('show');
-    document.getElementById('app-layout').style.display = 'flex';
+    document.getElementById('app-layout').style.display='flex';
     iniciarWatchdogSesion();
     initAppPostLogin();
   } else {
     document.getElementById('login-screen').classList.add('show');
   }
-  if(SYS.usuarios.length===1){ document.getElementById('li-user').value=SYS.usuarios[0].user; }
 });
 
 // Enter en login
@@ -4067,217 +2974,298 @@ document.addEventListener('keydown', function(e){
   if(e.key==='Enter' && document.getElementById('login-screen').classList.contains('show')) doLogin();
 });
 
-// ============================================================
-// SISTEMA MULTI-EMPRESA — SUPABASE BACKEND
-// ============================================================
-const SUPA_URL = 'https://hovsffdialeigpxvuojg.supabase.co';
-const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvdnNmZmRpYWxlaWdweHZ1b2pnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwODg4NDUsImV4cCI6MjA5MzY2NDg0NX0.44ZUShF1OwbJFreO8pGidoIGE3mmeNPr0v2-I4jAwws';
-const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
 
-var SESSION = { userId:null, empresaId:null, rol:null, nombre:null };
-var DB = { config:{empresa:'',rut:'',giro:'',dir:'',periodo:''}, cuentas:[], asientos:[], numAsiento:1, terceros:[] };
-var SYS = { planBase:[], empresas:[], usuarios:[] };
-
-async function sha256(str){
-  var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-  return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+// ══ HELPERS NAVEGACIÓN ═══════════════════════════════════════
+function findNavItem(secId){
+  return document.querySelector('.nav-item[data-sec="'+secId+'"]');
 }
-function showLoading(msg){ var el=document.getElementById('loading-overlay'); if(el){el.querySelector('.loading-msg').textContent=msg||'Cargando...';el.style.display='flex';} }
-function hideLoading(){ var el=document.getElementById('loading-overlay'); if(el) el.style.display='none'; }
 
+function abrirGrupoActivo(secId){
+  var item=findNavItem(secId);
+  if(!item) return;
+  var sub=item.closest('.nav-sub');
+  if(!sub) return;
+  sub.classList.add('open');
+  var grpId=sub.id.replace('-sub','').replace('grp-','');
+  var btn=document.getElementById('grp-'+grpId+'-btn');
+  if(btn) btn.classList.add('open');
+}
+
+function toggleGrp(gid){
+  var btn=document.getElementById('grp-'+gid+'-btn');
+  var sub=document.getElementById('grp-'+gid+'-sub');
+  if(!btn||!sub) return;
+  var open=sub.classList.contains('open');
+  if(open){sub.classList.remove('open');btn.classList.remove('open');}
+  else{sub.classList.add('open');btn.classList.add('open');}
+}
+
+function initNavListeners(){
+  document.querySelectorAll('.nav-item[data-sec]').forEach(function(el){
+    el.addEventListener('click',function(){
+      var secId=el.getAttribute('data-sec');
+      if(!secId||el.style.cursor==='default') return;
+      nav(secId,el);
+    });
+  });
+}
+// ═════════════════════════════════════════════════════════════
+
+// ══ SESIÓN PERSISTENTE ═══════════════════════════════════════
+var SESSION_KEY='sc_session';
+var INACTIVITY_MS=20*60*1000;
+var _inactivityTimer=null;
+
+function guardarSesion(){
+  try{sessionStorage.setItem(SESSION_KEY,JSON.stringify({userId:SESSION.userId,empresaId:SESSION.empresaId,rol:SESSION.rol,nombre:SESSION.nombre,ts:Date.now()}));}catch(e){}
+}
+function limpiarSesion(){try{sessionStorage.removeItem(SESSION_KEY);}catch(e){}}
+function recuperarSesion(){
+  try{
+    var raw=sessionStorage.getItem(SESSION_KEY);
+    if(!raw) return null;
+    var s=JSON.parse(raw);
+    if(!s||!s.userId) return null;
+    if(Date.now()-s.ts>INACTIVITY_MS){limpiarSesion();return null;}
+    return s;
+  }catch(e){return null;}
+}
+function resetInactivityTimer(){
+  if(_inactivityTimer) clearTimeout(_inactivityTimer);
+  guardarSesion();
+  _inactivityTimer=setTimeout(function(){
+    if(!SESSION.userId) return;
+    mostrarToast('Sesión cerrada por inactividad','warn');
+    setTimeout(function(){doLogout();},1500);
+  },INACTIVITY_MS);
+}
+function iniciarWatchdogSesion(){
+  ['click','keydown','mousemove','touchstart','scroll'].forEach(function(ev){
+    document.addEventListener(ev,resetInactivityTimer,{passive:true});
+  });
+  resetInactivityTimer();
+}
+function detenerWatchdogSesion(){
+  if(_inactivityTimer) clearTimeout(_inactivityTimer);
+  ['click','keydown','mousemove','touchstart','scroll'].forEach(function(ev){
+    document.removeEventListener(ev,resetInactivityTimer);
+  });
+}
+function mostrarToast(msg,tipo){
+  var t=document.createElement('div');
+  var bg=tipo==='warn'?'#f59e0b':tipo==='err'?'#ef4444':tipo==='ok'?'#16a34a':'var(--text)';
+  t.style.cssText='position:fixed;bottom:20px;right:20px;background:'+bg+';color:#fff;padding:12px 18px;border-radius:8px;font-size:13px;font-weight:500;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.25);transition:opacity .4s';
+  t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(function(){t.style.opacity='0';setTimeout(function(){t.remove();},400);},3000);
+}
+// ═════════════════════════════════════════════════════════════
+
+// ══ AUTO-REFRESH INICIO ══════════════════════════════════════
+var _inicioRefreshTimer=null;
+var _INICIO_REFRESH_MS=60*60*1000;
+
+function iniciarAutoRefreshInicio(){
+  detenerAutoRefreshInicio();
+  renderInicio();
+  _inicioRefreshTimer=setInterval(function(){
+    var sec=document.getElementById('sec-inicio');
+    if(sec&&sec.classList.contains('active')){
+      renderInicio();
+      mostrarToast('Datos actualizados','ok');
+    }
+  },_INICIO_REFRESH_MS);
+}
+function detenerAutoRefreshInicio(){
+  if(_inicioRefreshTimer){clearInterval(_inicioRefreshTimer);_inicioRefreshTimer=null;}
+}
+// ═════════════════════════════════════════════════════════════
+
+// ══ RENDER INICIO ════════════════════════════════════════════
+async function renderInicio(){
+  var fechaEl=document.getElementById('inicio-fecha');
+  if(fechaEl){var ahora=new Date();fechaEl.textContent=ahora.toLocaleDateString('es-CL',{weekday:'long',year:'numeric',month:'long',day:'numeric'});}
+  // Indicadores
+  var indEl=document.getElementById('inicio-indicadores');
+  if(indEl){
+    indEl.innerHTML='<div class="stat" style="border:1px solid var(--border)"><div class="stat-label">Cargando...</div><div class="stat-value">--</div></div>'.repeat(6);
+    try{
+      var inds=[{key:'uf',label:'UF',icon:'📊'},{key:'dolar',label:'Dólar USD',icon:'🇺🇸'},{key:'euro',label:'Euro',icon:'🇪🇺'},{key:'utm',label:'UTM',icon:'📋'},{key:'ipc',label:'IPC',icon:'📈'},{key:'libra_cobre',label:'Cobre (lb)',icon:'🔶'}];
+      var results=await Promise.allSettled(inds.map(function(ind){
+        return fetch('https://mindicador.cl/api/'+ind.key).then(function(r){return r.json();}).then(function(d){return{label:ind.label,icon:ind.icon,valor:d.serie&&d.serie[0]?d.serie[0].valor:null,fecha:d.serie&&d.serie[0]?d.serie[0].fecha:null,unidad:d.unidad_medida||''};});
+      }));
+      indEl.innerHTML=results.map(function(res){
+        if(res.status==='fulfilled'&&res.value.valor!==null){
+          var v=res.value.valor;var esPorc=res.value.unidad&&res.value.unidad.toLowerCase().includes('porcentaje');
+          var fmt=esPorc?v.toFixed(2)+'%':'$'+v.toLocaleString('es-CL',{minimumFractionDigits:2,maximumFractionDigits:2});
+          var fecha=res.value.fecha?new Date(res.value.fecha).toLocaleDateString('es-CL',{day:'2-digit',month:'2-digit',year:'numeric'}):'';
+          return '<div class="stat" style="border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px"><div class="stat-label" style="display:flex;align-items:center;gap:5px"><span>'+res.value.icon+'</span>'+res.value.label+'</div><div class="stat-value text-blue" style="font-size:20px;margin:4px 0">'+fmt+'</div>'+(fecha?'<div style="font-size:10px;color:var(--text3)">'+fecha+'</div>':'')+'</div>';
+        }
+        return '<div class="stat" style="border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px"><div class="stat-label"><span>'+res.value.icon+'</span> '+res.value.label+'</div><div class="stat-value" style="color:var(--text3)">N/D</div></div>';
+      }).join('');
+    }catch(e){indEl.innerHTML='<div style="color:var(--text3);padding:12px;font-size:13px">No se pudieron cargar los indicadores.</div>';}
+  }
+  renderResumenEmpresa();
+  renderCalendarioTributario();
+  renderLinksUtiles();
+}
+
+function renderResumenEmpresa(){
+  var el=document.getElementById('inicio-resumen-empresa'); if(!el) return;
+  var emp=SYS.empresas.find(function(e){return e.id===SESSION.empresaId;});
+  if(!emp){el.innerHTML='<div style="color:var(--text3);font-size:13px">Sin empresa activa.</div>';return;}
+  var totalCuentas=DB.cuentas?DB.cuentas.length:0;
+  var totalAsientos=DB.asientos?DB.asientos.length:0;
+  var totalAux=DB.terceros?DB.terceros.length:0;
+  var hoy=new Date().toISOString().slice(0,10);
+  var asientosMes=DB.asientos?DB.asientos.filter(function(a){return a.fecha&&a.fecha.slice(0,7)===hoy.slice(0,7);}).length:0;
+  var asientosHoy=DB.asientos?DB.asientos.filter(function(a){return a.fecha===hoy;}).length:0;
+  el.innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px">'
+    +'<div class="stat" style="border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px"><div class="stat-label">Cuentas</div><div class="stat-value" style="font-size:22px;color:var(--accent)">'+totalCuentas+'</div></div>'
+    +'<div class="stat" style="border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px"><div class="stat-label">Asientos totales</div><div class="stat-value" style="font-size:22px;color:var(--accent)">'+totalAsientos+'</div></div>'
+    +'<div class="stat" style="border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px"><div class="stat-label">Este mes</div><div class="stat-value" style="font-size:22px;color:var(--accent)">'+asientosMes+'</div></div>'
+    +'<div class="stat" style="border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px"><div class="stat-label">Auxiliares</div><div class="stat-value" style="font-size:22px;color:var(--accent)">'+totalAux+'</div></div>'
+    +(asientosHoy?'<div class="stat" style="border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px;background:var(--accent-bg)"><div class="stat-label" style="color:var(--accent)">Hoy</div><div class="stat-value" style="font-size:22px;color:var(--accent)">'+asientosHoy+'</div></div>':'')
+    +'</div><div style="margin-top:10px;font-size:11px;color:var(--text3)">RUT: '+emp.rut+'</div>';
+}
+
+function renderCalendarioTributario(){
+  var el=document.getElementById('inicio-calendario'); if(!el) return;
+  var ahora=new Date();var mes=ahora.getMonth()+1;var anio=ahora.getFullYear();
+  var venc=[{dia:12,desc:'IVA (F29) — 1ª categoría'},{dia:13,desc:'Ret. honorarios (F50)'},{dia:15,desc:'Cotizaciones AFP y Salud'},{dia:20,desc:'IVA (F29) — simplificados'},{dia:28,desc:'Libro remuneraciones'}];
+  var esp={4:[{dia:30,desc:'Renta Anual (F22)'}],5:[{dia:31,desc:'DJ 1887 — honorarios'}],7:[{dia:31,desc:'DJ 1879 — retenciones'}]};
+  var todos=venc.slice(); if(esp[mes]) todos=todos.concat(esp[mes]);
+  todos.sort(function(a,b){return a.dia-b.dia;});
+  el.innerHTML='<div style="display:flex;flex-direction:column;gap:6px">'+todos.map(function(v){
+    var dr=Math.ceil((new Date(anio,mes-1,v.dia)-ahora)/(864e5));
+    var clr=dr<0?'var(--text3)':dr<=3?'#ef4444':dr<=7?'#d97706':'var(--text2)';
+    var bgB=dr<0?'#f1f5f9':dr<=3?'#fee2e2':dr<=7?'#fef3c7':'#f0fdf4';
+    var clrB=dr<0?'#94a3b8':dr<=3?'#dc2626':dr<=7?'#d97706':'#16a34a';
+    var badge=dr<0?'Vencido':dr===0?'¡Hoy!':dr===1?'Mañana':'En '+dr+'d';
+    return '<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:6px;background:var(--surface2)"><div style="min-width:24px;font-size:13px;font-weight:700;color:var(--accent);text-align:center">'+(v.dia<10?'0':'')+v.dia+'</div><div style="flex:1;font-size:12px;color:'+clr+'">'+v.desc+'</div><div style="font-size:10px;font-weight:600;padding:2px 6px;border-radius:4px;background:'+bgB+';color:'+clrB+'">'+badge+'</div></div>';
+  }).join('')+'</div>';
+}
+
+function renderLinksUtiles(){
+  var el=document.getElementById('inicio-links'); if(!el) return;
+  var links=[{icon:'🏛️',label:'SII',url:'https://www.sii.cl',desc:'Impuestos Internos'},{icon:'👷',label:'Dir. del Trabajo',url:'https://www.dt.gob.cl',desc:'Trámites laborales'},{icon:'💰',label:'Previred',url:'https://www.previred.com',desc:'Cotizaciones'},{icon:'📰',label:'Diario Financiero',url:'https://www.df.cl',desc:'Noticias financieras'},{icon:'🏦',label:'Banco Central',url:'https://www.bcentral.cl',desc:'Indicadores'},{icon:'📋',label:'CMF',url:'https://www.cmfchile.cl',desc:'Mercado Financiero'},{icon:'💼',label:'Reg. Empresas',url:'https://www.registroempresa.cl',desc:'Trámites'},{icon:'📊',label:'INE',url:'https://www.ine.gob.cl',desc:'Estadísticas'}];
+  el.innerHTML=links.map(function(l){return '<a href="'+l.url+'" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius);border:1px solid var(--border);text-decoration:none;background:var(--surface);transition:border-color .15s" onmouseover="this.style.borderColor=\'var(--accent)\'" onmouseout="this.style.borderColor=\'var(--border)\'"><span style="font-size:18px">'+l.icon+'</span><div><div style="font-size:13px;font-weight:600;color:var(--text)">'+l.label+'</div><div style="font-size:11px;color:var(--text3)">'+l.desc+'</div></div></a>';}).join('');
+}
+// ═════════════════════════════════════════════════════════════
+
+// ══ SUBTIPO PLAN / COD SII ═══════════════════════════════════
+var SUBTIPO_PLAN_DATA=[];
+var COD_SII_DATA=[];
+
+function filtrarSubtiposPlan(tipoPlan){
+  var sel=document.getElementById('mc-subtipo-plan'); if(!sel) return;
+  var vistos={};
+  var opts=['<option value="">— Ninguno —</option>'];
+  SUBTIPO_PLAN_DATA.forEach(function(r){if(r.tipo===tipoPlan&&r.subtipo&&!vistos[r.subtipo]){vistos[r.subtipo]=true;opts.push('<option value="'+r.subtipo+'">'+r.subtipo+'</option>');}});
+  sel.innerHTML=opts.join('');
+}
+
+async function cargarCodSII(){
+  try{
+    var res=await supa.from('cod_sii').select('cod_sii,cod_orig,glosa,tipo').order('cod_sii');
+    COD_SII_DATA=res.data||[];
+    poblarSelectCodSII();
+  }catch(e){console.warn('cod_sii:',e.message);}
+}
+
+function poblarSelectCodSII(){
+  var sel=document.getElementById('mc-cod-sii'); if(!sel) return;
+  sel.innerHTML='<option value="">— Seleccionar —</option>'
+    +COD_SII_DATA.map(function(r){return '<option value="'+r.cod_sii+'">'+r.cod_sii+' ('+r.cod_orig+') — '+r.glosa+'</option>';}).join('');
+}
+
+async function renderSubtipoPlan(){
+  var tb=document.getElementById('tbody-subtipo-plan'); if(!tb) return;
+  tb.innerHTML='<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text3)">Cargando...</td></tr>';
+  try{
+    var res=await supa.from('subtipo_plan').select('*').order('cod');
+    var data=res.data||[];
+    if(!data.length){tb.innerHTML='<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text3)">Sin datos.</td></tr>';return;}
+    tb.innerHTML=''; data.forEach(function(r){var tr=document.createElement('tr');tr.innerHTML='<td><code>'+r.cod+'</code></td><td>'+typeBadge(r.tipo)+'</td><td style="font-size:12px;color:var(--text3)">'+(r.subtipo||'—')+'</td><td>'+r.nombre+'</td>';tb.appendChild(tr);});
+    var stats=document.getElementById('subtipo-plan-stats');
+    if(stats){var tipos={};data.forEach(function(r){tipos[r.tipo]=(tipos[r.tipo]||0)+1;});stats.innerHTML='<div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr))">'+Object.keys(tipos).map(function(t){return '<div class="stat"><div class="stat-label">'+t+'</div><div class="stat-value">'+tipos[t]+'</div></div>';}).join('')+'<div class="stat"><div class="stat-label">Total</div><div class="stat-value">'+data.length+'</div></div></div>';}
+  }catch(e){tb.innerHTML='<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--danger)">Error: '+e.message+'</td></tr>';}
+}
+
+async function renderCodSII(){
+  var tb=document.getElementById('tbody-cod-sii'); if(!tb) return;
+  tb.innerHTML='<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text3)">Cargando...</td></tr>';
+  try{
+    var res=await supa.from('cod_sii').select('*').order('cod_sii');
+    var data=res.data||[];
+    if(!data.length){tb.innerHTML='<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text3)">Sin datos.</td></tr>';return;}
+    tb.innerHTML=''; data.forEach(function(r){var tr=document.createElement('tr');tr.innerHTML='<td><code>'+r.cod_sii+'</code></td><td style="font-size:12px;color:var(--text3)">'+(r.cod_orig||'—')+'</td><td>'+r.glosa+'</td><td>'+typeBadge(r.tipo)+'</td><td style="text-align:center"><span class="badge" style="background:var(--surface2);font-size:11px">Niv.'+r.nivel+'</span></td>';tb.appendChild(tr);});
+    var stats=document.getElementById('cod-sii-stats');
+    if(stats){var tipos={};data.forEach(function(r){tipos[r.tipo]=(tipos[r.tipo]||0)+1;});stats.innerHTML='<div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr))">'+Object.keys(tipos).map(function(t){return '<div class="stat"><div class="stat-label">'+t+'</div><div class="stat-value">'+tipos[t]+'</div></div>';}).join('')+'<div class="stat"><div class="stat-label">Total</div><div class="stat-value">'+data.length+'</div></div></div>';}
+  }catch(e){tb.innerHTML='<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--danger)">Error: '+e.message+'</td></tr>';}
+}
+// ═════════════════════════════════════════════════════════════
+
+// ══ FUNCIONES SUPABASE ═══════════════════════════════════════
+async function loadSYS(){
+  try{
+    var res1=await supa.from('empresas').select('*').order('razon');
+    SYS.empresas=res1.data||[];
+    var res2=await supa.from('usuarios').select('*').order('nombre');
+    var res3=await supa.from('usuario_empresa').select('*');
+    SYS.usuarios=(res2.data||[]).map(function(u){
+      var empIds=(res3.data||[]).filter(function(x){return x.usuario_id===u.id;}).map(function(x){return x.empresa_id;});
+      return{id:u.id,nombre:u.nombre,user:u.user_login,passHash:u.pass_hash,rol:u.rol,empresaIds:empIds};
+    });
+    var res4=await supa.from('plan_base').select('*').order('cod');
+    SYS.planBase=(res4.data||[]).map(function(c){return{cod:c.cod,nom:c.nom,tipo:c.tipo,aux:c.aux,desc:c.desc_||''};});
+  }catch(e){console.error('loadSYS:',e);}
+}
+
+async function loadDB(){
+  if(!SESSION.empresaId) return;
+  DB={config:{empresa:'',rut:'',giro:'',dir:'',periodo:''},cuentas:[],asientos:[],numAsiento:1,terceros:[]};
+  showLoading('Cargando datos...');
+  try{
+    var emp=SYS.empresas.find(function(e){return e.id===SESSION.empresaId;});
+    if(emp) DB.config={empresa:emp.razon,rut:emp.rut,giro:emp.giro||'',dir:emp.dir||'',periodo:emp.periodo||''};
+    var cfg=await supa.from('empresa_config').select('num_asiento').eq('empresa_id',SESSION.empresaId).maybeSingle();
+    DB.numAsiento=cfg.data?cfg.data.num_asiento:1;
+    var res1=await supa.from('cuentas').select('*').eq('empresa_id',SESSION.empresaId).order('cod');
+    DB.cuentas=(res1.data||[]).map(function(c){return{cod:c.cod,nom:c.nom,tipo:c.tipo,aux:c.aux,desc:c.desc_||'',tipo_plan:c.tipo_plan||'',cod_sii:c.cod_sii||'',concepto:c.concepto||'',subtipo_plan:c.subtipo_plan||'',subtipo_flujo:c.subtipo_flujo||'',cta_cobrar:c.cta_cobrar||false,cta_pagar:c.cta_pagar||false,disp_pago:c.disp_pago||false};});
+    var res2=await supa.from('asientos').select('id,num,fecha,glosa').eq('empresa_id',SESSION.empresaId).order('fecha').order('num');
+    var ids=(res2.data||[]).map(function(a){return a.id;});
+    var lineasMap={};
+    if(ids.length>0){
+      var res3=await supa.from('lineas_asiento').select('*').in('asiento_id',ids);
+      (res3.data||[]).forEach(function(l){if(!lineasMap[l.asiento_id])lineasMap[l.asiento_id]=[];lineasMap[l.asiento_id].push({cuenta:l.cuenta_cod,aux:l.aux_nombre||'',debe:parseFloat(l.debe)||0,haber:parseFloat(l.haber)||0});});
+    }
+    DB.asientos=(res2.data||[]).map(function(a){return{num:a.num,fecha:a.fecha,glosa:a.glosa,lineas:lineasMap[a.id]||[]};});
+    var res4=await supa.from('terceros').select('*').eq('empresa_id',SESSION.empresaId).order('razon');
+    DB.terceros=(res4.data||[]).map(function(t){return{rut:t.rut,razon:t.razon,tipo:t.tipo,dir:t.dir||'',email:t.email||'',tel:t.tel||'',notas:t.notas||''};});
+  }catch(e){console.error('loadDB:',e);}
+  finally{hideLoading();}
+}
+
+async function saveDB(){
+  if(!SESSION.empresaId) return;
+  try{await supa.from('empresa_config').upsert({empresa_id:SESSION.empresaId,num_asiento:DB.numAsiento});}catch(e){}
+}
+
+async function saveSYS(){}
 
 async function saveCuenta(c){
-  await supa.from('cuentas').upsert({
-    empresa_id:   SESSION.empresaId,
-    cod:          c.cod,
-    nom:          c.nom,
-    tipo:         c.tipo||c.tipo_plan||'Activo',
-    aux:          c.aux,
-    desc_:        c.desc||'',
-    tipo_plan:    c.tipo_plan||'',
-    cod_sii:      c.cod_sii||'',
-    concepto:     c.concepto||'',
-    subtipo_plan: c.subtipo_plan||'',
-    subtipo_flujo:c.subtipo_flujo||'',
-    cta_cobrar:   c.cta_cobrar||'',
-    cta_pagar:    c.cta_pagar||'',
-    disp_pago:    c.disp_pago||false
-  },{onConflict:'empresa_id,cod'});
+  await supa.from('cuentas').upsert({empresa_id:SESSION.empresaId,cod:c.cod,nom:c.nom,tipo:c.tipo||c.tipo_plan||'Activo',aux:c.aux||false,desc_:c.desc||'',tipo_plan:c.tipo_plan||'',cod_sii:c.cod_sii||'',concepto:c.concepto||'',subtipo_plan:c.subtipo_plan||'',subtipo_flujo:c.subtipo_flujo||'',cta_cobrar:c.cta_cobrar||false,cta_pagar:c.cta_pagar||false,disp_pago:c.disp_pago||false},{onConflict:'empresa_id,cod'});
 }
-async function deleteCuentaSupa(cod){
-  await supa.from('cuentas').delete().eq('empresa_id',SESSION.empresaId).eq('cod',cod);
-}
-async function saveAsiento(asiento){
-  var {data,error}=await supa.from('asientos').insert({empresa_id:SESSION.empresaId,num:asiento.num,fecha:asiento.fecha,glosa:asiento.glosa}).select().single();
-  if(error) throw error;
-  if(asiento.lineas.length>0){
-    await supa.from('lineas_asiento').insert(asiento.lineas.map(function(l){return{asiento_id:data.id,cuenta_cod:l.cuenta,aux_nombre:l.aux||'',debe:l.debe||0,haber:l.haber||0};}));
-  }
-  await supa.from('empresa_config').upsert({empresa_id:SESSION.empresaId,num_asiento:DB.numAsiento});
-  return data;
-}
-async function deleteAsientoSupa(num){
-  var {data}=await supa.from('asientos').select('id').eq('empresa_id',SESSION.empresaId).eq('num',num).single();
-  if(data){ await supa.from('lineas_asiento').delete().eq('asiento_id',data.id); await supa.from('asientos').delete().eq('id',data.id); }
-}
-async function saveTerceroSupa(t){
+
+async function saveTercero(t){
   await supa.from('terceros').upsert({empresa_id:SESSION.empresaId,rut:t.rut,razon:t.razon,tipo:t.tipo,dir:t.dir||'',email:t.email||'',tel:t.tel||'',notas:t.notas||''},{onConflict:'empresa_id,rut'});
 }
-async function deleteTerceroSupa(rut){
-  await supa.from('terceros').delete().eq('empresa_id',SESSION.empresaId).eq('rut',rut);
+
+async function eliminarCuentaSupa(cod){
+  await supa.from('cuentas').delete().eq('empresa_id',SESSION.empresaId).eq('cod',cod);
 }
-
-
-
-
-
-
-async function saveEmpresa(){
-  var id=document.getElementById('me-edit-id').value;
-  var rut=document.getElementById('me-rut').value.trim();
-  var razon=document.getElementById('me-razon').value.trim();
-  var periodo=document.getElementById('me-periodo').value.trim();
-  var giro=document.getElementById('me-giro').value.trim();
-  var dir=document.getElementById('me-dir').value.trim();
-  if(!rut||!razon){msgEl('msg-modal-empresa','err','RUT y Razón Social son obligatorios.'); return;}
-  showLoading('Guardando empresa...');
-  try{
-    if(id){
-      await supa.from('empresas').update({rut,razon,periodo,giro,dir}).eq('id',id);
-      var e=SYS.empresas.find(function(x){return x.id===id;});
-      if(e){e.rut=rut;e.razon=razon;e.periodo=periodo;e.giro=giro;e.dir=dir;}
-      if(id===SESSION.empresaId){DB.config.empresa=razon;DB.config.rut=rut;DB.config.periodo=periodo;document.getElementById('sidebar-empresa').textContent=razon;}
-    }else{
-      var {data:ne}=await supa.from('empresas').insert({rut,razon,periodo,giro,dir}).select().single();
-      SYS.empresas.push(ne);
-      // Copiar plan base a la nueva empresa
-      if(SYS.planBase.length>0){
-        await supa.from('cuentas').insert(SYS.planBase.map(function(c){return{empresa_id:ne.id,cod:c.cod,nom:c.nom,tipo:c.tipo,aux:c.aux,desc_:c.desc||''};}));
-      }
-      await supa.from('empresa_config').insert({empresa_id:ne.id,num_asiento:1});
-    }
-    closeModal('modal-nueva-empresa');
-    document.getElementById('me-edit-id').value='';
-    document.getElementById('modal-empresa-titulo').textContent='Nueva Empresa';
-    renderEmpresasSistema();
-    msgEl('msg-sistema','ok','Empresa guardada correctamente.');
-  }catch(e){msgEl('msg-modal-empresa','err','Error: '+e.message);}
-  finally{hideLoading();}
-}
-
-function editEmpresa(id){
-  var e=SYS.empresas.find(function(x){return x.id===id;}); if(!e) return;
-  document.getElementById('me-edit-id').value=e.id;document.getElementById('me-rut').value=e.rut;
-  document.getElementById('me-razon').value=e.razon;document.getElementById('me-periodo').value=e.periodo||'';
-  document.getElementById('me-giro').value=e.giro||'';document.getElementById('me-dir').value=e.dir||'';
-  document.getElementById('modal-empresa-titulo').textContent='Editar Empresa';
-  openModal('modal-nueva-empresa');
-}
-
-async function delEmpresa(id){
-  if(id===SESSION.empresaId){alert('No puedes eliminar la empresa activa.'); return;}
-  var e=SYS.empresas.find(function(x){return x.id===id;});
-  if(!confirm('¿Eliminar empresa "'+(e?e.razon:id)+'"? Esta acción no se puede deshacer.')) return;
-  showLoading('Eliminando empresa...');
-  try{
-    await supa.from('empresas').delete().eq('id',id);
-    SYS.empresas=SYS.empresas.filter(function(x){return x.id!==id;});
-    SYS.usuarios.forEach(function(u){u.empresaIds=u.empresaIds.filter(function(x){return x!==id;});});
-    renderEmpresasSistema(); renderUsuariosSistema();
-    msgEl('msg-sistema','ok','Empresa eliminada.');
-  }catch(e){alert('Error: '+e.message);}
-  finally{hideLoading();}
-}
-
-async function cambiarEmpresa(empId){
-  if(!confirm('¿Cambiar a esta empresa?')) return;
-  SESSION.empresaId=empId;
-  await loadDB();
-  var emp=SYS.empresas.find(function(e){return e.id===empId;});
-  document.getElementById('sidebar-empresa').textContent=emp?emp.razon:'';
-  renderEmpresasSistema(); renderCuentas(); renderStatsCuentas(); renderDiario(); loadConfigForm();
-  msgEl('msg-sistema','ok','Empresa activa cambiada a: '+(emp?emp.razon:empId));
-}
-
-
-
-async function saveUsuario(){
-  var id=document.getElementById('mu-edit-id').value;
-  var nombre=document.getElementById('mu-nombre').value.trim();
-  var user=document.getElementById('mu-user').value.trim().toLowerCase();
-  var pass=document.getElementById('mu-pass').value;
-  var rol=document.getElementById('mu-rol').value;
-  var empChecks=document.querySelectorAll('#mu-empresas-list input[type=checkbox]:checked');
-  var empIds=Array.from(empChecks).map(function(c){return c.value;});
-  if(!nombre||!user){msgEl('msg-modal-usuario','err','Nombre y usuario son obligatorios.'); return;}
-  if(!empIds.length){msgEl('msg-modal-usuario','err','Asigna al menos una empresa.'); return;}
-  var dup=SYS.usuarios.find(function(u){return u.user===user&&u.id!==id;});
-  if(dup){msgEl('msg-modal-usuario','err','Ese usuario ya existe.'); return;}
-  showLoading('Guardando usuario...');
-  try{
-    var hash=pass?await sha256(pass):null;
-    var uData={nombre,user_login:user,rol};
-    if(hash) uData.pass_hash=hash;
-    if(id) uData.id=id;
-    var {data:saved}=await supa.from('usuarios').upsert(uData).select().single();
-    await supa.from('usuario_empresa').delete().eq('usuario_id',saved.id);
-    if(empIds.length){
-      await supa.from('usuario_empresa').insert(empIds.map(function(eid){return{usuario_id:saved.id,empresa_id:eid};}));
-    }
-    // Actualizar cache local
-    var existing=SYS.usuarios.find(function(u){return u.id===saved.id;});
-    if(existing){existing.nombre=nombre;existing.user=user;existing.rol=rol;existing.empresaIds=empIds;}
-    else SYS.usuarios.push({id:saved.id,nombre,user,passHash:saved.pass_hash,rol,empresaIds:empIds});
-    closeModal('modal-nuevo-usuario');
-    document.getElementById('mu-edit-id').value='';
-    document.getElementById('mu-pass').value='';
-    document.getElementById('modal-usuario-titulo').textContent='Nuevo Usuario';
-    renderUsuariosSistema();
-    msgEl('msg-sistema','ok',id?'Usuario actualizado.':'Usuario creado correctamente.');
-  }catch(e){msgEl('msg-modal-usuario','err','Error: '+e.message);}
-  finally{hideLoading();}
-}
-
-function editUsuario(id){
-  var u=SYS.usuarios.find(function(x){return x.id===id;}); if(!u) return;
-  document.getElementById('mu-edit-id').value=u.id;document.getElementById('mu-nombre').value=u.nombre;
-  document.getElementById('mu-user').value=u.user;document.getElementById('mu-pass').value='';
-  document.getElementById('mu-rol').value=u.rol;
-  populateMuEmpresas(u.empresaIds||[]);
-  document.getElementById('modal-usuario-titulo').textContent='Editar Usuario';
-  openModal('modal-nuevo-usuario');
-}
-
-async function delUsuario(id){
-  if(id===SESSION.userId){alert('No puedes eliminarte a ti mismo.'); return;}
-  var u=SYS.usuarios.find(function(x){return x.id===id;});
-  if(!confirm('¿Eliminar usuario '+(u?u.nombre:id)+'?')) return;
-  showLoading('Eliminando...');
-  try{
-    await supa.from('usuarios').delete().eq('id',id);
-    SYS.usuarios=SYS.usuarios.filter(function(x){return x.id!==id;});
-    renderUsuariosSistema();
-  }catch(e){alert('Error: '+e.message);}
-  finally{hideLoading();}
-}
-
-
-
-function populateMuEmpresa(){ populateMuEmpresas([]); }
-
-async function actualizarPlanBase(){
-  SYS.planBase=DB.cuentas.map(function(c){return Object.assign({},c);});
-  showLoading('Publicando plan base...');
-  try{
-    await supa.from('plan_base').upsert(SYS.planBase.map(function(c){return{cod:c.cod,nom:c.nom,tipo:c.tipo,aux:c.aux,desc_:c.desc||''};}));
-    msgEl('msg-cuentas','ok','Plan de cuentas publicado como plan base del sistema.');
-  }catch(e){alert('Error: '+e.message);}
-  finally{hideLoading();}
-}
-
-
-
-
+// ═════════════════════════════════════════════════════════════
 </script>
 </body>
 </html>
