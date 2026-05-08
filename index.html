@@ -3840,31 +3840,31 @@ async function renderCodSII(){
 
 // == INICIO - INDICADORES Y NOTICIAS ========================
 async function renderInicio(){
-  // Fecha
+  // ── Fecha
   var fechaEl=document.getElementById('inicio-fecha');
   if(fechaEl){
     var ahora=new Date();
     fechaEl.textContent=ahora.toLocaleDateString('es-CL',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   }
 
-  // ── Indicadores económicos desde mindicador.cl
+  // ── Indicadores económicos (mindicador.cl — sin CORS issues)
   var indEl=document.getElementById('inicio-indicadores');
   if(indEl){
     indEl.innerHTML='<div class="stat" style="border:1px solid var(--border)"><div class="stat-label">Cargando...</div><div class="stat-value">--</div></div>'.repeat(6);
     try{
       var inds=[
         {key:'uf',          label:'UF',         icon:'📊'},
-        {key:'dolar',       label:'Dólar USD',   icon:'🇺🇸'},
-        {key:'euro',        label:'Euro',        icon:'🇪🇺'},
-        {key:'utm',         label:'UTM',         icon:'📋'},
-        {key:'ipc',         label:'IPC',         icon:'📈'},
-        {key:'libra_cobre', label:'Cobre (lb)',  icon:'🔶'},
+        {key:'dolar',       label:'Dólar USD',  icon:'🇺🇸'},
+        {key:'euro',        label:'Euro',       icon:'🇪🇺'},
+        {key:'utm',         label:'UTM',        icon:'📋'},
+        {key:'ipc',         label:'IPC',        icon:'📈'},
+        {key:'libra_cobre', label:'Cobre (lb)', icon:'🔶'},
       ];
       var results=await Promise.allSettled(inds.map(function(ind){
         return fetch('https://mindicador.cl/api/'+ind.key)
           .then(function(r){return r.json();})
           .then(function(d){
-            return {label:ind.label,icon:ind.icon,
+            return{label:ind.label,icon:ind.icon,
               valor:d.serie&&d.serie[0]?d.serie[0].valor:null,
               fecha:d.serie&&d.serie[0]?d.serie[0].fecha:null,
               unidad:d.unidad_medida||''};
@@ -3891,73 +3891,117 @@ async function renderInicio(){
     }
   }
 
-  // ── Noticias usando Claude API con web_search
-  var cachKey='sc_noticias_'+new Date().toDateString();
-  var cached=null;
-  try{ var raw=sessionStorage.getItem(cachKey); if(raw) cached=JSON.parse(raw); }catch(e){}
-
-  if(cached){
-    mostrarNoticiasClaudeResult(cached);
-  } else {
-    // Mostrar loading
-    ['inicio-noticias-tributarias','inicio-noticias-laborales','inicio-noticias-financieras'].forEach(function(id){
-      var el=document.getElementById(id);
-      if(el) el.innerHTML='<div style="text-align:center;padding:20px;color:var(--text3)"><div style="display:inline-block;width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite"></div><div style="margin-top:8px;font-size:12px">Buscando noticias...</div></div>';
-    });
-    try{
-      var hoy=new Date().toLocaleDateString('es-CL',{day:'2-digit',month:'2-digit',year:'numeric'});
-      var resp=await fetch('https://api.anthropic.com/v1/messages',{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({
-          model:'claude-sonnet-4-20250514',
-          max_tokens:2000,
-          tools:[{type:'web_search_20250305',name:'web_search'}],
-          messages:[{role:'user',content:'Busca las 4 noticias más recientes de hoy '+hoy+' para cada una de estas categorías en Chile y responde SOLO en JSON válido sin markdown, sin explicaciones, con esta estructura exacta: {"tributarias":[{"titulo":"...","resumen":"...","fecha":"...","url":"..."}],"laborales":[...],"financieras":[...]}. Categorías: 1) Tributarias/SII (impuestos, resoluciones SII, declaraciones renta, IVA), 2) Laborales (remuneraciones, contratos, licencias, legislación laboral Chile), 3) Financieras (mercados, economía Chile, bolsa, tasas interés, inflación).'}]
-        })
-      });
-      var data=await resp.json();
-      var text=(data.content||[]).filter(function(b){return b.type==='text';}).map(function(b){return b.text;}).join('');
-      var clean=text.replace(/```json|```/g,'').trim();
-      var noticias=JSON.parse(clean);
-      // Guardar en cache por hoy
-      try{sessionStorage.setItem(cachKey,JSON.stringify(noticias));}catch(e){}
-      mostrarNoticiasClaudeResult(noticias);
-    }catch(e){
-      console.warn('Claude noticias error:',e);
-      // Fallback: mostrar mensaje amigable
-      ['inicio-noticias-tributarias','inicio-noticias-laborales','inicio-noticias-financieras'].forEach(function(id){
-        var el=document.getElementById(id);
-        if(el) el.innerHTML='<div style="color:var(--text3);font-size:13px;padding:8px;line-height:1.6">No se pudieron cargar las noticias automáticamente.<br><a href="https://www.sii.cl" target="_blank" style="color:var(--accent)">SII.cl</a> · <a href="https://www.dt.gob.cl" target="_blank" style="color:var(--accent)">DT.gob.cl</a> · <a href="https://www.df.cl" target="_blank" style="color:var(--accent)">DF.cl</a></div>';
-      });
-    }
-  }
-}
-
-function mostrarNoticiasClaudeResult(noticias){
-  var mapa={
-    'inicio-noticias-tributarias': noticias.tributarias||[],
-    'inicio-noticias-laborales':   noticias.laborales||[],
-    'inicio-noticias-financieras': noticias.financieras||[],
+  // ── Noticias: intentar múltiples proxies CORS + parsear XML en el browser
+  var FEEDS={
+    'inicio-noticias-tributarias':{
+      label:'Tributarias', urls:[
+        'https://www.sii.cl/rss/novedades.rss',
+      ]
+    },
+    'inicio-noticias-laborales':{
+      label:'Laborales', urls:[
+        'https://www.dt.gob.cl/portal/1629/propertyvalue-22929.xml',
+      ]
+    },
+    'inicio-noticias-financieras':{
+      label:'Financieras', urls:[
+        'https://www.latercera.com/categoria/negocios/feed/',
+        'https://www.biobiochile.cl/lista/categorias/economia/feed',
+      ]
+    },
   };
-  Object.keys(mapa).forEach(function(id){
-    var el=document.getElementById(id);
-    if(!el) return;
-    var items=mapa[id];
+
+  // Proxies CORS públicos (se intentan en orden hasta que uno funcione)
+  var PROXIES=[
+    function(url){ return 'https://corsproxy.io/?url='+encodeURIComponent(url); },
+    function(url){ return 'https://api.allorigins.win/raw?url='+encodeURIComponent(url); },
+    function(url){ return 'https://api.rss2json.com/v1/api.json?count=8&rss_url='+encodeURIComponent(url); },
+  ];
+
+  // Parsear XML RSS/Atom → array de items
+  function parseRSS(text, isJson){
+    if(isJson){
+      try{
+        var d=JSON.parse(text);
+        if(d.items&&d.items.length) return d.items.map(function(i){
+          return{title:i.title,link:i.link,pubDate:i.pubDate,description:i.description||''};
+        });
+      }catch(e){}
+      return [];
+    }
+    try{
+      var parser=new DOMParser();
+      var doc=parser.parseFromString(text,'text/xml');
+      var items=Array.from(doc.querySelectorAll('item, entry'));
+      return items.map(function(item){
+        var title=(item.querySelector('title')||{textContent:''}).textContent.trim();
+        var link=item.querySelector('link')?
+          (item.querySelector('link').textContent||item.querySelector('link').getAttribute('href')||''):'';
+        var pubDate=(item.querySelector('pubDate,published,updated')||{textContent:''}).textContent;
+        var desc=(item.querySelector('description,summary,content')||{textContent:''}).textContent;
+        return{title:title,link:link,pubDate:pubDate,description:desc};
+      }).filter(function(i){return i.title;});
+    }catch(e){ return []; }
+  }
+
+  // Intentar cargar un feed con múltiples proxies
+  async function fetchFeedConProxy(urls){
+    for(var ui=0;ui<urls.length;ui++){
+      var feedUrl=urls[ui];
+      for(var pi=0;pi<PROXIES.length;pi++){
+        try{
+          var proxyUrl=PROXIES[pi](feedUrl);
+          var isRss2json=proxyUrl.includes('rss2json');
+          var res=await fetch(proxyUrl,{signal:AbortSignal.timeout(6000)});
+          if(!res.ok) continue;
+          var text=await res.text();
+          if(!text||text.length<50) continue;
+          var items=parseRSS(text, isRss2json);
+          if(items.length>0) return items;
+        }catch(e){ /* siguiente proxy */ }
+      }
+    }
+    return [];
+  }
+
+  // Renderizar items en el DOM
+  function mostrarItems(id, items){
+    var el=document.getElementById(id); if(!el) return;
     if(!items||!items.length){
-      el.innerHTML='<div style="color:var(--text3);font-size:13px;padding:8px">Sin noticias disponibles.</div>';
+      el.innerHTML='<div style="color:var(--text3);font-size:13px;padding:8px;line-height:1.8">'
+        +'Sin noticias disponibles.<br>'
+        +'<a href="https://www.sii.cl" target="_blank" rel="noopener" style="color:var(--accent)">SII</a> · '
+        +'<a href="https://www.dt.gob.cl" target="_blank" rel="noopener" style="color:var(--accent)">DT</a> · '
+        +'<a href="https://www.df.cl" target="_blank" rel="noopener" style="color:var(--accent)">DF</a>'
+        +'</div>';
       return;
     }
-    el.innerHTML=items.map(function(n){
+    el.innerHTML=items.slice(0,6).map(function(item){
+      var fecha='';
+      try{ if(item.pubDate) fecha=new Date(item.pubDate).toLocaleDateString('es-CL',{day:'2-digit',month:'2-digit',year:'numeric'}); }catch(e){}
+      var desc=(item.description||'').replace(/<[^>]+>/g,'').trim();
+      if(desc.length>130) desc=desc.substring(0,130)+'...';
       return '<div style="padding:10px 0;border-bottom:1px solid var(--border)">'
-        +(n.url?'<a href="'+n.url+'" target="_blank" rel="noopener" style="font-size:13px;font-weight:600;color:var(--accent);text-decoration:none;display:block;margin-bottom:4px;line-height:1.4">'+n.titulo+'</a>'
-               :'<div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px;line-height:1.4">'+n.titulo+'</div>')
-        +(n.resumen?'<div style="font-size:11px;color:var(--text2);line-height:1.5;margin-bottom:4px">'+n.resumen+'</div>':'')
-        +(n.fecha?'<div style="font-size:10px;color:var(--text3)">'+n.fecha+'</div>':'')
+        +(item.link
+          ?'<a href="'+item.link+'" target="_blank" rel="noopener" style="font-size:13px;font-weight:600;color:var(--accent);text-decoration:none;display:block;margin-bottom:4px;line-height:1.4">'+item.title+'</a>'
+          :'<div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px;line-height:1.4">'+item.title+'</div>')
+        +(desc?'<div style="font-size:11px;color:var(--text2);line-height:1.5;margin-bottom:3px">'+desc+'</div>':'')
+        +(fecha?'<div style="font-size:10px;color:var(--text3)">'+fecha+'</div>':'')
         +'</div>';
     }).join('');
+  }
+
+  // Cargar cada sección de noticias en paralelo
+  Object.keys(FEEDS).forEach(function(id){
+    var cfg=FEEDS[id];
+    var el=document.getElementById(id);
+    if(el) el.innerHTML='<div style="text-align:center;padding:20px;color:var(--text3)"><div style="display:inline-block;width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite"></div></div>';
+    fetchFeedConProxy(cfg.urls)
+      .then(function(items){ mostrarItems(id, items); })
+      .catch(function(){ mostrarItems(id, []); });
   });
 }
+
 // ===========================================================
 
 
