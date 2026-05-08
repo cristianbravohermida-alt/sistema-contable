@@ -1489,13 +1489,13 @@ function applyRoleRestrictions(){
   }
   // Si no hay perfil definido, dar acceso completo (defensivo)
   if(!perfil){
-    document.querySelectorAll('.nav-item[data-sec], .nav-group').forEach(function(el){
+    document.querySelectorAll('.nav-item, .nav-group').forEach(function(el){
       el.style.display = '';
     });
     return;
   }
-  // Aplicar permisos: ocultar items sin permiso
   var permisos = perfil.permisos || {};
+  // 1) Ocultar items individuales con data-sec según permisos
   document.querySelectorAll('.nav-item[data-sec]').forEach(function(item){
     var sec = item.getAttribute('data-sec');
     if(permisos[sec] === false){
@@ -1504,8 +1504,15 @@ function applyRoleRestrictions(){
       item.style.display = '';
     }
   });
-  // Ocultar grupos completos si todos sus items están ocultos
+  // 2) Ocultar grupos SOLO si tienen items con data-sec Y todos están ocultos.
+  //    Grupos sin data-sec (ej: "Tesorería - Próximamente") SIEMPRE se mantienen.
   document.querySelectorAll('.nav-group').forEach(function(grp){
+    var itemsConSec = grp.querySelectorAll('.nav-item[data-sec]');
+    if(itemsConSec.length === 0){
+      // Grupo sin items navegables (Próximamente) — mantener visible
+      grp.style.display = '';
+      return;
+    }
     var visibles = grp.querySelectorAll('.nav-item[data-sec]:not([style*="display: none"])');
     grp.style.display = visibles.length === 0 ? 'none' : '';
   });
