@@ -1473,7 +1473,7 @@ function renderEmpresasSistema(){
 }
 
 // Guardar empresa (nueva o edición)
-function saveEmpresa(){
+async function saveEmpresa(){
   var id     = document.getElementById('me-edit-id').value;
   var rut    = document.getElementById('me-rut').value.trim();
   var razon  = document.getElementById('me-razon').value.trim();
@@ -1481,29 +1481,97 @@ function saveEmpresa(){
   var giro   = document.getElementById('me-giro').value.trim();
   var dir    = document.getElementById('me-dir').value.trim();
   if(!rut||!razon){ msgEl('msg-modal-empresa','err','RUT y Razón Social son obligatorios.'); return; }
+
+  // Validar duplicado de RUT
+  var dup = SYS.empresas.find(function(e){return e.rut===rut && e.id!==id;});
+  if(dup){ msgEl('msg-modal-empresa','err','Ese RUT ya existe en otra empresa.'); return; }
+
+  // ── MODO EDICIÓN
   if(id){
-    var e=SYS.empresas.find(function(x){return x.id===id;});
-    if(e){e.rut=rut;e.razon=razon;e.periodo=periodo;e.giro=giro;e.dir=dir;}
-    // Actualizar config de la empresa en su DB
-    var snap = localStorage.getItem('sc_e_'+id);
-    if(snap){ try{ var d=JSON.parse(snap); d.config.empresa=razon;d.config.rut=rut;d.config.periodo=periodo; localStorage.setItem('sc_e_'+id,JSON.stringify(d)); }catch(ex){} }
-    // Si es la empresa activa, actualizar DB en memoria
-    if(id===SESSION.empresaId){ DB.config.empresa=razon;DB.config.rut=rut;DB.config.periodo=periodo; document.getElementById('sidebar-empresa').textContent=razon; }
-  } else {
-    id='e_'+Date.now();
-    SYS.empresas.push({id:id,rut:rut,razon:razon,periodo:periodo,giro:giro,dir:dir});
-    // Pre-poblar con plan base
-    var nuevaDB = {config:{empresa:razon,rut:rut,giro:giro,dir:dir,periodo:periodo},
-      cuentas:SYS.planBase.map(function(c){return Object.assign({},c);}),
-      asientos:[],numAsiento:1,terceros:[]};
-    try{ localStorage.setItem('sc_e_'+id, JSON.stringify(nuevaDB)); }catch(ex){}
+    var e = SYS.empresas.find(function(x){return x.id===id;});
+    if(!e){ msgEl('msg-modal-empresa','err','Empresa no encontrada.'); return; }
+    showLoading('Actualizando empresa...');
+    try{
+      var updRes = await supa.from('empresas').update({
+        rut: rut, razon: razon, periodo: periodo, giro: giro, dir: dir
+      }).eq('id', id).select();
+      if(updRes.error){
+        hideLoading();
+        msgEl('msg-modal-empresa','err','Error: '+updRes.error.message);
+        return;
+      }
+      if(!updRes.data || !updRes.data.length){
+        hideLoading();
+        msgEl('msg-modal-empresa','err','No se actualizó. Verifica permisos en Supabase.');
+        return;
+      }
+      // Actualizar SYS en memoria
+      e.rut=rut; e.razon=razon; e.periodo=periodo; e.giro=giro; e.dir=dir;
+      // Si es la empresa activa, actualizar DB.config en memoria
+      if(id===SESSION.empresaId){
+        DB.config.empresa=razon; DB.config.rut=rut; DB.config.periodo=periodo;
+        DB.config.giro=giro; DB.config.dir=dir;
+        var sb=document.getElementById('sidebar-empresa');
+        if(sb) sb.textContent=razon;
+      }
+      hideLoading();
+      closeModal('modal-nueva-empresa');
+      renderEmpresasSistema();
+      actualizarSelectorEmpresas();
+      mostrarToast('Empresa actualizada correctamente.','ok');
+    }catch(e){
+      hideLoading();
+      console.error('saveEmpresa edit:',e);
+      msgEl('msg-modal-empresa','err','Error inesperado: '+(e.message||e));
+    }
+    return;
   }
-  saveSYS();
-  closeModal('modal-nueva-empresa');
-  document.getElementById('me-edit-id').value='';
-  document.getElementById('modal-empresa-titulo').textContent='Nueva Empresa';
-  renderEmpresasSistema();
-  msgEl('msg-sistema','ok','Empresa guardada correctamente.');
+
+  // ── MODO CREACIÓN
+  showLoading('Creando empresa...');
+  try{
+    var nuevoId = 'e_'+Date.now();
+    var insRes = await supa.from('empresas').insert({
+      id: nuevoId, rut: rut, razon: razon, periodo: periodo, giro: giro, dir: dir
+    }).select();
+    if(insRes.error){
+      hideLoading();
+      msgEl('msg-modal-empresa','err','Error: '+insRes.error.message);
+      return;
+    }
+    if(!insRes.data || !insRes.data.length){
+      hideLoading();
+      msgEl('msg-modal-empresa','err','No se creó. Verifica permisos en Supabase.');
+      return;
+    }
+    // Asignar a usuario admin actual
+    if(SESSION.userId){
+      var ueRes = await supa.from('usuario_empresa').insert({
+        usuario_id: SESSION.userId, empresa_id: nuevoId
+      });
+      if(ueRes.error){
+        hideLoading();
+        msgEl('msg-modal-empresa','err','Empresa creada pero error asignando: '+ueRes.error.message);
+        return;
+      }
+    }
+    // Crear empresa_config inicial
+    await supa.from('empresa_config').insert({empresa_id: nuevoId, num_asiento: 1});
+    // Actualizar SYS en memoria
+    SYS.empresas.push({id:nuevoId, rut:rut, razon:razon, periodo:periodo, giro:giro, dir:dir});
+    // Asignar a usuario actual en memoria
+    var u=SYS.usuarios.find(function(x){return x.id===SESSION.userId;});
+    if(u && !u.empresaIds.includes(nuevoId)) u.empresaIds.push(nuevoId);
+    hideLoading();
+    closeModal('modal-nueva-empresa');
+    renderEmpresasSistema();
+    actualizarSelectorEmpresas();
+    mostrarToast('Empresa "'+razon+'" creada correctamente.','ok');
+  }catch(e){
+    hideLoading();
+    console.error('saveEmpresa create:',e);
+    msgEl('msg-modal-empresa','err','Error inesperado: '+(e.message||e));
+  }
 }
 
 function editEmpresa(id){
@@ -1518,19 +1586,7 @@ function editEmpresa(id){
   openModal('modal-nueva-empresa');
 }
 
-function delEmpresa(id){
-  if(id===SESSION.empresaId){alert('No puedes eliminar la empresa activa.'); return;}
-  var e=SYS.empresas.find(function(x){return x.id===id;});
-  if(!confirm('¿Eliminar empresa "'+(e?e.razon:id)+'" y todos sus datos? Esta acción no se puede deshacer.')) return;
-  SYS.empresas=SYS.empresas.filter(function(x){return x.id!==id;});
-  SYS.usuarios.forEach(function(u){
-    if(u.empresaId===id){ u.empresaIds=[]; delete u.empresaId; }
-    if(u.empresaIds) u.empresaIds=u.empresaIds.filter(function(x){return x!==id;});
-  });
-  try{ localStorage.removeItem('sc_e_'+id); }catch(ex){}
-  saveSYS(); renderEmpresasSistema(); renderUsuariosSistema();
-  msgEl('msg-sistema','ok','Empresa eliminada.');
-}
+function delEmpresa(eid){ return eliminarEmpresa(eid); }
 
 // Cambiar empresa activa (solo admin)
 function cambiarEmpresa(empId){
@@ -1609,13 +1665,16 @@ async function saveUsuario(){
   var dup = SYS.usuarios.find(function(u){return u.user===email && u.id!==id;});
   if(dup){ msgEl('msg-modal-usuario','err','Ese correo ya existe en el sistema.'); return; }
 
-  // ── MODO EDICIÓN
+  // ════════════════════════════════════════════════════════════
+  // MODO EDICIÓN
+  // ════════════════════════════════════════════════════════════
   if(id){
     var u = SYS.usuarios.find(function(x){return x.id===id;});
     if(!u){ msgEl('msg-modal-usuario','err','Usuario no encontrado.'); return; }
 
     showLoading('Actualizando usuario...');
     try{
+      // 1. Actualizar nombre/email/rol en tabla usuarios
       var updRes = await supa.from('usuarios').update({
         nombre: nombre, user_login: email, rol: rol
       }).eq('id', id).select();
@@ -1626,58 +1685,112 @@ async function saveUsuario(){
       }
       if(!updRes.data || !updRes.data.length){
         hideLoading();
-        msgEl('msg-modal-usuario','err','No se actualizó. Verifica permisos en Supabase.');
+        msgEl('msg-modal-usuario','err','No se actualizó. Verifica permisos.');
         return;
       }
 
-      var delRes = await supa.from('usuario_empresa').delete().eq('usuario_id', id);
-      if(delRes.error){
-        hideLoading();
-        msgEl('msg-modal-usuario','err','Error eliminando empresas: '+delRes.error.message);
-        return;
-      }
-      if(empIds.length){
-        var insRes = await supa.from('usuario_empresa').insert(
-          empIds.map(function(eid){return{usuario_id:id, empresa_id:eid};})
-        );
-        if(insRes.error){
+      // 2. Si cambió la contraseña, llamar Edge Function
+      if(pass && pass.length >= 6 && u.auth_user_id){
+        var { data: sess } = await supa.auth.getSession();
+        var token = sess && sess.session ? sess.session.access_token : null;
+        if(!token){ hideLoading(); msgEl('msg-modal-usuario','err','Sesión inválida.'); return; }
+
+        var res = await fetch(SUPA_URL+'/functions/v1/update-password', {
+          method:'POST',
+          headers:{
+            'Authorization':'Bearer '+token,
+            'Content-Type':'application/json'
+          },
+          body: JSON.stringify({ authUserId: u.auth_user_id, newPassword: pass })
+        });
+        var data = await res.json();
+        if(!res.ok){
           hideLoading();
-          msgEl('msg-modal-usuario','err','Error asignando empresas: '+insRes.error.message);
+          msgEl('msg-modal-usuario','err','Error contraseña: '+(data.error||'desconocido'));
           return;
         }
+      } else if(pass && pass.length > 0 && pass.length < 6){
+        hideLoading();
+        msgEl('msg-modal-usuario','err','Contraseña mínima 6 caracteres (o vacía para no cambiar).');
+        return;
       }
 
+      // 3. Actualizar relaciones empresa
+      await supa.from('usuario_empresa').delete().eq('usuario_id', id);
+      if(empIds.length){
+        await supa.from('usuario_empresa').insert(
+          empIds.map(function(eid){return{usuario_id:id, empresa_id:eid};})
+        );
+      }
+
+      // 4. Actualizar SYS en memoria
       u.nombre=nombre; u.user=email; u.rol=rol; u.empresaIds=empIds;
 
       hideLoading();
       closeModal('modal-nuevo-usuario');
       renderUsuariosSistema();
-
-      var msg = 'Usuario actualizado en BD.';
-      if(pass && pass.length >= 6){
-        msg += ' La contraseña debe cambiarse manualmente en Supabase → Authentication → Users.';
-      }
-      mostrarToast(msg, 'ok');
+      mostrarToast('Usuario actualizado correctamente.','ok');
 
     }catch(e){
       hideLoading();
-      console.error('saveUsuario error:', e);
+      console.error('saveUsuario edit:',e);
       msgEl('msg-modal-usuario','err','Error: '+(e.message||e));
     }
     return;
   }
 
-  // ── MODO CREACIÓN — Mostrar instrucciones (no se crea automáticamente)
-  msgEl('msg-modal-usuario','warn',
-    'Para crear un usuario nuevo:\n'+
-    '1) Ve a Supabase → Authentication → Add User\n'+
-    '2) Crea cuenta con: '+email+' y contraseña\n'+
-    '3) Copia el UUID generado\n'+
-    '4) Ve a SQL Editor y ejecuta:\n'+
-    "INSERT INTO usuarios (id,nombre,user_login,rol,auth_user_id) VALUES "+
-    "(\'u_"+Date.now()+"\',\'"+nombre+"\',\'"+email+"\',\'"+rol+"\',\'UUID-AQUI\');\n"+
-    '5) Asignar empresa: INSERT INTO usuario_empresa...\n'+
-    'Luego recarga el sistema.');
+  // ════════════════════════════════════════════════════════════
+  // MODO CREACIÓN — usa Edge Function create-user
+  // ════════════════════════════════════════════════════════════
+  if(!pass || pass.length < 6){
+    msgEl('msg-modal-usuario','err','La contraseña debe tener mínimo 6 caracteres.');
+    return;
+  }
+
+  showLoading('Creando usuario...');
+  try{
+    var { data: sess } = await supa.auth.getSession();
+    var token = sess && sess.session ? sess.session.access_token : null;
+    if(!token){ hideLoading(); msgEl('msg-modal-usuario','err','Sesión inválida.'); return; }
+
+    var res = await fetch(SUPA_URL+'/functions/v1/create-user', {
+      method:'POST',
+      headers:{
+        'Authorization':'Bearer '+token,
+        'Content-Type':'application/json'
+      },
+      body: JSON.stringify({
+        email: email,
+        password: pass,
+        nombre: nombre,
+        rol: rol,
+        empresaIds: empIds
+      })
+    });
+    var data = await res.json();
+    if(!res.ok){
+      hideLoading();
+      msgEl('msg-modal-usuario','err','Error: '+(data.error||'desconocido'));
+      return;
+    }
+
+    // Recargar SYS para reflejar el nuevo usuario
+    await loadSYS();
+
+    hideLoading();
+    closeModal('modal-nuevo-usuario');
+    document.getElementById('mu-edit-id').value='';
+    document.getElementById('mu-pass').value='';
+    var titulo=document.getElementById('modal-usuario-titulo');
+    if(titulo) titulo.textContent='Nuevo Usuario';
+    renderUsuariosSistema();
+    mostrarToast('Usuario '+nombre+' creado correctamente. Ya puede iniciar sesión.','ok');
+
+  }catch(e){
+    hideLoading();
+    console.error('saveUsuario create:',e);
+    msgEl('msg-modal-usuario','err','Error inesperado: '+(e.message||e));
+  }
 }
 
 function editUsuario(id){
@@ -1694,13 +1807,7 @@ function editUsuario(id){
   openModal('modal-nuevo-usuario');
 }
 
-function delUsuario(id){
-  if(id===SESSION.userId){alert('No puedes eliminarte a ti mismo.'); return;}
-  var u=SYS.usuarios.find(function(x){return x.id===id;});
-  if(!confirm('¿Eliminar usuario '+(u?u.nombre:id)+'?')) return;
-  SYS.usuarios=SYS.usuarios.filter(function(x){return x.id!==id;});
-  saveSYS(); renderUsuariosSistema();
-}
+function delUsuario(uid){ return eliminarUsuarioCompleto(uid); }
 
 // ── Plan base: sincronizar con empresa activa
 // Cuando el admin actualiza el plan base, cada empresa NUEVA lo hereda.
@@ -3390,24 +3497,83 @@ async function renderCodSII(){
 async function eliminarUsuarioCompleto(uid){
   var u = SYS.usuarios.find(function(x){return x.id===uid;});
   if(!u){ mostrarToast('Usuario no encontrado','err'); return; }
+  if(uid===SESSION.userId){ mostrarToast('No puedes eliminarte a ti mismo','err'); return; }
   if(u.rol==='admin' && SYS.usuarios.filter(function(x){return x.rol==='admin';}).length<=1){
-    mostrarToast('No puedes eliminar el único administrador','err'); return;
+    mostrarToast('No puedes eliminar el último administrador','err'); return;
   }
   if(!confirm('¿Eliminar al usuario '+u.nombre+'? Esta acción no se puede deshacer.')) return;
+
   showLoading('Eliminando usuario...');
   try{
-    var del1 = await supa.from('usuario_empresa').delete().eq('usuario_id', uid);
-    if(del1.error) throw del1.error;
-    var del2 = await supa.from('usuarios').delete().eq('id', uid);
-    if(del2.error) throw del2.error;
+    var { data: sess } = await supa.auth.getSession();
+    var token = sess && sess.session ? sess.session.access_token : null;
+    if(!token){ hideLoading(); mostrarToast('Sesión inválida','err'); return; }
+
+    var res = await fetch(SUPA_URL+'/functions/v1/delete-user', {
+      method:'POST',
+      headers:{
+        'Authorization':'Bearer '+token,
+        'Content-Type':'application/json'
+      },
+      body: JSON.stringify({ userId: uid, authUserId: u.auth_user_id })
+    });
+    var data = await res.json();
+    if(!res.ok){
+      hideLoading();
+      mostrarToast('Error: '+(data.error||'desconocido'),'err');
+      return;
+    }
     SYS.usuarios = SYS.usuarios.filter(function(x){return x.id!==uid;});
     hideLoading();
     renderUsuariosSistema();
-    mostrarToast('Usuario eliminado correctamente. Si tenía cuenta en Supabase Auth, eliminarla manualmente desde Authentication → Users.','ok');
+    mostrarToast('Usuario eliminado correctamente.','ok');
   }catch(e){
     hideLoading();
-    mostrarToast('Error al eliminar: '+(e.message||e),'err');
-    console.error('eliminar error:', e);
+    console.error('eliminar:', e);
+    mostrarToast('Error: '+(e.message||e),'err');
+  }
+}
+
+async function eliminarEmpresa(eid){
+  var e = SYS.empresas.find(function(x){return x.id===eid;});
+  if(!e){ mostrarToast('Empresa no encontrada','err'); return; }
+  if(SYS.empresas.length<=1){ mostrarToast('No puedes eliminar la última empresa','err'); return; }
+  if(!confirm('¿Eliminar "'+e.razon+'"? Se eliminarán TODAS sus cuentas, asientos, terceros y configuración. Esta acción NO se puede deshacer.')) return;
+  showLoading('Eliminando empresa...');
+  try{
+    // Eliminar líneas de asiento
+    var asientosEmp = await supa.from('asientos').select('id').eq('empresa_id', eid);
+    if(asientosEmp.data && asientosEmp.data.length){
+      var idsAsientos = asientosEmp.data.map(function(a){return a.id;});
+      await supa.from('lineas_asiento').delete().in('asiento_id', idsAsientos);
+    }
+    // Eliminar en orden
+    await supa.from('asientos').delete().eq('empresa_id', eid);
+    await supa.from('cuentas').delete().eq('empresa_id', eid);
+    await supa.from('terceros').delete().eq('empresa_id', eid);
+    await supa.from('empresa_config').delete().eq('empresa_id', eid);
+    await supa.from('usuario_empresa').delete().eq('empresa_id', eid);
+    var delRes = await supa.from('empresas').delete().eq('id', eid);
+    if(delRes.error) throw delRes.error;
+    // Actualizar SYS en memoria
+    SYS.empresas = SYS.empresas.filter(function(x){return x.id!==eid;});
+    SYS.usuarios.forEach(function(u){ u.empresaIds = u.empresaIds.filter(function(x){return x!==eid;}); });
+    // Si era la empresa activa, cambiar
+    if(eid===SESSION.empresaId){
+      var primera = SYS.empresas[0];
+      if(primera){
+        SESSION.empresaId=primera.id;
+        await loadDB();
+      }
+    }
+    hideLoading();
+    renderEmpresasSistema();
+    actualizarSelectorEmpresas();
+    mostrarToast('Empresa eliminada correctamente.','ok');
+  }catch(e){
+    hideLoading();
+    console.error('eliminarEmpresa:',e);
+    mostrarToast('Error: '+(e.message||e),'err');
   }
 }
 </script>
