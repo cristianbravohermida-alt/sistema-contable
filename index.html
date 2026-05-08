@@ -1490,6 +1490,7 @@ async function doLogin(){
 // ── LOGOUT
 function doLogout(){
   detenerWatchdogSesion();
+  detenerAutoRefreshInicio();
   limpiarSesion();
   SESSION = {userId:null,empresaId:null,rol:null,nombre:null};
   DB = {config:{empresa:'',rut:'',giro:'',dir:'',periodo:''},cuentas:[],asientos:[],numAsiento:1,terceros:[]};
@@ -1521,7 +1522,7 @@ function initAppPostLogin(){
   var startNav = findNavItem(startSec);
   if(startNav) startNav.classList.add('active');
   document.getElementById('sec-'+startSec).classList.add('active');
-  renderInicio();
+  iniciarAutoRefreshInicio(); // carga y programa refresh cada hora
 }
 
 // ── Restricciones de rol
@@ -1820,7 +1821,7 @@ function nav(id, el){
   document.getElementById('sec-'+id).classList.add('active');
   if(el) el.classList.add('active');
   abrirGrupoActivo(id);
-  if(id==='inicio'){ renderInicio(); }
+  if(id==='inicio'){ iniciarAutoRefreshInicio(); } else { detenerAutoRefreshInicio(); }
   if(id==='cuentas'){ renderCuentas(); renderStatsCuentas(); }
   if(id==='diario'){ renderDiario(); }
   if(id==='mayor'){ populateMayorSel(); renderMayor(); }
@@ -3629,7 +3630,7 @@ function detenerWatchdogSesion(){
 
 function mostrarToast(msg, tipo){
   var t = document.createElement('div');
-  var bg = tipo==='warn' ? '#f59e0b' : tipo==='err' ? '#ef4444' : 'var(--text)';
+  var bg = tipo==='warn' ? '#f59e0b' : tipo==='err' ? '#ef4444' : tipo==='ok' ? '#16a34a' : 'var(--text)';
   t.style.cssText = 'position:fixed;bottom:20px;right:20px;background:'+bg+';color:#fff;padding:12px 18px;border-radius:8px;font-size:13px;font-weight:500;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.25);transition:opacity .4s';
   t.textContent = msg;
   document.body.appendChild(t);
@@ -3944,6 +3945,36 @@ async function renderInicio(){
   });
 }
 // ===========================================================
+
+
+// ══ AUTO-REFRESH NOTICIAS (cada 1 hora) ══════════════════════
+var _inicioRefreshTimer = null;
+var _INICIO_REFRESH_MS  = 60 * 60 * 1000; // 1 hora en ms
+
+function iniciarAutoRefreshInicio(){
+  // Evitar timers duplicados
+  detenerAutoRefreshInicio();
+  renderInicio(); // carga inmediata
+  _inicioRefreshTimer = setInterval(function(){
+    // Solo actualizar si sec-inicio está activa
+    var sec = document.getElementById('sec-inicio');
+    if(sec && sec.classList.contains('active')){
+      renderInicio();
+      // Toast discreto de actualización
+      mostrarToast('Indicadores y noticias actualizados', 'ok');
+    }
+  }, _INICIO_REFRESH_MS);
+  console.log('Auto-refresh Inicio iniciado (cada 1 hora)');
+}
+
+function detenerAutoRefreshInicio(){
+  if(_inicioRefreshTimer){
+    clearInterval(_inicioRefreshTimer);
+    _inicioRefreshTimer = null;
+    console.log('Auto-refresh Inicio detenido');
+  }
+}
+// ═════════════════════════════════════════════════════════════
 
 // ============================================================
 // INIT
