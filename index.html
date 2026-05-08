@@ -256,10 +256,10 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
     <div class="login-title">SistemaContable</div>
     <div class="login-sub">Ingresa tus credenciales</div>
     <div class="login-err" id="login-err">Usuario o contraseña incorrectos.</div>
-    <div class="login-field"><label>Usuario</label><input id="li-user" type="text" placeholder="correo@empresa.cl" autocomplete="email" autocomplete="username"></div>
+    <div class="login-field"><label>Usuario</label><input id="li-user" type="text" placeholder="usuario o correo@empresa.cl" autocomplete="username"></div>
     <div class="login-field"><label>Contraseña</label><input id="li-pass" type="password" placeholder="••••••••" autocomplete="current-password"></div>
     <button class="login-btn" onclick="doLogin()">Ingresar</button>
-    <p style="text-align:center;font-size:11px;color:var(--text3);margin-top:16px">Acceso inicial: admin / admin123</p>
+
   </div>
 </div>
 
@@ -1148,7 +1148,7 @@ async function initSistemaSiVacio(){
   SYS.empresas.push({id:emp2,rut:'76.987.654-3',razon:'Comercial Las Condes Ltda.',
     giro:'Retail y distribucion',dir:'Av. Apoquindo 4500, Las Condes',
     periodo:'Enero – Diciembre 2025'});
-  var hash = await sha256('admin123');
+  var hash = await sha256('Admin2026!#');
   SYS.usuarios.push({id:'u_1',nombre:'Administrador',user:'admin',
     passHash:hash,rol:'admin',empresaIds:[emp1,emp2]});
   _precargarEmpresa1(emp1);
@@ -1335,60 +1335,69 @@ async function doLogin(){
 
   showLoading('Verificando credenciales...');
 
-  try{
-    // ── Autenticación via Supabase Auth (JWT real)
-    var { data, error } = await supa.auth.signInWithPassword({ email: user, password: pass });
+  // ── MODO A: Supabase Auth (para usuarios migrados con auth_user_id)
+  var usrConAuth = SYS.usuarios.find(function(u){
+    return (u.user===user) && u.auth_user_id;
+  });
 
-    if(error){
-      hideLoading();
-      // Registrar intento fallido
-      var intentos=(rl&&!rl.lockUntil?rl.intentos:0)||0;
-      intentos++;
-      var lockUntil = intentos>=5 ? Date.now()+15*60*1000 : null;
-      try{ sessionStorage.setItem(rlKey, JSON.stringify({intentos:intentos,lockUntil:lockUntil})); }catch(e){}
-      if(lockUntil){
-        errEl.textContent='Demasiados intentos. Cuenta bloqueada 15 minutos.';
-      } else {
-        errEl.textContent='Usuario o contraseña incorrectos. ('+(5-intentos)+' intentos restantes)';
+  if(usrConAuth){
+    try{
+      var { data, error } = await supa.auth.signInWithPassword({ email: user, password: pass });
+      if(error){
+        hideLoading();
+        var intentos=(rl&&!rl.lockUntil?rl.intentos:0)||0; intentos++;
+        var lockUntil=intentos>=5?Date.now()+15*60*1000:null;
+        try{ sessionStorage.setItem(rlKey,JSON.stringify({intentos:intentos,lockUntil:lockUntil})); }catch(e){}
+        errEl.textContent = lockUntil
+          ? 'Demasiados intentos. Cuenta bloqueada 15 minutos.'
+          : 'Usuario o contraseña incorrectos. ('+(5-intentos)+' intentos restantes)';
+        errEl.classList.add('show'); return;
       }
-      errEl.classList.add('show'); return;
-    }
-
-    // Login exitoso → limpiar rate limit
-    try{ sessionStorage.removeItem(rlKey); }catch(e){}
-
-    // Buscar el usuario del sistema vinculado al auth_user_id
-    var usr = SYS.usuarios.find(function(u){ return u.auth_user_id === data.user.id; });
-    if(!usr){
-      await supa.auth.signOut();
+      try{ sessionStorage.removeItem(rlKey); }catch(e){}
+      var usr=SYS.usuarios.find(function(u){return u.auth_user_id===data.user.id;});
+      if(!usr||!usr.empresaIds||!usr.empresaIds.length){
+        await supa.auth.signOut(); hideLoading();
+        errEl.textContent='Usuario sin empresas asignadas.'; errEl.classList.add('show'); return;
+      }
+      SESSION={userId:usr.id,auth_user_id:data.user.id,empresaId:usr.empresaIds[0],rol:usr.rol,nombre:usr.nombre};
+      await loadDB(); hideLoading();
+      document.getElementById('login-screen').classList.remove('show');
+      document.getElementById('app-layout').style.display='flex';
+      document.getElementById('li-pass').value='';
+      guardarSesion(); iniciarWatchdogSesion(); initNavListeners(); initAppPostLogin();
+      return;
+    }catch(e){
       hideLoading();
-      errEl.textContent='Usuario no tiene acceso al sistema. Contacte al administrador.';
-      errEl.classList.add('show'); return;
+      errEl.textContent='Error de conexión. Intenta nuevamente.'; errEl.classList.add('show'); return;
     }
-    if(!usr.empresaIds || !usr.empresaIds.length){
-      await supa.auth.signOut();
-      hideLoading();
-      errEl.textContent='Este usuario no tiene empresas asignadas.';
-      errEl.classList.add('show'); return;
-    }
-
-    SESSION = { userId:usr.id, auth_user_id:data.user.id, empresaId:usr.empresaIds[0], rol:usr.rol, nombre:usr.nombre };
-    await loadDB();
-    hideLoading();
-    document.getElementById('login-screen').classList.remove('show');
-    document.getElementById('app-layout').style.display = 'flex';
-    document.getElementById('li-pass').value = '';
-    guardarSesion();
-    iniciarWatchdogSesion();
-    initNavListeners();
-    initAppPostLogin();
-
-  }catch(e){
-    hideLoading();
-    console.error('Login error:', e);
-    errEl.textContent='Error de conexión. Intenta nuevamente.';
-    errEl.classList.add('show');
   }
+
+  // ── MODO B: Login local con hash (usuarios aún no migrados a Supabase Auth)
+  var hash = await sha256(pass);
+  var usr = SYS.usuarios.find(function(u){
+    return (u.user===user) && u.passHash===hash;
+  });
+  if(!usr){
+    hideLoading();
+    var intentos=(rl&&!rl.lockUntil?rl.intentos:0)||0; intentos++;
+    var lockUntil=intentos>=5?Date.now()+15*60*1000:null;
+    try{ sessionStorage.setItem(rlKey,JSON.stringify({intentos:intentos,lockUntil:lockUntil})); }catch(e){}
+    errEl.textContent = lockUntil
+      ? 'Demasiados intentos. Cuenta bloqueada 15 minutos.'
+      : 'Usuario o contraseña incorrectos. ('+(5-intentos)+' intentos restantes)';
+    errEl.classList.add('show'); return;
+  }
+  if(!usr.empresaIds||!usr.empresaIds.length){
+    hideLoading();
+    errEl.textContent='Este usuario no tiene empresas asignadas.'; errEl.classList.add('show'); return;
+  }
+  try{ sessionStorage.removeItem(rlKey); }catch(e){}
+  SESSION={userId:usr.id,auth_user_id:null,empresaId:usr.empresaIds[0],rol:usr.rol,nombre:usr.nombre};
+  await loadDB(); hideLoading();
+  document.getElementById('login-screen').classList.remove('show');
+  document.getElementById('app-layout').style.display='flex';
+  document.getElementById('li-pass').value='';
+  guardarSesion(); iniciarWatchdogSesion(); initNavListeners(); initAppPostLogin();
 }
 
 // ── LOGOUT
@@ -3137,38 +3146,44 @@ function cambiarEmpresaDesdeSelector(empId){
 window.addEventListener('load', async function(){
   try{
     showLoading('Conectando...');
-    // Cargar datos del sistema y cod_sii en paralelo
     await Promise.all([loadSYS(), cargarCodSII()]);
     await initSistemaSiVacio();
     hideLoading();
     initNavListeners();
 
-    // Intentar restaurar sesión: primero via Supabase Auth, luego via sessionStorage
-    var { data: authData } = await supa.auth.getSession();
-    var sesionLocal = recuperarSesion();
-
-    if(authData && authData.session && authData.session.user){
-      // Sesión Supabase Auth activa → restaurar
-      var authUid = authData.session.user.id;
-      var usr = SYS.usuarios.find(function(u){ return u.auth_user_id === authUid; });
-      if(usr && usr.empresaIds && usr.empresaIds.length){
-        var empId = sesionLocal ? sesionLocal.empresaId : usr.empresaIds[0];
-        SESSION = {userId:usr.id, auth_user_id:authUid, empresaId:empId, rol:usr.rol, nombre:usr.nombre};
-        showLoading('Restaurando sesión...');
-        await loadDB();
-        hideLoading();
-        document.getElementById('login-screen').classList.remove('show');
-        document.getElementById('app-layout').style.display = 'flex';
-        iniciarWatchdogSesion();
-        initAppPostLogin();
-        return;
+    // Intentar restaurar sesión via Supabase Auth
+    try{
+      var { data: authData } = await supa.auth.getSession();
+      if(authData && authData.session && authData.session.user){
+        var authUid = authData.session.user.id;
+        var usr = SYS.usuarios.find(function(u){ return u.auth_user_id===authUid; });
+        if(usr && usr.empresaIds && usr.empresaIds.length){
+          var sesLocal = recuperarSesion();
+          var empId = sesLocal ? sesLocal.empresaId : usr.empresaIds[0];
+          SESSION = {userId:usr.id,auth_user_id:authUid,empresaId:empId,rol:usr.rol,nombre:usr.nombre};
+          showLoading('Restaurando sesión...');
+          await loadDB(); hideLoading();
+          document.getElementById('login-screen').classList.remove('show');
+          document.getElementById('app-layout').style.display = 'flex';
+          iniciarWatchdogSesion(); initAppPostLogin();
+          return;
+        }
       }
+    }catch(e){ /* sin sesión Auth activa */ }
+
+    // Intentar restaurar sesión local (usuarios con hash, sin Auth aún)
+    var sesLocal = recuperarSesion();
+    if(sesLocal && SYS.usuarios.find(function(u){ return u.id===sesLocal.userId; })){
+      SESSION = {userId:sesLocal.userId,auth_user_id:null,empresaId:sesLocal.empresaId,rol:sesLocal.rol,nombre:sesLocal.nombre};
+      showLoading('Restaurando sesión...');
+      await loadDB(); hideLoading();
+      document.getElementById('login-screen').classList.remove('show');
+      document.getElementById('app-layout').style.display = 'flex';
+      iniciarWatchdogSesion(); initAppPostLogin();
+      return;
     }
 
-    // Sin sesión válida → mostrar login
-    await supa.auth.signOut();
     document.getElementById('login-screen').classList.add('show');
-
   }catch(e){
     console.error('Load error:',e);
     hideLoading();
