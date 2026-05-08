@@ -1337,9 +1337,6 @@ async function doLogin(){
 
   // Calcular hash de la contraseña ingresada
   var hash = await sha256(pass);
-  console.log('DEBUG user:', user);
-  console.log('DEBUG hash calculado:', hash);
-  console.log('DEBUG SYS.usuarios:', SYS.usuarios.map(function(u){return {user:u.user, hash:u.passHash};}));
 
   // Buscar usuario por hash
   var usr = SYS.usuarios.find(function(u){
@@ -1605,45 +1602,86 @@ async function saveUsuario(){
   if(!nombre||!email){ msgEl('msg-modal-usuario','err','Nombre y email son obligatorios.'); return; }
   if(!empIds.length){ msgEl('msg-modal-usuario','err','Asigna al menos una empresa.'); return; }
   var dup = SYS.usuarios.find(function(u){return u.user===email && u.id!==id;});
-  if(dup){ msgEl('msg-modal-usuario','err','Ese email ya existe en el sistema.'); return; }
+  if(dup){ msgEl('msg-modal-usuario','err','Ese usuario ya existe en el sistema.'); return; }
 
-  // ── MODO EDICIÓN (usuario existente)
+  // ══════════════════════════════════════════════════════════
+  // MODO EDICIÓN (usuario existente)
+  // ══════════════════════════════════════════════════════════
   if(id){
     var u = SYS.usuarios.find(function(x){return x.id===id;});
-    if(!u) return;
+    if(!u){ msgEl('msg-modal-usuario','err','Usuario no encontrado.'); return; }
 
     showLoading('Actualizando usuario...');
     try{
-      // Si cambió la contraseña, actualizar en Supabase Auth
-      if(pass && pass.length >= 6 && u.auth_user_id){
-        var { error: pwErr } = await supa.auth.admin.updateUserById(u.auth_user_id, { password: pass });
-        if(pwErr) throw new Error('No se pudo cambiar la contraseña: '+pwErr.message);
+      // 1. Calcular nuevo hash si cambió la contraseña
+      var hash = u.passHash;
+      if(pass && pass.length >= 6){
+        hash = await sha256(pass);
+      } else if(pass && pass.length > 0 && pass.length < 6){
+        hideLoading();
+        msgEl('msg-modal-usuario','err','La contraseña debe tener mínimo 6 caracteres (o dejarla vacía para no cambiarla).');
+        return;
       }
-      // Actualizar en tabla usuarios
-      var hash = pass ? await sha256(pass) : u.passHash;
-      await supa.from('usuarios').update({
-        nombre: nombre, user_login: email, pass_hash: hash, rol: rol
-      }).eq('id', id);
-      // Actualizar relaciones empresa
-      await supa.from('usuario_empresa').delete().eq('usuario_id', id);
+
+      // 2. Actualizar en tabla usuarios — VERIFICAR ERRORES
+      var updRes = await supa.from('usuarios').update({
+        nombre: nombre,
+        user_login: email,
+        pass_hash: hash,
+        rol: rol
+      }).eq('id', id).select();
+
+      if(updRes.error){
+        hideLoading();
+        msgEl('msg-modal-usuario','err','Error al guardar en BD: '+updRes.error.message);
+        console.error('UPDATE error:', updRes.error);
+        return;
+      }
+      if(!updRes.data || !updRes.data.length){
+        hideLoading();
+        msgEl('msg-modal-usuario','err','No se actualizó ningún registro. Verifica permisos en Supabase.');
+        console.warn('UPDATE devolvió 0 filas — posible problema RLS');
+        return;
+      }
+
+      // 3. Actualizar relaciones empresa
+      var delRes = await supa.from('usuario_empresa').delete().eq('usuario_id', id);
+      if(delRes.error){
+        hideLoading();
+        msgEl('msg-modal-usuario','err','Error eliminando empresas: '+delRes.error.message);
+        return;
+      }
       if(empIds.length){
-        await supa.from('usuario_empresa').insert(empIds.map(function(eid){return{usuario_id:id,empresa_id:eid};}));
+        var insRes = await supa.from('usuario_empresa').insert(
+          empIds.map(function(eid){return{usuario_id:id, empresa_id:eid};})
+        );
+        if(insRes.error){
+          hideLoading();
+          msgEl('msg-modal-usuario','err','Error asignando empresas: '+insRes.error.message);
+          return;
+        }
       }
-      // Actualizar SYS en memoria
+
+      // 4. Actualizar SYS en memoria
       u.nombre=nombre; u.user=email; u.rol=rol; u.empresaIds=empIds;
-      if(pass && hash) u.passHash=hash;
+      u.passHash=hash;
+
       hideLoading();
       closeModal('modal-nuevo-usuario');
       renderUsuariosSistema();
-      msgEl('msg-sistema','ok','Usuario actualizado correctamente.');
+      mostrarToast('Usuario actualizado correctamente. Cambios guardados en BD.','ok');
+
     }catch(e){
       hideLoading();
-      msgEl('msg-modal-usuario','err','Error al actualizar: '+e.message);
+      console.error('saveUsuario edición error:', e);
+      msgEl('msg-modal-usuario','err','Error inesperado: '+(e.message||e));
     }
     return;
   }
 
-  // ── MODO CREACIÓN (usuario nuevo)
+  // ══════════════════════════════════════════════════════════
+  // MODO CREACIÓN (usuario nuevo)
+  // ══════════════════════════════════════════════════════════
   if(!pass || pass.length < 6){
     msgEl('msg-modal-usuario','err','La contraseña debe tener mínimo 6 caracteres.');
     return;
@@ -1651,53 +1689,61 @@ async function saveUsuario(){
 
   showLoading('Creando usuario...');
   try{
-    // 1. Crear en Supabase Auth (genera UUID automáticamente)
-    var { data: authData, error: authErr } = await supa.auth.admin.createUser({
-      email: email,
-      password: pass,
-      email_confirm: true  // confirmado automáticamente, sin email de verificación
-    });
-    if(authErr) throw new Error('Error en Auth: '+authErr.message);
-
-    var authUserId = authData.user.id;
     var hash = await sha256(pass);
     var nuevoId = 'u_'+Date.now();
 
-    // 2. Insertar en tabla usuarios con auth_user_id
-    await supa.from('usuarios').insert({
+    // 1. Insertar en tabla usuarios — VERIFICAR ERRORES
+    var insRes = await supa.from('usuarios').insert({
       id: nuevoId,
       nombre: nombre,
       user_login: email,
       pass_hash: hash,
-      rol: rol,
-      auth_user_id: authUserId
-    });
+      rol: rol
+    }).select();
 
-    // 3. Asignar empresas
-    if(empIds.length){
-      await supa.from('usuario_empresa').insert(
-        empIds.map(function(eid){return{usuario_id:nuevoId, empresa_id:eid};})
-      );
+    if(insRes.error){
+      hideLoading();
+      msgEl('msg-modal-usuario','err','Error al crear: '+insRes.error.message);
+      console.error('INSERT error:', insRes.error);
+      return;
+    }
+    if(!insRes.data || !insRes.data.length){
+      hideLoading();
+      msgEl('msg-modal-usuario','err','No se insertó. Verifica permisos en Supabase.');
+      return;
     }
 
-    // 4. Actualizar SYS en memoria
+    // 2. Asignar empresas
+    if(empIds.length){
+      var ueRes = await supa.from('usuario_empresa').insert(
+        empIds.map(function(eid){return{usuario_id:nuevoId, empresa_id:eid};})
+      );
+      if(ueRes.error){
+        hideLoading();
+        msgEl('msg-modal-usuario','err','Usuario creado pero no se asignaron empresas: '+ueRes.error.message);
+        return;
+      }
+    }
+
+    // 3. Actualizar SYS en memoria
     SYS.usuarios.push({
       id:nuevoId, nombre:nombre, user:email, passHash:hash,
-      auth_user_id:authUserId, rol:rol, empresaIds:empIds
+      auth_user_id:null, rol:rol, empresaIds:empIds
     });
 
     hideLoading();
     closeModal('modal-nuevo-usuario');
     document.getElementById('mu-edit-id').value='';
     document.getElementById('mu-pass').value='';
-    document.getElementById('modal-usuario-titulo').textContent='Nuevo Usuario';
+    var titulo=document.getElementById('modal-usuario-titulo');
+    if(titulo) titulo.textContent='Nuevo Usuario';
     renderUsuariosSistema();
-    mostrarToast('Usuario '+nombre+' creado correctamente. Ya puede iniciar sesión.','ok');
+    mostrarToast('Usuario '+nombre+' creado correctamente.','ok');
 
   }catch(e){
     hideLoading();
-    console.error('saveUsuario error:', e);
-    msgEl('msg-modal-usuario','err','Error al crear usuario: '+e.message);
+    console.error('saveUsuario creación error:', e);
+    msgEl('msg-modal-usuario','err','Error inesperado: '+(e.message||e));
   }
 }
 
@@ -3410,20 +3456,18 @@ async function eliminarUsuarioCompleto(uid){
   if(!confirm('¿Eliminar al usuario '+u.nombre+'? Esta acción no se puede deshacer.')) return;
   showLoading('Eliminando usuario...');
   try{
-    // Eliminar de Supabase Auth si tiene auth_user_id
-    if(u.auth_user_id){
-      await supa.auth.admin.deleteUser(u.auth_user_id);
-    }
-    // Eliminar relaciones y registro
-    await supa.from('usuario_empresa').delete().eq('usuario_id', uid);
-    await supa.from('usuarios').delete().eq('id', uid);
+    var del1 = await supa.from('usuario_empresa').delete().eq('usuario_id', uid);
+    if(del1.error) throw del1.error;
+    var del2 = await supa.from('usuarios').delete().eq('id', uid);
+    if(del2.error) throw del2.error;
     SYS.usuarios = SYS.usuarios.filter(function(x){return x.id!==uid;});
     hideLoading();
     renderUsuariosSistema();
-    mostrarToast('Usuario eliminado correctamente','ok');
+    mostrarToast('Usuario eliminado correctamente. Si tenía cuenta en Supabase Auth, eliminarla manualmente desde Authentication → Users.','ok');
   }catch(e){
     hideLoading();
-    mostrarToast('Error al eliminar: '+e.message,'err');
+    mostrarToast('Error al eliminar: '+(e.message||e),'err');
+    console.error('eliminar error:', e);
   }
 }
 </script>
