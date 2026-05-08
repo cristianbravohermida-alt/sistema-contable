@@ -1337,6 +1337,9 @@ async function doLogin(){
 
   // Calcular hash de la contraseña ingresada
   var hash = await sha256(pass);
+  console.log('DEBUG user buscado:', user);
+  console.log('DEBUG hash calculado:', hash);
+  console.log('DEBUG usuarios en SYS:', SYS.usuarios.map(function(u){return {user:u.user, passHash:u.passHash, auth_id:u.auth_user_id};}));
 
   // Buscar usuario por hash
   var usr = SYS.usuarios.find(function(u){
