@@ -3097,42 +3097,52 @@ function renderResumenEmpresa(){
     +(ah?'<div class="stat" style="border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px;background:var(--accent-bg)"><div class="stat-label" style="color:var(--accent)">Hoy</div><div class="stat-value" style="font-size:22px;color:var(--accent)">'+ah+'</div></div>':'')
     +'</div><div style="margin-top:10px;font-size:11px;color:var(--text3)">RUT: '+emp.rut+'</div>';
 }
+// Calendario tributario SII Chile 2026 — con corrección de feriados
+var CAL_SII_2026 = {
+  1:[{d:5,t:"IVA F29 — pago institución recaudadora"},{d:8,t:"Inicio Operación Renta AT2026"},{d:12,t:"Cotizaciones AFP, Salud y AFC (Previred)"},{d:12,t:"IVA F29 — declaración internet (general)"},{d:19,t:"IVA F29 — pago en línea PEL (1ª cat. DTE)"},{d:20,t:"F50 — retenciones e impuestos específicos"},{d:20,t:"IVA F29 — facturadores electrónicos"},{d:28,t:"IVA F29 — declaración sin movimiento"}],
+  2:[{d:2,t:"IVA F29 — declaración sin movimiento"},{d:5,t:"IVA F29 — pago institución recaudadora"},{d:12,t:"Cotizaciones AFP, Salud y AFC (Previred)"},{d:12,t:"IVA F29 — declaración internet (general)"},{d:19,t:"IVA F29 — pago en línea PEL (1ª cat. DTE)"},{d:20,t:"F50 — retenciones e impuestos específicos"},{d:20,t:"IVA F29 — facturadores electrónicos"}],
+  3:[{d:5,t:"IVA F29 — pago institución recaudadora"},{d:12,t:"Cotizaciones AFP, Salud y AFC (Previred)"},{d:12,t:"IVA F29 — declaración internet (general)"},{d:19,t:"IVA F29 — pago en línea PEL (1ª cat. DTE)"},{d:20,t:"F50 — retenciones e impuestos específicos"},{d:20,t:"IVA F29 — facturadores electrónicos"},{d:26,t:"DJ 1879 — retenciones honorarios"},{d:26,t:"DJ 1887 — honorarios año anterior"},{d:30,t:"IVA F29 — declaración sin movimiento"}],
+  4:[{d:6,t:"IVA F29 — pago institución recaudadora"},{d:13,t:"Cotizaciones AFP, Salud y AFC (Previred)"},{d:13,t:"IVA F29 — declaración internet (general)"},{d:20,t:"F50 — retenciones e impuestos específicos"},{d:20,t:"IVA F29 — facturadores electrónicos"},{d:20,t:"IVA F29 — pago en línea PEL (1ª cat. DTE)"},{d:28,t:"IVA F29 — declaración sin movimiento"},{d:30,t:"Renta Anual F22 — plazo general"}],
+  5:[{d:5,t:"IVA F29 — pago institución recaudadora"},{d:12,t:"Cotizaciones AFP, Salud y AFC (Previred)"},{d:12,t:"IVA F29 — declaración internet (general)"},{d:19,t:"IVA F29 — pago en línea PEL (1ª cat. DTE)"},{d:20,t:"F50 — retenciones e impuestos específicos"},{d:20,t:"IVA F29 — facturadores electrónicos"},{d:28,t:"IVA F29 — declaración sin movimiento"},{d:29,t:"DJ 1887 — plazo extendido SII"}],
+  6:[{d:5,t:"IVA F29 — pago institución recaudadora"},{d:12,t:"Cotizaciones AFP, Salud y AFC (Previred)"},{d:12,t:"IVA F29 — declaración internet (general)"},{d:19,t:"IVA F29 — pago en línea PEL (1ª cat. DTE)"},{d:22,t:"F50 — retenciones e impuestos específicos"},{d:22,t:"IVA F29 — facturadores electrónicos"},{d:30,t:"DJ anual — declaraciones varias"},{d:30,t:"IVA F29 — declaración sin movimiento"}],
+  7:[{d:6,t:"IVA F29 — pago institución recaudadora"},{d:13,t:"Cotizaciones AFP, Salud y AFC (Previred)"},{d:13,t:"IVA F29 — declaración internet (general)"},{d:20,t:"F50 — retenciones e impuestos específicos"},{d:20,t:"IVA F29 — facturadores electrónicos"},{d:20,t:"IVA F29 — pago en línea PEL (1ª cat. DTE)"},{d:28,t:"IVA F29 — declaración sin movimiento"}],
+  8:[{d:5,t:"IVA F29 — pago institución recaudadora"},{d:12,t:"Cotizaciones AFP, Salud y AFC (Previred)"},{d:12,t:"IVA F29 — declaración internet (general)"},{d:19,t:"IVA F29 — pago en línea PEL (1ª cat. DTE)"},{d:20,t:"F50 — retenciones e impuestos específicos"},{d:20,t:"IVA F29 — facturadores electrónicos"},{d:28,t:"IVA F29 — declaración sin movimiento"}],
+  9:[{d:7,t:"IVA F29 — pago institución recaudadora"},{d:14,t:"Cotizaciones AFP, Salud y AFC (Previred)"},{d:14,t:"IVA F29 — declaración internet (general)"},{d:21,t:"F50 — retenciones e impuestos específicos"},{d:21,t:"IVA F29 — facturadores electrónicos"},{d:21,t:"IVA F29 — pago en línea PEL (1ª cat. DTE)"},{d:28,t:"IVA F29 — declaración sin movimiento"}],
+  10:[{d:5,t:"IVA F29 — pago institución recaudadora"},{d:13,t:"Cotizaciones AFP, Salud y AFC (Previred)"},{d:13,t:"IVA F29 — declaración internet (general)"},{d:19,t:"IVA F29 — pago en línea PEL (1ª cat. DTE)"},{d:20,t:"F50 — retenciones e impuestos específicos"},{d:20,t:"IVA F29 — facturadores electrónicos"},{d:28,t:"IVA F29 — declaración sin movimiento"},{d:30,t:"PPM voluntario — plazo recargo"}],
+  11:[{d:5,t:"IVA F29 — pago institución recaudadora"},{d:12,t:"Cotizaciones AFP, Salud y AFC (Previred)"},{d:12,t:"IVA F29 — declaración internet (general)"},{d:19,t:"IVA F29 — pago en línea PEL (1ª cat. DTE)"},{d:20,t:"F50 — retenciones e impuestos específicos"},{d:20,t:"IVA F29 — facturadores electrónicos"},{d:30,t:"IVA F29 — declaración sin movimiento"}],
+  12:[{d:7,t:"IVA F29 — pago institución recaudadora"},{d:14,t:"Cotizaciones AFP, Salud y AFC (Previred)"},{d:14,t:"IVA F29 — declaración internet (general)"},{d:21,t:"F50 — retenciones e impuestos específicos"},{d:21,t:"IVA F29 — facturadores electrónicos"},{d:21,t:"IVA F29 — pago en línea PEL (1ª cat. DTE)"},{d:28,t:"IVA F29 — declaración sin movimiento"},{d:31,t:"Cierre ejercicio contable"}],
+};
+
 function renderCalendarioTributario(){
   var el=document.getElementById('inicio-calendario'); if(!el) return;
   var ahora=new Date();
-  var ahora_solo=new Date(ahora.getFullYear(),ahora.getMonth(),ahora.getDate()); // medianoche hoy
+  var hoy=new Date(ahora.getFullYear(),ahora.getMonth(),ahora.getDate());
   var mes=ahora.getMonth()+1;
   var anio=ahora.getFullYear();
 
-  // Vencimientos mensuales fijos SII Chile (días hábiles confirmados)
-  var venc=[
-    {dia:12, desc:'Cotizaciones AFP, Salud y AFC (Previred)'},
-    {dia:12, desc:'IVA F29 — Grandes contribuyentes'},
-    {dia:20, desc:'IVA F29 — Resto de contribuyentes'},
-    {dia:20, desc:'Ret. honorarios F50'},
-    {dia:28, desc:'Pago remuneraciones y finiquitos'},
-  ];
+  // Usar calendario SII 2026 si está disponible, sino fallback genérico
+  var venc=[];
+  if(anio===2026 && CAL_SII_2026[mes]){
+    venc=CAL_SII_2026[mes].map(function(v){return{dia:v.d,desc:v.t};});
+  } else {
+    // Fallback genérico para otros años (regla general SII sin feriados)
+    venc=[
+      {dia:5,  desc:'IVA F29 — pago institución recaudadora'},
+      {dia:12, desc:'IVA F29 — declaración internet (general)'},
+      {dia:12, desc:'Cotizaciones AFP, Salud y AFC (Previred)'},
+      {dia:19, desc:'IVA F29 — pago en línea PEL (1ª cat. DTE)'},
+      {dia:20, desc:'IVA F29 — facturadores electrónicos'},
+      {dia:20, desc:'F50 — retenciones e impuestos específicos'},
+      {dia:28, desc:'IVA F29 — declaración sin movimiento'},
+    ];
+  }
 
-  // Vencimientos especiales por mes
-  var esp={
-    1: [{dia:12, desc:'Inicio Operación Renta'}],
-    3: [{dia:31, desc:'DJ 1887 — honorarios año anterior'}],
-    4: [{dia:30, desc:'Renta Anual F22 — plazo general'}],
-    5: [{dia:30, desc:'DJ 1887 — honorarios (plazo extendido)'}],
-    6: [{dia:30, desc:'DJ 1879 — retenciones año anterior'}],
-    7: [{dia:31, desc:'F22 fuera de plazo — recargo'}],
-    10:[{dia:31, desc:'PPM voluntario — plazo recargo'}],
-    12:[{dia:31, desc:'Cierre ejercicio contable'}],
-  };
+  // Ordenar y eliminar duplicados por día+descripción
+  venc.sort(function(a,b){return a.dia-b.dia;});
 
-  var todos=venc.slice();
-  if(esp[mes]) todos=todos.concat(esp[mes]);
-  todos.sort(function(a,b){return a.dia-b.dia;});
-
-  // Calcular días restantes usando solo fechas (sin hora) para evitar errores
-  el.innerHTML='<div style="display:flex;flex-direction:column;gap:6px">'+todos.map(function(v){
-    var fechaVenc=new Date(anio,mes-1,v.dia); // medianoche del día vencimiento
-    var dr=Math.round((fechaVenc-ahora_solo)/(1000*60*60*24));
+  el.innerHTML='<div style="display:flex;flex-direction:column;gap:6px">'+venc.map(function(v){
+    var fechaVenc=new Date(anio,mes-1,v.dia);
+    var dr=Math.round((fechaVenc-hoy)/(1000*60*60*24));
     var clr=dr<0?'var(--text3)':dr<=3?'#ef4444':dr<=7?'#d97706':'var(--text2)';
     var bgB=dr<0?'#f1f5f9':dr<=3?'#fee2e2':dr<=7?'#fef3c7':'#f0fdf4';
     var clrB=dr<0?'#94a3b8':dr<=3?'#dc2626':dr<=7?'#d97706':'#16a34a';
@@ -3142,7 +3152,10 @@ function renderCalendarioTributario(){
       +'<div style="flex:1;font-size:12px;color:'+clr+'">'+v.desc+'</div>'
       +'<div style="font-size:10px;font-weight:600;padding:2px 6px;border-radius:4px;white-space:nowrap;background:'+bgB+';color:'+clrB+'">'+badge+'</div>'
       +'</div>';
-  }).join('')+'</div>';
+  }).join('')+'</div>'
+  +'<div style="margin-top:10px;font-size:10px;color:var(--text3);text-align:right">'
+  +'<a href="https://misiir.sii.cl//cgi_calendario/calendario.cgi" target="_blank" rel="noopener" style="color:var(--accent)">Ver calendario oficial SII →</a>'
+  +'</div>';
 }
 function renderLinksUtiles(){
   var el=document.getElementById('inicio-links');if(!el)return;
