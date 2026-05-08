@@ -27,10 +27,6 @@ a{color:var(--accent);text-decoration:none}
 .main{margin-left:220px;flex:1;display:flex;flex-direction:column;min-height:100vh}
 
 /* SIDEBAR */
-.sidebar-scroll{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:8px}
-.sidebar-scroll::-webkit-scrollbar{width:4px}
-.sidebar-scroll::-webkit-scrollbar-track{background:transparent}
-.sidebar-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2);border-radius:2px}
 .nav-group-btn{display:flex;align-items:center;gap:9px;padding:8px 10px;margin:1px 8px;border-radius:var(--radius);cursor:pointer;font-size:13px;font-weight:500;color:#94a3b8;transition:all .12s;user-select:none}
 .nav-group-btn:hover{background:rgba(255,255,255,.08);color:#e2e8f0}
 .nav-group-btn.open{color:#e2e8f0}
@@ -41,6 +37,11 @@ a{color:var(--accent);text-decoration:none}
 .nav-sub.open{display:block}
 .nav-sub .nav-item{font-size:12.5px;padding:6px 10px;margin:1px 4px;color:#94a3b8}
 .nav-sub .nav-item.active{background:rgba(59,130,246,.18);color:#60a5fa}
+.sidebar-scroll{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:8px}
+.sidebar-scroll::-webkit-scrollbar{width:4px}
+.sidebar-scroll::-webkit-scrollbar-track{background:transparent}
+.sidebar-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2);border-radius:2px}
+
 .sidebar-brand{padding:18px 16px 14px;border-bottom:1px solid var(--border)}
 .brand-icon{width:32px;height:32px;background:var(--accent);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;margin-bottom:8px}
 .brand-icon svg{color:#fff;fill:none;stroke:currentColor;stroke-width:2}
@@ -244,6 +245,36 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
     <div class="login-logo">
       <svg viewBox="0 0 24 24"><path d="M4 4h16v2H4zM4 9h16v2H4zM4 14h10v2H4zM4 19h7v2H4z"/></svg>
     </div>
+    <div class="login-title">SistemaContable</div>
+    <div class="login-sub">Ingresa tus credenciales</div>
+    <div class="login-err" id="login-err">Usuario o contraseña incorrectos.</div>
+    <div class="login-field"><label>Usuario</label><input id="li-user" type="text" placeholder="usuario@empresa.cl" autocomplete="username"></div>
+    <div class="login-field"><label>Contraseña</label><input id="li-pass" type="password" placeholder="••••••••" autocomplete="current-password"></div>
+    <button class="login-btn" onclick="doLogin()">Ingresar</button>
+    <p style="text-align:center;font-size:11px;color:var(--text3);margin-top:16px">Acceso inicial: admin / admin123</p>
+  </div>
+</div>
+
+<div class="layout" id="app-layout" style="display:none">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-icon">
+      <svg viewBox="0 0 24 24" width="18" height="18"><path d="M4 4h16v2H4zM4 9h16v2H4zM4 14h10v2H4zM4 19h7v2H4z"/></svg>
+    </div>
+    <div class="brand-name">SistemaContable</div>
+    <div class="brand-sub" id="sidebar-empresa">Mi Empresa S.A.</div>
+  </div>
+
+  <!-- Selector empresa: visible solo cuando tiene >1 empresa -->
+  <div id="sb-empresa-nav" style="display:none;padding:6px 8px;border-bottom:1px solid var(--border);margin-bottom:4px">
+    <div style="font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;padding:0 4px;margin-bottom:4px">Empresa activa</div>
+    <select id="sb-empresa-sel" onchange="cambiarEmpresaDesdeSelector(this.value)"
+      style="width:100%;font-size:12px;font-weight:500;padding:6px 8px;border:1px solid var(--border);border-radius:var(--radius);background:var(--accent-bg);color:var(--accent);cursor:pointer">
+    </select>
+  </div>
+  <div 
   <div class="sidebar-scroll">
   <div class="nav-item active" data-sec="inicio" style="margin:4px 8px;font-weight:600;color:#94a3b8">
     <svg class="icon" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
@@ -322,8 +353,7 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
   <div id="nav-sec-sistema" style="display:none"></div>
   <div id="nav-sistema" style="display:none"></div>
   </div>
-
-  <div class="sidebar-footer" style="padding:10px 12px">
+<div class="sidebar-footer" style="padding:10px 12px">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
       <div id="sb-avatar" style="width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">A</div>
       <div style="overflow:hidden;flex:1">
@@ -337,6 +367,7 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
       Cerrar sesión
     </button>
   </div>
+
 </aside>
 
 <!-- MAIN -->
@@ -344,45 +375,46 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
 
 <!-- ===== PLAN DE CUENTAS ===== -->
 <div id="sec-inicio" class="section active">
-    <div class="topbar">
-      <div><div class="page-title">Inicio</div><div class="page-sub" id="inicio-fecha"></div></div>
-      <div class="topbar-actions">
-        <button class="btn btn-sm" onclick="renderInicio()">
-          <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-          Actualizar
-        </button>
-      </div>
+  <div class="topbar">
+    <div><div class="page-title">Inicio</div><div class="page-sub" id="inicio-fecha"></div></div>
+    <div class="topbar-actions">
+      <button class="btn btn-sm" onclick="renderInicio()">
+        <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        Actualizar
+      </button>
     </div>
-    <div class="content">
-      <div style="margin-bottom:24px">
-        <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">Indicadores Económicos</div>
-        <div id="inicio-indicadores" class="stats-grid" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px"></div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px">
-        <div class="card" style="padding:16px">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border)">
-            <span style="font-size:18px">🏢</span><div style="font-size:13px;font-weight:700;color:var(--text)">Resumen Empresa Activa</div>
-          </div>
-          <div id="inicio-resumen-empresa"></div>
+  </div>
+  <div class="content">
+    <div style="margin-bottom:24px">
+      <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">Indicadores Económicos</div>
+      <div id="inicio-indicadores" class="stats-grid" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px">
+      <div class="card" style="padding:16px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border)">
+          <span style="font-size:18px">🏢</span><div style="font-size:13px;font-weight:700;color:var(--text)">Resumen Empresa Activa</div>
         </div>
-        <div class="card" style="padding:16px">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border)">
-            <span style="font-size:18px">📅</span><div style="font-size:13px;font-weight:700;color:var(--text)">Vencimientos del Mes</div>
-            <div style="margin-left:auto;font-size:10px;color:var(--text3)">SII Chile</div>
-          </div>
-          <div id="inicio-calendario"></div>
-        </div>
+        <div id="inicio-resumen-empresa"></div>
       </div>
       <div class="card" style="padding:16px">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border)">
-          <span style="font-size:18px">🔗</span><div style="font-size:13px;font-weight:700;color:var(--text)">Accesos Rápidos</div>
+          <span style="font-size:18px">📅</span><div style="font-size:13px;font-weight:700;color:var(--text)">Vencimientos del Mes</div>
+          <div style="margin-left:auto;font-size:10px;color:var(--text3)">SII Chile</div>
         </div>
-        <div id="inicio-links" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px"></div>
+        <div id="inicio-calendario"></div>
       </div>
     </div>
+    <div class="card" style="padding:16px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border)">
+        <span style="font-size:18px">🔗</span><div style="font-size:13px;font-weight:700;color:var(--text)">Accesos Rápidos</div>
+      </div>
+      <div id="inicio-links" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px"></div>
+    </div>
   </div>
+</div>
 
-  <div id="sec-cuentas" class="section">
+
+<div id="sec-cuentas" class="section">
   <div class="topbar">
     <div><div class="page-title">Plan de Cuentas</div><div class="page-sub">Gestión del catálogo de cuentas contables</div></div>
     <div class="topbar-actions">
@@ -1004,45 +1036,40 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
       <button class="btn" onclick="closeModal('modal-ver-asiento')">Cerrar</button>
     </div>
   </div>
-  <!-- SUB TIPO PLAN -->
-  <div id="sec-subtipo-plan" class="section">
-    <div class="topbar"><div><div class="page-title">Sub Tipo Plan</div><div class="page-sub">Catálogo de subtipos del plan de cuentas</div></div></div>
-    <div class="content"><div id="subtipo-plan-stats" style="margin-bottom:16px"></div>
-      <div class="card" style="overflow-x:auto"><table class="table">
-        <thead><tr><th>Código</th><th>Tipo</th><th>Sub Tipo</th><th>Nombre</th></tr></thead>
-        <tbody id="tbody-subtipo-plan"><tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text3)">Cargando...</td></tr></tbody>
-      </table></div></div>
-  </div>
+</div>
 
-  <!-- CÓDIGOS SII -->
-  <div id="sec-cod-sii" class="section">
-    <div class="topbar"><div><div class="page-title">Códigos SII</div><div class="page-sub">Catálogo Resolución 2, Anexo N°1</div></div></div>
-    <div class="content"><div id="cod-sii-stats" style="margin-bottom:16px"></div>
-      <div class="card" style="overflow-x:auto"><table class="table">
-        <thead><tr><th>Código</th><th>Cód. Original</th><th>Glosa</th><th>Tipo</th><th>Nivel</th></tr></thead>
-        <tbody id="tbody-cod-sii"><tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text3)">Cargando...</td></tr></tbody>
-      </table></div></div>
-  </div>
-
-  <!-- CENTROS DE COSTOS -->
-  <div id="sec-centros-costos" class="section">
-    <div class="topbar"><div><div class="page-title">Centros de Costos</div><div class="page-sub">Gestión de centros de costos</div></div></div>
-    <div class="content"><div class="empty" style="padding:60px 0">
-      <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
-      <p>Módulo Centros de Costos — Próximamente</p>
-    </div></div>
+<div id="sec-subtipo-plan" class="section">
+  <div class="topbar"><div><div class="page-title">Sub Tipo Plan</div><div class="page-sub">Catálogo de subtipos</div></div></div>
+  <div class="content">
+    <div id="subtipo-plan-stats" style="margin-bottom:16px"></div>
+    <div class="card" style="overflow-x:auto"><table class="table">
+      <thead><tr><th>Código</th><th>Tipo</th><th>Sub Tipo</th><th>Nombre</th></tr></thead>
+      <tbody id="tbody-subtipo-plan"><tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text3)">Cargando...</td></tr></tbody>
+    </table></div>
   </div>
 </div>
 
+<div id="sec-cod-sii" class="section">
+  <div class="topbar"><div><div class="page-title">Códigos SII</div><div class="page-sub">Resolución 2, Anexo N°1</div></div></div>
+  <div class="content">
+    <div id="cod-sii-stats" style="margin-bottom:16px"></div>
+    <div class="card" style="overflow-x:auto"><table class="table">
+      <thead><tr><th>Código</th><th>Cód. Original</th><th>Glosa</th><th>Tipo</th><th>Nivel</th></tr></thead>
+      <tbody id="tbody-cod-sii"><tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text3)">Cargando...</td></tr></tbody>
+    </table></div>
+  </div>
+</div>
+
+<div id="sec-centros-costos" class="section">
+  <div class="topbar"><div><div class="page-title">Centros de Costos</div><div class="page-sub">Gestión de centros de costos</div></div></div>
+  <div class="content"><div class="empty" style="padding:60px 0">
+    <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+    <p>Módulo Centros de Costos — Próximamente</p>
+  </div></div>
+</div>
+
+
 <script>
-// ============================================================
-// SUPABASE
-// ============================================================
-const SUPA_URL = 'https://hovsffdialeigpxvuojg.supabase.co';
-const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvdnNmZmRpYWxlaWdweHZ1b2pnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwODg4NDUsImV4cCI6MjA5MzY2NDg0NX0.44ZUShF1OwbJFreO8pGidoIGE3mmeNPr0v2-I4jAwws';
-const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
-
-
 // ============================================================
 // ============================================================
 // SISTEMA MULTI-EMPRESA / MULTI-USUARIO
@@ -1274,7 +1301,8 @@ async function doLogin(){
   if(!usr.empresaIds || !usr.empresaIds.length){ alert('Este usuario no tiene empresas asignadas.'); return; }
   SESSION = { userId:usr.id, empresaId:usr.empresaIds[0], rol:usr.rol, nombre:usr.nombre };
   loadDB();
-  // Cuentas se cargan desde Supabase via loadDB()
+  // Si empresa no tiene cuentas → copiar plan base
+  // Cuentas desde Supabase via loadDB()
   document.getElementById('login-screen').classList.remove('show');
   document.getElementById('app-layout').style.display = 'flex';
   document.getElementById('li-pass').value = '';
@@ -1317,10 +1345,9 @@ function initAppPostLogin(){
   var startNav = findNavItem(startSec);
   document.getElementById('sec-'+startSec).classList.add('active');
   if(startNav) startNav.classList.add('active');
-  abrirGrupoActivo(startSec);
-  if(startSec==='inicio'){ iniciarAutoRefreshInicio(); }
-  else if(startSec==='balance8'){ initB8Selects(); toggleB8Modo(); renderBalance8(); }
+  if(startSec==='balance8'){ initB8Selects(); toggleB8Modo(); renderBalance8(); }
   else { renderCuentas(); renderStatsCuentas(); renderDiario(); loadConfigForm(); }
+  iniciarAutoRefreshInicio();
 }
 
 // ── Restricciones de rol
@@ -1611,6 +1638,8 @@ function nav(id, el){
   if(id==='eerr'){ initEERRSelects(); toggleEERRModo(); renderEERR(); }
   if(id==='config'){ loadConfigForm(); }
   if(id==='sistema'){ populateMuEmpresas([]); renderEmpresasSistema(); renderUsuariosSistema(); }
+
+  abrirGrupoActivo(id);
   if(id==='subtipo-plan'){ renderSubtipoPlan(); }
   if(id==='cod-sii'){ renderCodSII(); }
   if(id==='centros-costos'){ /* próximamente */ }
@@ -2952,21 +2981,9 @@ function cambiarEmpresaDesdeSelector(empId){
 window.addEventListener('load', async function(){
   loadSYS();
   await initSistemaSiVacio();
-    await cargarCodSII();
-  initNavListeners();
-  var sesion=recuperarSesion();
-  if(sesion&&SYS.usuarios.find(function(u){return u.id===sesion.userId;})){
-    SESSION={userId:sesion.userId,empresaId:sesion.empresaId,rol:sesion.rol,nombre:sesion.nombre};
-    showLoading('Restaurando sesión...');
-    await loadDB();
-    hideLoading();
-    document.getElementById('login-screen').classList.remove('show');
-    document.getElementById('app-layout').style.display='flex';
-    iniciarWatchdogSesion();
-    initAppPostLogin();
-  } else {
-    document.getElementById('login-screen').classList.add('show');
-  }
+  document.getElementById('login-screen').classList.add('show');
+  // Pre-llenar usuario para demo (solo si hay exactamente 1 usuario)
+  if(SYS.usuarios.length===1){ document.getElementById('li-user').value=SYS.usuarios[0].user; }
 });
 
 // Enter en login
@@ -2975,255 +2992,24 @@ document.addEventListener('keydown', function(e){
 });
 
 
-// ══ HELPERS NAVEGACIÓN ═══════════════════════════════════════
-function findNavItem(secId){
-  return document.querySelector('.nav-item[data-sec="'+secId+'"]');
-}
+// ══ SUPABASE ═════════════════════════════════════════════════
+const SUPA_URL = 'https://hovsffdialeigpxvuojg.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhvdnNmZmRpYWxlaWdweHZ1b2pnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgwODg4NDUsImV4cCI6MjA5MzY2NDg0NX0.44ZUShF1OwbJFreO8pGidoIGE3mmeNPr0v2-I4jAwws';
+const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
 
-function abrirGrupoActivo(secId){
-  var item=findNavItem(secId);
-  if(!item) return;
-  var sub=item.closest('.nav-sub');
-  if(!sub) return;
-  sub.classList.add('open');
-  var grpId=sub.id.replace('-sub','').replace('grp-','');
-  var btn=document.getElementById('grp-'+grpId+'-btn');
-  if(btn) btn.classList.add('open');
-}
-
-function toggleGrp(gid){
-  var btn=document.getElementById('grp-'+gid+'-btn');
-  var sub=document.getElementById('grp-'+gid+'-sub');
-  if(!btn||!sub) return;
-  var open=sub.classList.contains('open');
-  if(open){sub.classList.remove('open');btn.classList.remove('open');}
-  else{sub.classList.add('open');btn.classList.add('open');}
-}
-
-function initNavListeners(){
-  document.querySelectorAll('.nav-item[data-sec]').forEach(function(el){
-    el.addEventListener('click',function(){
-      var secId=el.getAttribute('data-sec');
-      if(!secId||el.style.cursor==='default') return;
-      nav(secId,el);
-    });
-  });
-}
-// ═════════════════════════════════════════════════════════════
-
-// ══ SESIÓN PERSISTENTE ═══════════════════════════════════════
-var SESSION_KEY='sc_session';
-var INACTIVITY_MS=20*60*1000;
-var _inactivityTimer=null;
-
-function guardarSesion(){
-  try{sessionStorage.setItem(SESSION_KEY,JSON.stringify({userId:SESSION.userId,empresaId:SESSION.empresaId,rol:SESSION.rol,nombre:SESSION.nombre,ts:Date.now()}));}catch(e){}
-}
-function limpiarSesion(){try{sessionStorage.removeItem(SESSION_KEY);}catch(e){}}
-function recuperarSesion(){
-  try{
-    var raw=sessionStorage.getItem(SESSION_KEY);
-    if(!raw) return null;
-    var s=JSON.parse(raw);
-    if(!s||!s.userId) return null;
-    if(Date.now()-s.ts>INACTIVITY_MS){limpiarSesion();return null;}
-    return s;
-  }catch(e){return null;}
-}
-function resetInactivityTimer(){
-  if(_inactivityTimer) clearTimeout(_inactivityTimer);
-  guardarSesion();
-  _inactivityTimer=setTimeout(function(){
-    if(!SESSION.userId) return;
-    mostrarToast('Sesión cerrada por inactividad','warn');
-    setTimeout(function(){doLogout();},1500);
-  },INACTIVITY_MS);
-}
-function iniciarWatchdogSesion(){
-  ['click','keydown','mousemove','touchstart','scroll'].forEach(function(ev){
-    document.addEventListener(ev,resetInactivityTimer,{passive:true});
-  });
-  resetInactivityTimer();
-}
-function detenerWatchdogSesion(){
-  if(_inactivityTimer) clearTimeout(_inactivityTimer);
-  ['click','keydown','mousemove','touchstart','scroll'].forEach(function(ev){
-    document.removeEventListener(ev,resetInactivityTimer);
-  });
-}
-function mostrarToast(msg,tipo){
-  var t=document.createElement('div');
-  var bg=tipo==='warn'?'#f59e0b':tipo==='err'?'#ef4444':tipo==='ok'?'#16a34a':'var(--text)';
-  t.style.cssText='position:fixed;bottom:20px;right:20px;background:'+bg+';color:#fff;padding:12px 18px;border-radius:8px;font-size:13px;font-weight:500;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.25);transition:opacity .4s';
-  t.textContent=msg;
-  document.body.appendChild(t);
-  setTimeout(function(){t.style.opacity='0';setTimeout(function(){t.remove();},400);},3000);
-}
-// ═════════════════════════════════════════════════════════════
-
-// ══ AUTO-REFRESH INICIO ══════════════════════════════════════
-var _inicioRefreshTimer=null;
-var _INICIO_REFRESH_MS=60*60*1000;
-
-function iniciarAutoRefreshInicio(){
-  detenerAutoRefreshInicio();
-  renderInicio();
-  _inicioRefreshTimer=setInterval(function(){
-    var sec=document.getElementById('sec-inicio');
-    if(sec&&sec.classList.contains('active')){
-      renderInicio();
-      mostrarToast('Datos actualizados','ok');
-    }
-  },_INICIO_REFRESH_MS);
-}
-function detenerAutoRefreshInicio(){
-  if(_inicioRefreshTimer){clearInterval(_inicioRefreshTimer);_inicioRefreshTimer=null;}
-}
-// ═════════════════════════════════════════════════════════════
-
-// ══ RENDER INICIO ════════════════════════════════════════════
-async function renderInicio(){
-  var fechaEl=document.getElementById('inicio-fecha');
-  if(fechaEl){var ahora=new Date();fechaEl.textContent=ahora.toLocaleDateString('es-CL',{weekday:'long',year:'numeric',month:'long',day:'numeric'});}
-  // Indicadores
-  var indEl=document.getElementById('inicio-indicadores');
-  if(indEl){
-    indEl.innerHTML='<div class="stat" style="border:1px solid var(--border)"><div class="stat-label">Cargando...</div><div class="stat-value">--</div></div>'.repeat(6);
-    try{
-      var inds=[{key:'uf',label:'UF',icon:'📊'},{key:'dolar',label:'Dólar USD',icon:'🇺🇸'},{key:'euro',label:'Euro',icon:'🇪🇺'},{key:'utm',label:'UTM',icon:'📋'},{key:'ipc',label:'IPC',icon:'📈'},{key:'libra_cobre',label:'Cobre (lb)',icon:'🔶'}];
-      var results=await Promise.allSettled(inds.map(function(ind){
-        return fetch('https://mindicador.cl/api/'+ind.key).then(function(r){return r.json();}).then(function(d){return{label:ind.label,icon:ind.icon,valor:d.serie&&d.serie[0]?d.serie[0].valor:null,fecha:d.serie&&d.serie[0]?d.serie[0].fecha:null,unidad:d.unidad_medida||''};});
-      }));
-      indEl.innerHTML=results.map(function(res){
-        if(res.status==='fulfilled'&&res.value.valor!==null){
-          var v=res.value.valor;var esPorc=res.value.unidad&&res.value.unidad.toLowerCase().includes('porcentaje');
-          var fmt=esPorc?v.toFixed(2)+'%':'$'+v.toLocaleString('es-CL',{minimumFractionDigits:2,maximumFractionDigits:2});
-          var fecha=res.value.fecha?new Date(res.value.fecha).toLocaleDateString('es-CL',{day:'2-digit',month:'2-digit',year:'numeric'}):'';
-          return '<div class="stat" style="border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px"><div class="stat-label" style="display:flex;align-items:center;gap:5px"><span>'+res.value.icon+'</span>'+res.value.label+'</div><div class="stat-value text-blue" style="font-size:20px;margin:4px 0">'+fmt+'</div>'+(fecha?'<div style="font-size:10px;color:var(--text3)">'+fecha+'</div>':'')+'</div>';
-        }
-        return '<div class="stat" style="border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px"><div class="stat-label"><span>'+res.value.icon+'</span> '+res.value.label+'</div><div class="stat-value" style="color:var(--text3)">N/D</div></div>';
-      }).join('');
-    }catch(e){indEl.innerHTML='<div style="color:var(--text3);padding:12px;font-size:13px">No se pudieron cargar los indicadores.</div>';}
-  }
-  renderResumenEmpresa();
-  renderCalendarioTributario();
-  renderLinksUtiles();
-}
-
-function renderResumenEmpresa(){
-  var el=document.getElementById('inicio-resumen-empresa'); if(!el) return;
-  var emp=SYS.empresas.find(function(e){return e.id===SESSION.empresaId;});
-  if(!emp){el.innerHTML='<div style="color:var(--text3);font-size:13px">Sin empresa activa.</div>';return;}
-  var totalCuentas=DB.cuentas?DB.cuentas.length:0;
-  var totalAsientos=DB.asientos?DB.asientos.length:0;
-  var totalAux=DB.terceros?DB.terceros.length:0;
-  var hoy=new Date().toISOString().slice(0,10);
-  var asientosMes=DB.asientos?DB.asientos.filter(function(a){return a.fecha&&a.fecha.slice(0,7)===hoy.slice(0,7);}).length:0;
-  var asientosHoy=DB.asientos?DB.asientos.filter(function(a){return a.fecha===hoy;}).length:0;
-  el.innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px">'
-    +'<div class="stat" style="border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px"><div class="stat-label">Cuentas</div><div class="stat-value" style="font-size:22px;color:var(--accent)">'+totalCuentas+'</div></div>'
-    +'<div class="stat" style="border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px"><div class="stat-label">Asientos totales</div><div class="stat-value" style="font-size:22px;color:var(--accent)">'+totalAsientos+'</div></div>'
-    +'<div class="stat" style="border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px"><div class="stat-label">Este mes</div><div class="stat-value" style="font-size:22px;color:var(--accent)">'+asientosMes+'</div></div>'
-    +'<div class="stat" style="border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px"><div class="stat-label">Auxiliares</div><div class="stat-value" style="font-size:22px;color:var(--accent)">'+totalAux+'</div></div>'
-    +(asientosHoy?'<div class="stat" style="border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px;background:var(--accent-bg)"><div class="stat-label" style="color:var(--accent)">Hoy</div><div class="stat-value" style="font-size:22px;color:var(--accent)">'+asientosHoy+'</div></div>':'')
-    +'</div><div style="margin-top:10px;font-size:11px;color:var(--text3)">RUT: '+emp.rut+'</div>';
-}
-
-function renderCalendarioTributario(){
-  var el=document.getElementById('inicio-calendario'); if(!el) return;
-  var ahora=new Date();var mes=ahora.getMonth()+1;var anio=ahora.getFullYear();
-  var venc=[{dia:12,desc:'IVA (F29) — 1ª categoría'},{dia:13,desc:'Ret. honorarios (F50)'},{dia:15,desc:'Cotizaciones AFP y Salud'},{dia:20,desc:'IVA (F29) — simplificados'},{dia:28,desc:'Libro remuneraciones'}];
-  var esp={4:[{dia:30,desc:'Renta Anual (F22)'}],5:[{dia:31,desc:'DJ 1887 — honorarios'}],7:[{dia:31,desc:'DJ 1879 — retenciones'}]};
-  var todos=venc.slice(); if(esp[mes]) todos=todos.concat(esp[mes]);
-  todos.sort(function(a,b){return a.dia-b.dia;});
-  el.innerHTML='<div style="display:flex;flex-direction:column;gap:6px">'+todos.map(function(v){
-    var dr=Math.ceil((new Date(anio,mes-1,v.dia)-ahora)/(864e5));
-    var clr=dr<0?'var(--text3)':dr<=3?'#ef4444':dr<=7?'#d97706':'var(--text2)';
-    var bgB=dr<0?'#f1f5f9':dr<=3?'#fee2e2':dr<=7?'#fef3c7':'#f0fdf4';
-    var clrB=dr<0?'#94a3b8':dr<=3?'#dc2626':dr<=7?'#d97706':'#16a34a';
-    var badge=dr<0?'Vencido':dr===0?'¡Hoy!':dr===1?'Mañana':'En '+dr+'d';
-    return '<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:6px;background:var(--surface2)"><div style="min-width:24px;font-size:13px;font-weight:700;color:var(--accent);text-align:center">'+(v.dia<10?'0':'')+v.dia+'</div><div style="flex:1;font-size:12px;color:'+clr+'">'+v.desc+'</div><div style="font-size:10px;font-weight:600;padding:2px 6px;border-radius:4px;background:'+bgB+';color:'+clrB+'">'+badge+'</div></div>';
-  }).join('')+'</div>';
-}
-
-function renderLinksUtiles(){
-  var el=document.getElementById('inicio-links'); if(!el) return;
-  var links=[{icon:'🏛️',label:'SII',url:'https://www.sii.cl',desc:'Impuestos Internos'},{icon:'👷',label:'Dir. del Trabajo',url:'https://www.dt.gob.cl',desc:'Trámites laborales'},{icon:'💰',label:'Previred',url:'https://www.previred.com',desc:'Cotizaciones'},{icon:'📰',label:'Diario Financiero',url:'https://www.df.cl',desc:'Noticias financieras'},{icon:'🏦',label:'Banco Central',url:'https://www.bcentral.cl',desc:'Indicadores'},{icon:'📋',label:'CMF',url:'https://www.cmfchile.cl',desc:'Mercado Financiero'},{icon:'💼',label:'Reg. Empresas',url:'https://www.registroempresa.cl',desc:'Trámites'},{icon:'📊',label:'INE',url:'https://www.ine.gob.cl',desc:'Estadísticas'}];
-  el.innerHTML=links.map(function(l){return '<a href="'+l.url+'" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius);border:1px solid var(--border);text-decoration:none;background:var(--surface);transition:border-color .15s" onmouseover="this.style.borderColor=\'var(--accent)\'" onmouseout="this.style.borderColor=\'var(--border)\'"><span style="font-size:18px">'+l.icon+'</span><div><div style="font-size:13px;font-weight:600;color:var(--text)">'+l.label+'</div><div style="font-size:11px;color:var(--text3)">'+l.desc+'</div></div></a>';}).join('');
-}
-// ═════════════════════════════════════════════════════════════
-
-// ══ SUBTIPO PLAN / COD SII ═══════════════════════════════════
-var SUBTIPO_PLAN_DATA=[];
-var COD_SII_DATA=[];
-
-function filtrarSubtiposPlan(tipoPlan){
-  var sel=document.getElementById('mc-subtipo-plan'); if(!sel) return;
-  var vistos={};
-  var opts=['<option value="">— Ninguno —</option>'];
-  SUBTIPO_PLAN_DATA.forEach(function(r){if(r.tipo===tipoPlan&&r.subtipo&&!vistos[r.subtipo]){vistos[r.subtipo]=true;opts.push('<option value="'+r.subtipo+'">'+r.subtipo+'</option>');}});
-  sel.innerHTML=opts.join('');
-}
-
-async function cargarCodSII(){
-  try{
-    var res=await supa.from('cod_sii').select('cod_sii,cod_orig,glosa,tipo').order('cod_sii');
-    COD_SII_DATA=res.data||[];
-    poblarSelectCodSII();
-  }catch(e){console.warn('cod_sii:',e.message);}
-}
-
-function poblarSelectCodSII(){
-  var sel=document.getElementById('mc-cod-sii'); if(!sel) return;
-  sel.innerHTML='<option value="">— Seleccionar —</option>'
-    +COD_SII_DATA.map(function(r){return '<option value="'+r.cod_sii+'">'+r.cod_sii+' ('+r.cod_orig+') — '+r.glosa+'</option>';}).join('');
-}
-
-async function renderSubtipoPlan(){
-  var tb=document.getElementById('tbody-subtipo-plan'); if(!tb) return;
-  tb.innerHTML='<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text3)">Cargando...</td></tr>';
-  try{
-    var res=await supa.from('subtipo_plan').select('*').order('cod');
-    var data=res.data||[];
-    if(!data.length){tb.innerHTML='<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text3)">Sin datos.</td></tr>';return;}
-    tb.innerHTML=''; data.forEach(function(r){var tr=document.createElement('tr');tr.innerHTML='<td><code>'+r.cod+'</code></td><td>'+typeBadge(r.tipo)+'</td><td style="font-size:12px;color:var(--text3)">'+(r.subtipo||'—')+'</td><td>'+r.nombre+'</td>';tb.appendChild(tr);});
-    var stats=document.getElementById('subtipo-plan-stats');
-    if(stats){var tipos={};data.forEach(function(r){tipos[r.tipo]=(tipos[r.tipo]||0)+1;});stats.innerHTML='<div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr))">'+Object.keys(tipos).map(function(t){return '<div class="stat"><div class="stat-label">'+t+'</div><div class="stat-value">'+tipos[t]+'</div></div>';}).join('')+'<div class="stat"><div class="stat-label">Total</div><div class="stat-value">'+data.length+'</div></div></div>';}
-  }catch(e){tb.innerHTML='<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--danger)">Error: '+e.message+'</td></tr>';}
-}
-
-async function renderCodSII(){
-  var tb=document.getElementById('tbody-cod-sii'); if(!tb) return;
-  tb.innerHTML='<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text3)">Cargando...</td></tr>';
-  try{
-    var res=await supa.from('cod_sii').select('*').order('cod_sii');
-    var data=res.data||[];
-    if(!data.length){tb.innerHTML='<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text3)">Sin datos.</td></tr>';return;}
-    tb.innerHTML=''; data.forEach(function(r){var tr=document.createElement('tr');tr.innerHTML='<td><code>'+r.cod_sii+'</code></td><td style="font-size:12px;color:var(--text3)">'+(r.cod_orig||'—')+'</td><td>'+r.glosa+'</td><td>'+typeBadge(r.tipo)+'</td><td style="text-align:center"><span class="badge" style="background:var(--surface2);font-size:11px">Niv.'+r.nivel+'</span></td>';tb.appendChild(tr);});
-    var stats=document.getElementById('cod-sii-stats');
-    if(stats){var tipos={};data.forEach(function(r){tipos[r.tipo]=(tipos[r.tipo]||0)+1;});stats.innerHTML='<div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr))">'+Object.keys(tipos).map(function(t){return '<div class="stat"><div class="stat-label">'+t+'</div><div class="stat-value">'+tipos[t]+'</div></div>';}).join('')+'<div class="stat"><div class="stat-label">Total</div><div class="stat-value">'+data.length+'</div></div></div>';}
-  }catch(e){tb.innerHTML='<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--danger)">Error: '+e.message+'</td></tr>';}
-}
-// ═════════════════════════════════════════════════════════════
-
-// ══ FUNCIONES SUPABASE ═══════════════════════════════════════
 async function loadSYS(){
   try{
-    var res1=await supa.from('empresas').select('*').order('razon');
-    SYS.empresas=res1.data||[];
-    var res2=await supa.from('usuarios').select('*').order('nombre');
-    var res3=await supa.from('usuario_empresa').select('*');
-    SYS.usuarios=(res2.data||[]).map(function(u){
-      var empIds=(res3.data||[]).filter(function(x){return x.usuario_id===u.id;}).map(function(x){return x.empresa_id;});
-      return{id:u.id,nombre:u.nombre,user:u.user_login,passHash:u.pass_hash,rol:u.rol,empresaIds:empIds};
-    });
-    var res4=await supa.from('plan_base').select('*').order('cod');
-    SYS.planBase=(res4.data||[]).map(function(c){return{cod:c.cod,nom:c.nom,tipo:c.tipo,aux:c.aux,desc:c.desc_||''};});
+    var r1=await supa.from('empresas').select('*').order('razon'); SYS.empresas=r1.data||[];
+    var r2=await supa.from('usuarios').select('*').order('nombre');
+    var r3=await supa.from('usuario_empresa').select('*');
+    SYS.usuarios=(r2.data||[]).map(function(u){var eids=(r3.data||[]).filter(function(x){return x.usuario_id===u.id;}).map(function(x){return x.empresa_id;});return{id:u.id,nombre:u.nombre,user:u.user_login,passHash:u.pass_hash,rol:u.rol,empresaIds:eids};});
+    var r4=await supa.from('plan_base').select('*').order('cod'); SYS.planBase=(r4.data||[]).map(function(c){return{cod:c.cod,nom:c.nom,tipo:c.tipo,aux:c.aux,desc:c.desc_||''};});
   }catch(e){console.error('loadSYS:',e);}
 }
-
+async function saveDB(){if(!SESSION.empresaId)return;try{await supa.from('empresa_config').upsert({empresa_id:SESSION.empresaId,num_asiento:DB.numAsiento});}catch(e){}}
+async function saveSYS(){}
 async function loadDB(){
-  if(!SESSION.empresaId) return;
+  if(!SESSION.empresaId)return;
   DB={config:{empresa:'',rut:'',giro:'',dir:'',periodo:''},cuentas:[],asientos:[],numAsiento:1,terceros:[]};
   showLoading('Cargando datos...');
   try{
@@ -3231,39 +3017,115 @@ async function loadDB(){
     if(emp) DB.config={empresa:emp.razon,rut:emp.rut,giro:emp.giro||'',dir:emp.dir||'',periodo:emp.periodo||''};
     var cfg=await supa.from('empresa_config').select('num_asiento').eq('empresa_id',SESSION.empresaId).maybeSingle();
     DB.numAsiento=cfg.data?cfg.data.num_asiento:1;
-    var res1=await supa.from('cuentas').select('*').eq('empresa_id',SESSION.empresaId).order('cod');
-    DB.cuentas=(res1.data||[]).map(function(c){return{cod:c.cod,nom:c.nom,tipo:c.tipo,aux:c.aux,desc:c.desc_||'',tipo_plan:c.tipo_plan||'',cod_sii:c.cod_sii||'',concepto:c.concepto||'',subtipo_plan:c.subtipo_plan||'',subtipo_flujo:c.subtipo_flujo||'',cta_cobrar:c.cta_cobrar||false,cta_pagar:c.cta_pagar||false,disp_pago:c.disp_pago||false};});
-    var res2=await supa.from('asientos').select('id,num,fecha,glosa').eq('empresa_id',SESSION.empresaId).order('fecha').order('num');
-    var ids=(res2.data||[]).map(function(a){return a.id;});
-    var lineasMap={};
-    if(ids.length>0){
-      var res3=await supa.from('lineas_asiento').select('*').in('asiento_id',ids);
-      (res3.data||[]).forEach(function(l){if(!lineasMap[l.asiento_id])lineasMap[l.asiento_id]=[];lineasMap[l.asiento_id].push({cuenta:l.cuenta_cod,aux:l.aux_nombre||'',debe:parseFloat(l.debe)||0,haber:parseFloat(l.haber)||0});});
-    }
-    DB.asientos=(res2.data||[]).map(function(a){return{num:a.num,fecha:a.fecha,glosa:a.glosa,lineas:lineasMap[a.id]||[]};});
-    var res4=await supa.from('terceros').select('*').eq('empresa_id',SESSION.empresaId).order('razon');
-    DB.terceros=(res4.data||[]).map(function(t){return{rut:t.rut,razon:t.razon,tipo:t.tipo,dir:t.dir||'',email:t.email||'',tel:t.tel||'',notas:t.notas||''};});
-  }catch(e){console.error('loadDB:',e);}
-  finally{hideLoading();}
+    var r1=await supa.from('cuentas').select('*').eq('empresa_id',SESSION.empresaId).order('cod');
+    DB.cuentas=(r1.data||[]).map(function(c){return{cod:c.cod,nom:c.nom,tipo:c.tipo,aux:c.aux,desc:c.desc_||'',tipo_plan:c.tipo_plan||'',cod_sii:c.cod_sii||'',concepto:c.concepto||'',subtipo_plan:c.subtipo_plan||'',subtipo_flujo:c.subtipo_flujo||'',cta_cobrar:c.cta_cobrar||false,cta_pagar:c.cta_pagar||false,disp_pago:c.disp_pago||false};});
+    var r2=await supa.from('asientos').select('id,num,fecha,glosa').eq('empresa_id',SESSION.empresaId).order('fecha').order('num');
+    var ids=(r2.data||[]).map(function(a){return a.id;});
+    var lmap={};
+    if(ids.length){var r3=await supa.from('lineas_asiento').select('*').in('asiento_id',ids);(r3.data||[]).forEach(function(l){if(!lmap[l.asiento_id])lmap[l.asiento_id]=[];lmap[l.asiento_id].push({cuenta:l.cuenta_cod,aux:l.aux_nombre||'',debe:parseFloat(l.debe)||0,haber:parseFloat(l.haber)||0});});}
+    DB.asientos=(r2.data||[]).map(function(a){return{num:a.num,fecha:a.fecha,glosa:a.glosa,lineas:lmap[a.id]||[]};});
+    var r4=await supa.from('terceros').select('*').eq('empresa_id',SESSION.empresaId).order('razon');
+    DB.terceros=(r4.data||[]).map(function(t){return{rut:t.rut,razon:t.razon,tipo:t.tipo,dir:t.dir||'',email:t.email||'',tel:t.tel||'',notas:t.notas||''};});
+  }catch(e){console.error('loadDB:',e);}finally{hideLoading();}
 }
+async function saveCuenta(c){await supa.from('cuentas').upsert({empresa_id:SESSION.empresaId,cod:c.cod,nom:c.nom,tipo:c.tipo||c.tipo_plan||'Activo',aux:c.aux||false,desc_:c.desc||'',tipo_plan:c.tipo_plan||'',cod_sii:c.cod_sii||'',concepto:c.concepto||'',subtipo_plan:c.subtipo_plan||'',subtipo_flujo:c.subtipo_flujo||'',cta_cobrar:c.cta_cobrar||false,cta_pagar:c.cta_pagar||false,disp_pago:c.disp_pago||false},{onConflict:'empresa_id,cod'});}
+async function saveTercero(t){await supa.from('terceros').upsert({empresa_id:SESSION.empresaId,rut:t.rut,razon:t.razon,tipo:t.tipo,dir:t.dir||'',email:t.email||'',tel:t.tel||'',notas:t.notas||''},{onConflict:'empresa_id,rut'});}
+// ═════════════════════════════════════════════════════════════
 
-async function saveDB(){
-  if(!SESSION.empresaId) return;
-  try{await supa.from('empresa_config').upsert({empresa_id:SESSION.empresaId,num_asiento:DB.numAsiento});}catch(e){}
+// ══ NAVEGACIÓN ═══════════════════════════════════════════════
+function findNavItem(secId){return document.querySelector('.nav-item[data-sec="'+secId+'"]');}
+function toggleGrp(gid){var btn=document.getElementById('grp-'+gid+'-btn');var sub=document.getElementById('grp-'+gid+'-sub');if(!btn||!sub)return;var open=sub.classList.contains('open');if(open){sub.classList.remove('open');btn.classList.remove('open');}else{sub.classList.add('open');btn.classList.add('open');}}
+function abrirGrupoActivo(secId){var item=findNavItem(secId);if(!item)return;var sub=item.closest('.nav-sub');if(!sub)return;sub.classList.add('open');var grpId=sub.id.replace('-sub','').replace('grp-','');var btn=document.getElementById('grp-'+grpId+'-btn');if(btn)btn.classList.add('open');}
+function initNavListeners(){document.querySelectorAll('.nav-item[data-sec]').forEach(function(el){el.addEventListener('click',function(){var s=el.getAttribute('data-sec');if(!s||el.style.cursor==='default')return;nav(s,el);});});}
+// ═════════════════════════════════════════════════════════════
+
+// ══ SESIÓN + WATCHDOG ════════════════════════════════════════
+var SESSION_KEY='sc_session';var INACTIVITY_MS=20*60*1000;var _inactivityTimer=null;
+function guardarSesion(){try{sessionStorage.setItem(SESSION_KEY,JSON.stringify({userId:SESSION.userId,empresaId:SESSION.empresaId,rol:SESSION.rol,nombre:SESSION.nombre,ts:Date.now()}));}catch(e){}}
+function limpiarSesion(){try{sessionStorage.removeItem(SESSION_KEY);}catch(e){}}
+function recuperarSesion(){try{var raw=sessionStorage.getItem(SESSION_KEY);if(!raw)return null;var s=JSON.parse(raw);if(!s||!s.userId)return null;if(Date.now()-s.ts>INACTIVITY_MS){limpiarSesion();return null;}return s;}catch(e){return null;}}
+function resetInactivityTimer(){if(_inactivityTimer)clearTimeout(_inactivityTimer);guardarSesion();_inactivityTimer=setTimeout(function(){if(!SESSION.userId)return;mostrarToast('Sesión cerrada por inactividad','warn');setTimeout(function(){doLogout();},1500);},INACTIVITY_MS);}
+function iniciarWatchdogSesion(){['click','keydown','mousemove','touchstart','scroll'].forEach(function(ev){document.addEventListener(ev,resetInactivityTimer,{passive:true});});resetInactivityTimer();}
+function detenerWatchdogSesion(){if(_inactivityTimer)clearTimeout(_inactivityTimer);['click','keydown','mousemove','touchstart','scroll'].forEach(function(ev){document.removeEventListener(ev,resetInactivityTimer);});}
+function mostrarToast(msg,tipo){var t=document.createElement('div');var bg=tipo==='warn'?'#f59e0b':tipo==='err'?'#ef4444':tipo==='ok'?'#16a34a':'var(--text)';t.style.cssText='position:fixed;bottom:20px;right:20px;background:'+bg+';color:#fff;padding:12px 18px;border-radius:8px;font-size:13px;font-weight:500;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.25);transition:opacity .4s';t.textContent=msg;document.body.appendChild(t);setTimeout(function(){t.style.opacity='0';setTimeout(function(){t.remove();},400);},3000);}
+// ═════════════════════════════════════════════════════════════
+
+// ══ AUTO-REFRESH INICIO ══════════════════════════════════════
+var _inicioRefreshTimer=null;var _INICIO_REFRESH_MS=60*60*1000;
+function iniciarAutoRefreshInicio(){detenerAutoRefreshInicio();renderInicio();_inicioRefreshTimer=setInterval(function(){var sec=document.getElementById('sec-inicio');if(sec&&sec.classList.contains('active')){renderInicio();mostrarToast('Datos actualizados','ok');}},_INICIO_REFRESH_MS);}
+function detenerAutoRefreshInicio(){if(_inicioRefreshTimer){clearInterval(_inicioRefreshTimer);_inicioRefreshTimer=null;}}
+// ═════════════════════════════════════════════════════════════
+
+// ══ RENDER INICIO ════════════════════════════════════════════
+async function renderInicio(){
+  var fechaEl=document.getElementById('inicio-fecha');
+  if(fechaEl){var ahora=new Date();fechaEl.textContent=ahora.toLocaleDateString('es-CL',{weekday:'long',year:'numeric',month:'long',day:'numeric'});}
+  var indEl=document.getElementById('inicio-indicadores');
+  if(indEl){
+    indEl.innerHTML='<div class="stat" style="border:1px solid var(--border)"><div class="stat-label">Cargando...</div><div class="stat-value">--</div></div>'.repeat(6);
+    try{
+      var inds=[{key:'uf',label:'UF',icon:'📊'},{key:'dolar',label:'Dólar USD',icon:'🇺🇸'},{key:'euro',label:'Euro',icon:'🇪🇺'},{key:'utm',label:'UTM',icon:'📋'},{key:'ipc',label:'IPC',icon:'📈'},{key:'libra_cobre',label:'Cobre (lb)',icon:'🔶'}];
+      var results=await Promise.allSettled(inds.map(function(ind){return fetch('https://mindicador.cl/api/'+ind.key).then(function(r){return r.json();}).then(function(d){return{label:ind.label,icon:ind.icon,valor:d.serie&&d.serie[0]?d.serie[0].valor:null,fecha:d.serie&&d.serie[0]?d.serie[0].fecha:null,unidad:d.unidad_medida||''};});}));
+      indEl.innerHTML=results.map(function(res){
+        if(res.status==='fulfilled'&&res.value.valor!==null){var v=res.value.valor;var esPorc=res.value.unidad&&res.value.unidad.toLowerCase().includes('porcentaje');var fmt=esPorc?v.toFixed(2)+'%':'$'+v.toLocaleString('es-CL',{minimumFractionDigits:2,maximumFractionDigits:2});var fecha=res.value.fecha?new Date(res.value.fecha).toLocaleDateString('es-CL',{day:'2-digit',month:'2-digit',year:'numeric'}):'';return '<div class="stat" style="border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px"><div class="stat-label" style="display:flex;align-items:center;gap:5px"><span>'+res.value.icon+'</span>'+res.value.label+'</div><div class="stat-value text-blue" style="font-size:20px;margin:4px 0">'+fmt+'</div>'+(fecha?'<div style="font-size:10px;color:var(--text3)">'+fecha+'</div>':'')+'</div>';}
+        return '<div class="stat" style="border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px"><div class="stat-label"><span>'+res.value.icon+'</span> '+res.value.label+'</div><div class="stat-value" style="color:var(--text3)">N/D</div></div>';
+      }).join('');
+    }catch(e){indEl.innerHTML='<div style="color:var(--text3);padding:12px;font-size:13px">No se pudieron cargar los indicadores.</div>';}
+  }
+  renderResumenEmpresa(); renderCalendarioTributario(); renderLinksUtiles();
 }
-
-async function saveSYS(){}
-
-async function saveCuenta(c){
-  await supa.from('cuentas').upsert({empresa_id:SESSION.empresaId,cod:c.cod,nom:c.nom,tipo:c.tipo||c.tipo_plan||'Activo',aux:c.aux||false,desc_:c.desc||'',tipo_plan:c.tipo_plan||'',cod_sii:c.cod_sii||'',concepto:c.concepto||'',subtipo_plan:c.subtipo_plan||'',subtipo_flujo:c.subtipo_flujo||'',cta_cobrar:c.cta_cobrar||false,cta_pagar:c.cta_pagar||false,disp_pago:c.disp_pago||false},{onConflict:'empresa_id,cod'});
+function renderResumenEmpresa(){
+  var el=document.getElementById('inicio-resumen-empresa');if(!el)return;
+  var emp=SYS.empresas.find(function(e){return e.id===SESSION.empresaId;});
+  if(!emp){el.innerHTML='<div style="color:var(--text3);font-size:13px">Sin empresa activa.</div>';return;}
+  var tc=DB.cuentas?DB.cuentas.length:0,ta=DB.asientos?DB.asientos.length:0,tax=DB.terceros?DB.terceros.length:0;
+  var hoy=new Date().toISOString().slice(0,10);
+  var am=DB.asientos?DB.asientos.filter(function(a){return a.fecha&&a.fecha.slice(0,7)===hoy.slice(0,7);}).length:0;
+  var ah=DB.asientos?DB.asientos.filter(function(a){return a.fecha===hoy;}).length:0;
+  el.innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px">'
+    +'<div class="stat" style="border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px"><div class="stat-label">Cuentas</div><div class="stat-value" style="font-size:22px;color:var(--accent)">'+tc+'</div></div>'
+    +'<div class="stat" style="border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px"><div class="stat-label">Asientos</div><div class="stat-value" style="font-size:22px;color:var(--accent)">'+ta+'</div></div>'
+    +'<div class="stat" style="border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px"><div class="stat-label">Este mes</div><div class="stat-value" style="font-size:22px;color:var(--accent)">'+am+'</div></div>'
+    +'<div class="stat" style="border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px"><div class="stat-label">Auxiliares</div><div class="stat-value" style="font-size:22px;color:var(--accent)">'+tax+'</div></div>'
+    +(ah?'<div class="stat" style="border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px;background:var(--accent-bg)"><div class="stat-label" style="color:var(--accent)">Hoy</div><div class="stat-value" style="font-size:22px;color:var(--accent)">'+ah+'</div></div>':'')
+    +'</div><div style="margin-top:10px;font-size:11px;color:var(--text3)">RUT: '+emp.rut+'</div>';
 }
-
-async function saveTercero(t){
-  await supa.from('terceros').upsert({empresa_id:SESSION.empresaId,rut:t.rut,razon:t.razon,tipo:t.tipo,dir:t.dir||'',email:t.email||'',tel:t.tel||'',notas:t.notas||''},{onConflict:'empresa_id,rut'});
+function renderCalendarioTributario(){
+  var el=document.getElementById('inicio-calendario');if(!el)return;
+  var ahora=new Date();var mes=ahora.getMonth()+1;var anio=ahora.getFullYear();
+  var venc=[{dia:12,desc:'IVA F29 — 1ª categoría'},{dia:13,desc:'Ret. honorarios F50'},{dia:15,desc:'Cotizaciones AFP/Salud'},{dia:20,desc:'IVA F29 — simplificados'},{dia:28,desc:'Libro remuneraciones'}];
+  var esp={4:[{dia:30,desc:'Renta Anual F22'}],5:[{dia:31,desc:'DJ 1887 honorarios'}],7:[{dia:31,desc:'DJ 1879 retenciones'}]};
+  var todos=venc.slice();if(esp[mes])todos=todos.concat(esp[mes]);todos.sort(function(a,b){return a.dia-b.dia;});
+  el.innerHTML='<div style="display:flex;flex-direction:column;gap:6px">'+todos.map(function(v){
+    var dr=Math.ceil((new Date(anio,mes-1,v.dia)-ahora)/864e5);
+    var clr=dr<0?'var(--text3)':dr<=3?'#ef4444':dr<=7?'#d97706':'var(--text2)';
+    var bgB=dr<0?'#f1f5f9':dr<=3?'#fee2e2':dr<=7?'#fef3c7':'#f0fdf4';
+    var clrB=dr<0?'#94a3b8':dr<=3?'#dc2626':dr<=7?'#d97706':'#16a34a';
+    var badge=dr<0?'Vencido':dr===0?'¡Hoy!':dr===1?'Mañana':'En '+dr+'d';
+    return '<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:6px;background:var(--surface2)"><div style="min-width:24px;font-size:13px;font-weight:700;color:var(--accent);text-align:center">'+(v.dia<10?'0':'')+v.dia+'</div><div style="flex:1;font-size:12px;color:'+clr+'">'+v.desc+'</div><div style="font-size:10px;font-weight:600;padding:2px 6px;border-radius:4px;background:'+bgB+';color:'+clrB+'">'+badge+'</div></div>';
+  }).join('')+'</div>';
 }
+function renderLinksUtiles(){
+  var el=document.getElementById('inicio-links');if(!el)return;
+  var links=[{icon:'🏛️',label:'SII',url:'https://www.sii.cl',desc:'Impuestos Internos'},{icon:'👷',label:'Dir. Trabajo',url:'https://www.dt.gob.cl',desc:'Trámites laborales'},{icon:'💰',label:'Previred',url:'https://www.previred.com',desc:'Cotizaciones'},{icon:'📰',label:'Diario Financiero',url:'https://www.df.cl',desc:'Noticias financieras'},{icon:'🏦',label:'Banco Central',url:'https://www.bcentral.cl',desc:'Indicadores'},{icon:'📋',label:'CMF',url:'https://www.cmfchile.cl',desc:'Mercado Financiero'},{icon:'💼',label:'Reg. Empresas',url:'https://www.registroempresa.cl',desc:'Trámites'},{icon:'📊',label:'INE',url:'https://www.ine.gob.cl',desc:'Estadísticas'}];
+  el.innerHTML=links.map(function(l){return '<a href="'+l.url+'" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius);border:1px solid var(--border);text-decoration:none;background:var(--surface);transition:border-color .15s" onmouseover="this.style.borderColor=\'var(--accent)\'" onmouseout="this.style.borderColor=\'var(--border)\'"><span style="font-size:18px">'+l.icon+'</span><div><div style="font-size:13px;font-weight:600;color:var(--text)">'+l.label+'</div><div style="font-size:11px;color:var(--text3)">'+l.desc+'</div></div></a>';}).join('');
+}
+// ═════════════════════════════════════════════════════════════
 
-async function eliminarCuentaSupa(cod){
-  await supa.from('cuentas').delete().eq('empresa_id',SESSION.empresaId).eq('cod',cod);
+// ══ SUBTIPO PLAN / COD SII ═══════════════════════════════════
+var SUBTIPO_PLAN_DATA=[];var COD_SII_DATA=[];
+function filtrarSubtiposPlan(tipoPlan){var sel=document.getElementById('mc-subtipo-plan');if(!sel)return;var v={};var o=['<option value="">— Ninguno —</option>'];SUBTIPO_PLAN_DATA.forEach(function(r){if(r.tipo===tipoPlan&&r.subtipo&&!v[r.subtipo]){v[r.subtipo]=true;o.push('<option value="'+r.subtipo+'">'+r.subtipo+'</option>');}});sel.innerHTML=o.join('');}
+async function cargarCodSII(){try{var res=await supa.from('cod_sii').select('cod_sii,cod_orig,glosa,tipo').order('cod_sii');COD_SII_DATA=res.data||[];poblarSelectCodSII();}catch(e){console.warn('cod_sii:',e.message);}}
+function poblarSelectCodSII(){var sel=document.getElementById('mc-cod-sii');if(!sel)return;sel.innerHTML='<option value="">— Seleccionar —</option>'+COD_SII_DATA.map(function(r){return '<option value="'+r.cod_sii+'">'+r.cod_sii+' ('+r.cod_orig+') — '+r.glosa+'</option>';}).join('');}
+async function renderSubtipoPlan(){
+  var tb=document.getElementById('tbody-subtipo-plan');if(!tb)return;
+  tb.innerHTML='<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text3)">Cargando...</td></tr>';
+  try{var res=await supa.from('subtipo_plan').select('*').order('cod');var data=res.data||[];if(!data.length){tb.innerHTML='<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text3)">Sin datos.</td></tr>';return;}tb.innerHTML='';data.forEach(function(r){var tr=document.createElement('tr');tr.innerHTML='<td><code>'+r.cod+'</code></td><td>'+typeBadge(r.tipo)+'</td><td style="font-size:12px;color:var(--text3)">'+(r.subtipo||'—')+'</td><td>'+r.nombre+'</td>';tb.appendChild(tr);});}catch(e){tb.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--danger)">Error: '+e.message+'</td></tr>';}
+}
+async function renderCodSII(){
+  var tb=document.getElementById('tbody-cod-sii');if(!tb)return;
+  tb.innerHTML='<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text3)">Cargando...</td></tr>';
+  try{var res=await supa.from('cod_sii').select('*').order('cod_sii');var data=res.data||[];if(!data.length){tb.innerHTML='<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text3)">Sin datos.</td></tr>';return;}tb.innerHTML='';data.forEach(function(r){var tr=document.createElement('tr');tr.innerHTML='<td><code>'+r.cod_sii+'</code></td><td style="font-size:12px;color:var(--text3)">'+(r.cod_orig||'—')+'</td><td>'+r.glosa+'</td><td>'+typeBadge(r.tipo)+'</td><td style="text-align:center"><span class="badge" style="background:var(--surface2);font-size:11px">Niv.'+r.nivel+'</span></td>';tb.appendChild(tr);});}catch(e){tb.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--danger)">Error: '+e.message+'</td></tr>';}
 }
 // ═════════════════════════════════════════════════════════════
 </script>
