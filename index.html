@@ -3000,28 +3000,31 @@ function cambiarEmpresaDesdeSelector(empId){
 // ============================================================
 window.addEventListener('load', async function(){
   try{
-  showLoading('Conectando...');
-  await loadSYS();
-  await initSistemaSiVacio();
-  await loadSYS();
-  hideLoading();
-  initNavListeners();
-  await cargarCodSII();
-  // Intentar recuperar sesión previa
-  var sesion = recuperarSesion();
-  if(sesion && SYS.usuarios.find(function(u){ return u.id===sesion.userId; })){
-    SESSION = {userId:sesion.userId, empresaId:sesion.empresaId, rol:sesion.rol, nombre:sesion.nombre};
-    showLoading('Restaurando sesión...');
-    await loadDB();
+    showLoading('Conectando...');
+    // Paralelizar: loadSYS + cargarCodSII al mismo tiempo
+    await Promise.all([loadSYS(), cargarCodSII()]);
+    await initSistemaSiVacio();
     hideLoading();
-    document.getElementById('login-screen').classList.remove('show');
-    document.getElementById('app-layout').style.display = 'flex';
-    iniciarWatchdogSesion();
-    initAppPostLogin();
-  } else {
+    initNavListeners();
+    // Intentar recuperar sesión previa
+    var sesion = recuperarSesion();
+    if(sesion && SYS.usuarios.find(function(u){ return u.id===sesion.userId; })){
+      SESSION = {userId:sesion.userId, empresaId:sesion.empresaId, rol:sesion.rol, nombre:sesion.nombre};
+      showLoading('Restaurando sesión...');
+      await loadDB();
+      hideLoading();
+      document.getElementById('login-screen').classList.remove('show');
+      document.getElementById('app-layout').style.display = 'flex';
+      iniciarWatchdogSesion();
+      initAppPostLogin();
+    } else {
+      document.getElementById('login-screen').classList.add('show');
+    }
+  }catch(e){
+    console.error('Load error:',e);
+    hideLoading();
     document.getElementById('login-screen').classList.add('show');
   }
-  }catch(e){ console.error('Load error:',e); hideLoading(); document.getElementById('login-screen').classList.add('show'); }
 });
 
 // Enter en login
@@ -3037,11 +3040,19 @@ const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
 
 async function loadSYS(){
   try{
-    var r1=await supa.from('empresas').select('*').order('razon'); SYS.empresas=r1.data||[];
-    var r2=await supa.from('usuarios').select('*').order('nombre');
-    var r3=await supa.from('usuario_empresa').select('*');
-    SYS.usuarios=(r2.data||[]).map(function(u){var eids=(r3.data||[]).filter(function(x){return x.usuario_id===u.id;}).map(function(x){return x.empresa_id;});return{id:u.id,nombre:u.nombre,user:u.user_login,passHash:u.pass_hash,rol:u.rol,empresaIds:eids};});
-    var r4=await supa.from('plan_base').select('*').order('cod'); SYS.planBase=(r4.data||[]).map(function(c){return{cod:c.cod,nom:c.nom,tipo:c.tipo,aux:c.aux,desc:c.desc_||''};});
+    // Paralelizar: empresas + usuarios + usuario_empresa al mismo tiempo
+    var [r1,r2,r3,r4] = await Promise.all([
+      supa.from('empresas').select('*').order('razon'),
+      supa.from('usuarios').select('*').order('nombre'),
+      supa.from('usuario_empresa').select('*'),
+      supa.from('plan_base').select('cod,nom,tipo,aux,desc_').order('cod'),
+    ]);
+    SYS.empresas = r1.data||[];
+    SYS.usuarios = (r2.data||[]).map(function(u){
+      var eids=(r3.data||[]).filter(function(x){return x.usuario_id===u.id;}).map(function(x){return x.empresa_id;});
+      return{id:u.id,nombre:u.nombre,user:u.user_login,passHash:u.pass_hash,rol:u.rol,empresaIds:eids};
+    });
+    SYS.planBase = (r4.data||[]).map(function(c){return{cod:c.cod,nom:c.nom,tipo:c.tipo,aux:c.aux,desc:c.desc_||''};});
   }catch(e){console.error('loadSYS:',e);}
 }
 async function saveDB(){if(!SESSION.empresaId)return;try{await supa.from('empresa_config').upsert({empresa_id:SESSION.empresaId,num_asiento:DB.numAsiento});}catch(e){}}
@@ -3053,18 +3064,45 @@ async function loadDB(){
   try{
     var emp=SYS.empresas.find(function(e){return e.id===SESSION.empresaId;});
     if(emp) DB.config={empresa:emp.razon,rut:emp.rut,giro:emp.giro||'',dir:emp.dir||'',periodo:emp.periodo||''};
-    var cfg=await supa.from('empresa_config').select('num_asiento').eq('empresa_id',SESSION.empresaId).maybeSingle();
-    DB.numAsiento=cfg.data?cfg.data.num_asiento:1;
-    var r1=await supa.from('cuentas').select('*').eq('empresa_id',SESSION.empresaId).order('cod');
-    DB.cuentas=(r1.data||[]).map(function(c){return{cod:c.cod,nom:c.nom,tipo:c.tipo,aux:c.aux,desc:c.desc_||'',tipo_plan:c.tipo_plan||'',cod_sii:c.cod_sii||'',concepto:c.concepto||'',subtipo_plan:c.subtipo_plan||'',subtipo_flujo:c.subtipo_flujo||'',cta_cobrar:c.cta_cobrar||false,cta_pagar:c.cta_pagar||false,disp_pago:c.disp_pago||false};});
-    var r2=await supa.from('asientos').select('id,num,fecha,glosa').eq('empresa_id',SESSION.empresaId).order('fecha').order('num');
-    var ids=(r2.data||[]).map(function(a){return a.id;});
+
+    // Paralelizar: config + cuentas + terceros al mismo tiempo
+    var [cfg,r1,r4] = await Promise.all([
+      supa.from('empresa_config').select('num_asiento').eq('empresa_id',SESSION.empresaId).maybeSingle(),
+      supa.from('cuentas').select('*').eq('empresa_id',SESSION.empresaId).order('cod'),
+      supa.from('terceros').select('*').eq('empresa_id',SESSION.empresaId).order('razon'),
+    ]);
+    DB.numAsiento = cfg.data?cfg.data.num_asiento:1;
+    DB.cuentas = (r1.data||[]).map(function(c){return{
+      cod:c.cod,nom:c.nom,tipo:c.tipo,aux:c.aux,desc:c.desc_||'',
+      tipo_plan:c.tipo_plan||'',cod_sii:c.cod_sii||'',concepto:c.concepto||'',
+      subtipo_plan:c.subtipo_plan||'',subtipo_flujo:c.subtipo_flujo||'',
+      cta_cobrar:c.cta_cobrar||false,cta_pagar:c.cta_pagar||false,disp_pago:c.disp_pago||false
+    };});
+    DB.terceros = (r4.data||[]).map(function(t){return{
+      rut:t.rut,razon:t.razon,tipo:t.tipo,dir:t.dir||'',email:t.email||'',tel:t.tel||'',notas:t.notas||''
+    };});
+
+    // Asientos: primero los headers, luego las líneas en paralelo
+    var r2 = await supa.from('asientos').select('id,num,fecha,glosa').eq('empresa_id',SESSION.empresaId).order('fecha').order('num');
+    var ids = (r2.data||[]).map(function(a){return a.id;});
     var lmap={};
-    if(ids.length){var r3=await supa.from('lineas_asiento').select('*').in('asiento_id',ids);(r3.data||[]).forEach(function(l){if(!lmap[l.asiento_id])lmap[l.asiento_id]=[];lmap[l.asiento_id].push({cuenta:l.cuenta_cod,aux:l.aux_nombre||'',debe:parseFloat(l.debe)||0,haber:parseFloat(l.haber)||0});});}
+    if(ids.length){
+      // Supabase limita IN a 1000 — dividir si hay muchos asientos
+      var chunks=[]; var sz=500;
+      for(var ci=0;ci<ids.length;ci+=sz) chunks.push(ids.slice(ci,ci+sz));
+      var lineasArrays = await Promise.all(chunks.map(function(chunk){
+        return supa.from('lineas_asiento').select('asiento_id,cuenta_cod,aux_nombre,debe,haber').in('asiento_id',chunk);
+      }));
+      lineasArrays.forEach(function(res){
+        (res.data||[]).forEach(function(l){
+          if(!lmap[l.asiento_id])lmap[l.asiento_id]=[];
+          lmap[l.asiento_id].push({cuenta:l.cuenta_cod,aux:l.aux_nombre||'',debe:parseFloat(l.debe)||0,haber:parseFloat(l.haber)||0});
+        });
+      });
+    }
     DB.asientos=(r2.data||[]).map(function(a){return{num:a.num,fecha:a.fecha,glosa:a.glosa,lineas:lmap[a.id]||[]};});
-    var r4=await supa.from('terceros').select('*').eq('empresa_id',SESSION.empresaId).order('razon');
-    DB.terceros=(r4.data||[]).map(function(t){return{rut:t.rut,razon:t.razon,tipo:t.tipo,dir:t.dir||'',email:t.email||'',tel:t.tel||'',notas:t.notas||''};});
-  }catch(e){console.error('loadDB:',e);}finally{hideLoading();}
+  }catch(e){console.error('loadDB:',e);}
+  finally{hideLoading();}
 }
 async function saveCuenta(c){await supa.from('cuentas').upsert({empresa_id:SESSION.empresaId,cod:c.cod,nom:c.nom,tipo:c.tipo||c.tipo_plan||'Activo',aux:c.aux||false,desc_:c.desc||'',tipo_plan:c.tipo_plan||'',cod_sii:c.cod_sii||'',concepto:c.concepto||'',subtipo_plan:c.subtipo_plan||'',subtipo_flujo:c.subtipo_flujo||'',cta_cobrar:c.cta_cobrar||false,cta_pagar:c.cta_pagar||false,disp_pago:c.disp_pago||false},{onConflict:'empresa_id,cod'});}
 async function saveTercero(t){await supa.from('terceros').upsert({empresa_id:SESSION.empresaId,rut:t.rut,razon:t.razon,tipo:t.tipo,dir:t.dir||'',email:t.email||'',tel:t.tel||'',notas:t.notas||''},{onConflict:'empresa_id,rut'});}
