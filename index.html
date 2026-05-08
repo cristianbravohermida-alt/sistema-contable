@@ -337,26 +337,23 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
       <div class="nav-item" style="color:var(--text3);cursor:default;font-style:italic"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Próximamente</div>
     </div>
   </div>
-  <div class="nav-group" id="grp-admin">
-    <div class="nav-group-btn" id="grp-admin-btn" onclick="toggleGrp('admin')">
-      <svg class="icon" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/></svg>Administración<svg class="chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-    </div>
-    <div class="nav-sub" id="grp-admin-sub">
-      <div class="nav-item" data-sec="cuentas">Plan de Cuentas</div>
-      <div class="nav-item" data-sec="auxiliares">Auxiliares / Terceros</div>
-      <div class="nav-item" data-sec="subtipo-plan">Sub Tipo Plan</div>
-      <div class="nav-item" data-sec="cod-sii">Códigos SII</div>
-      <div class="nav-item" data-sec="centros-costos">Centros de Costos</div>
-    </div>
-  </div>
   <div class="nav-group" id="grp-config">
     <div class="nav-group-btn" id="grp-config-btn" onclick="toggleGrp('config')">
       <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Configuración<svg class="chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
     </div>
     <div class="nav-sub" id="grp-config-sub">
-      <div class="nav-item" data-sec="config">Configuración Sistema</div>
-      <div class="nav-item" data-sec="sistema">Gestión del Sistema</div>
-    </div>
+      <!-- Administración con sub-items -->
+      <div class="nav-subheader" style="padding:6px 10px 4px 10px;font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;margin-top:4px">Administración</div>
+      <div class="nav-item" data-sec="cuentas" style="padding-left:14px">Plan de Cuentas</div>
+      <div class="nav-item" data-sec="auxiliares" style="padding-left:14px">Auxiliares / Terceros</div>
+      <div class="nav-item" data-sec="subtipo-plan" style="padding-left:14px">Sub Tipo Plan</div>
+      <div class="nav-item" data-sec="cod-sii" style="padding-left:14px">Códigos SII</div>
+      <div class="nav-item" data-sec="centros-costos" style="padding-left:14px">Centros de Costos</div>
+      <!-- Gestión y Configuración -->
+      <div class="nav-subheader" style="padding:6px 10px 4px 10px;font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;margin-top:8px">Sistema</div>
+      <div class="nav-item" data-sec="sistema" style="padding-left:14px">Gestión del Sistema</div>
+      <div class="nav-item" data-sec="config" style="padding-left:14px">Configuración Sistema</div>
+        </div>
   </div>
   <div id="nav-sec-sistema" style="display:none"></div>
   <div id="nav-sistema" style="display:none"></div>
