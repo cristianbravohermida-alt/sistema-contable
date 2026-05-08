@@ -349,6 +349,7 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
       <div class="nav-item" data-sec="subtipo-plan" style="padding-left:14px">Sub Tipo Plan</div>
       <div class="nav-item" data-sec="cod-sii" style="padding-left:14px">Códigos SII</div>
       <div class="nav-item" data-sec="centros-costos" style="padding-left:14px">Centros de Costos</div>
+      <div class="nav-item" data-sec="perfiles" style="padding-left:14px">Perfiles</div>
       <!-- Gestión y Configuración -->
       <div class="nav-subheader" style="padding:6px 10px 4px 10px;font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;margin-top:8px">Sistema</div>
       <div class="nav-item" data-sec="sistema" style="padding-left:14px">Gestión del Sistema</div>
@@ -413,6 +414,66 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
   </div>
 </div>
 
+
+
+<div id="sec-perfiles" class="section">
+  <div class="topbar">
+    <div><div class="page-title">Perfiles</div><div class="page-sub">Gestiona los perfiles de acceso del sistema</div></div>
+    <div class="topbar-actions">
+      <button class="btn btn-primary btn-sm" onclick="openModalPerfil()">
+        <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nuevo Perfil
+      </button>
+    </div>
+  </div>
+  <div class="content">
+    <div id="msg-perfiles" style="margin-bottom:12px"></div>
+    <div class="card" style="overflow-x:auto">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Descripción</th>
+            <th style="text-align:center">Usuarios</th>
+            <th style="text-align:center">Permisos</th>
+            <th style="text-align:center">Tipo</th>
+            <th style="text-align:right">Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-perfiles">
+          <tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text3)">Cargando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PERFIL -->
+<div id="modal-perfil" class="modal">
+  <div class="modal-content" style="max-width:640px">
+    <div class="modal-header">
+      <h3 id="modal-perfil-titulo">Nuevo Perfil</h3>
+      <button class="modal-close" onclick="closeModal('modal-perfil')">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="mp-edit-id" value="">
+      <div id="msg-modal-perfil"></div>
+      <div class="form-grid cols2" style="gap:14px">
+        <div class="field span2"><label>Nombre del Perfil *</label><input id="mp-nombre" placeholder="Ej: Auditor"></div>
+        <div class="field span2"><label>Descripción</label><input id="mp-descripcion" placeholder="Breve descripción del perfil"></div>
+      </div>
+      <div style="margin-top:18px">
+        <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em">Permisos de Acceso</div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:10px">Selecciona las secciones que este perfil podrá ver:</div>
+        <div id="mp-permisos-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-perfil')">Cancelar</button>
+      <button class="btn btn-primary" onclick="savePerfil()">Guardar</button>
+    </div>
+  </div>
+</div>
 
 <div id="sec-cuentas" class="section">
   <div class="topbar">
@@ -749,7 +810,7 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
       <button class="btn btn-primary role-admin" onclick="openModal('modal-nueva-empresa')">
         <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Nueva Empresa
       </button>
-      <button class="btn role-admin" onclick="openModal('modal-nuevo-usuario')">
+      <button class="btn role-admin" onclick="openModalUsuario()">
         <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Nuevo Usuario
       </button>
     </div>
@@ -828,11 +889,9 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
         <div class="field span2"><label>Nombre completo *</label><input id="mu-nombre" placeholder="Juan Pérez"></div>
         <div class="field span2"><label>Usuario (email) *</label><input id="mu-user" type="email" placeholder="juan@empresa.cl"></div>
         <div class="field"><label>Contraseña *</label><input id="mu-pass" type="password" placeholder="Mínimo 6 caracteres"></div>
-        <div class="field"><label>Rol *</label>
-          <select id="mu-rol">
-            <option value="admin">Admin</option>
-            <option value="contador">Contador</option>
-            <option value="lectura">Solo Lectura</option>
+        <div class="field"><label>Perfil *</label>
+          <select id="mu-perfil-id">
+            <option value="">— Selecciona perfil —</option>
           </select>
         </div>
         <div class="field span2">
@@ -1378,7 +1437,7 @@ async function doLogout(){
   detenerAutoRefreshInicio();
   limpiarSesion();
   try{ await supa.auth.signOut(); }catch(e){}
-  SESSION = {userId:null,auth_user_id:null,empresaId:null,rol:null,nombre:null};
+  SESSION = {userId:null,auth_user_id:null,empresaId:null,perfil_id:null,nombre:null};
   DB = {config:{empresa:'',rut:'',giro:'',dir:'',periodo:''},cuentas:[],asientos:[],numAsiento:1,terceros:[]};
   document.getElementById('app-layout').style.display = 'none';
   initNavListeners();
@@ -1394,10 +1453,11 @@ function initAppPostLogin(){
   document.getElementById('sidebar-empresa').textContent = emp ? emp.razon : '';
   document.getElementById('sb-username').textContent = SESSION.nombre;
   actualizarSelectorEmpresas();
-  var rolLabels = {admin:'Admin',contador:'Contador',lectura:'Solo Lectura'};
-  var rolCls    = {admin:'badge-admin',contador:'badge-contador',lectura:'badge-lectura'};
+  var perfilUser = SYS.perfiles && SYS.perfiles.find(function(p){return p.id===SESSION.perfil_id;});
+  var perfilNombre = perfilUser ? perfilUser.nombre : '—';
+  var perfilCls = perfilUser && perfilUser.built_in ? 'badge-admin' : 'badge-contador';
   document.getElementById('sb-rol-badge').innerHTML =
-    '<span class="badge '+(rolCls[SESSION.rol]||'badge-lectura')+'">'+(rolLabels[SESSION.rol]||SESSION.rol)+'</span>';
+    '<span class="badge '+perfilCls+'">'+esc(perfilNombre)+'</span>';
   var initials = SESSION.nombre.split(' ').map(function(w){return w[0];}).join('').substring(0,2).toUpperCase();
   document.getElementById('sb-avatar').textContent = initials;
   applyRoleRestrictions();
@@ -1419,29 +1479,33 @@ function initAppPostLogin(){
 // Contador  → puede ingresar datos, no ve Gestión del Sistema ni Configuración
 // Lectura   → solo informes (Balance 8, Estado Resultado); sin botones de escritura
 function applyRoleRestrictions(){
-  var rol = SESSION.rol;
-  var isAdmin    = rol==='admin';
-  var isContador = rol==='contador';
-  var isLectura  = rol==='lectura';
-
-  // Gestión del sistema: solo admin
-  var navSistema = document.getElementById('nav-sistema');
-  if(navSistema) navSistema.style.display = isAdmin ? '' : 'none';
-  // Configuración: admin y contador
-  var navConfig = findNavItem('config');
-  if(navConfig) navConfig.style.display = isLectura ? 'none' : '';
-  // Módulos de ingreso (diario, cuentas, auxiliares): ocultos para lectura
-  ['cuentas','diario','mayor','auxiliares'].forEach(function(id){
-  var nav = findNavItem(id);
-    if(nav) nav.style.display = isLectura ? 'none' : '';
+  // Determinar perfil del usuario actual
+  var usr = SYS.usuarios.find(function(u){return u.id===SESSION.userId;});
+  var perfil = null;
+  if(usr && usr.perfil_id && SYS.perfiles){
+    perfil = SYS.perfiles.find(function(p){return p.id===usr.perfil_id;});
+  }
+  // Si no hay perfil definido, dar acceso completo (defensivo)
+  if(!perfil){
+    document.querySelectorAll('.nav-item[data-sec], .nav-group').forEach(function(el){
+      el.style.display = '';
+    });
+    return;
+  }
+  // Aplicar permisos: ocultar items sin permiso
+  var permisos = perfil.permisos || {};
+  document.querySelectorAll('.nav-item[data-sec]').forEach(function(item){
+    var sec = item.getAttribute('data-sec');
+    if(permisos[sec] === false){
+      item.style.display = 'none';
+    } else {
+      item.style.display = '';
+    }
   });
-  // Botones de escritura: ocultos para lectura
-  document.querySelectorAll('.role-escritura').forEach(function(el){
-    el.style.display = isLectura ? 'none' : '';
-  });
-  // Botones solo admin: eliminar cuentas, config avanzada
-  document.querySelectorAll('.role-admin').forEach(function(el){
-    el.style.display = isAdmin ? '' : 'none';
+  // Ocultar grupos completos si todos sus items están ocultos
+  document.querySelectorAll('.nav-group').forEach(function(grp){
+    var visibles = grp.querySelectorAll('.nav-item[data-sec]:not([style*="display: none"])');
+    grp.style.display = visibles.length === 0 ? 'none' : '';
   });
 }
 
@@ -1607,29 +1671,36 @@ function cambiarEmpresa(empId){
 
 // Renderizar tabla de usuarios
 function renderUsuariosSistema(){
-  var tb=document.getElementById('tbody-usuarios'); if(!tb) return;
-  var rolLabels={admin:'Admin',contador:'Contador',lectura:'Solo Lectura'};
-  var rolCls={admin:'badge-admin',contador:'badge-contador',lectura:'badge-lectura'};
-  if(!SYS.usuarios.length){
-    tb.innerHTML='<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text3)">Sin usuarios.</td></tr>'; return;
+  var tb = document.getElementById('tbody-usuarios-sistema');
+  if(!tb) return;
+  if(!SYS.usuarios || !SYS.usuarios.length){
+    tb.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text3)">No hay usuarios.</td></tr>';
+    return;
   }
-  tb.innerHTML = SYS.usuarios.map(function(u,i){
-    // Compatibilidad: normalizar campo
-    if(u.empresaId && !u.empresaIds){ u.empresaIds=[u.empresaId]; }
-    var empIds = u.empresaIds || [];
-    var empNombres = empIds.map(function(id){
-      var e=SYS.empresas.find(function(x){return x.id===id;}); return e?e.razon:id;
+  tb.innerHTML = '';
+  SYS.usuarios.forEach(function(u){
+    var perfil = SYS.perfiles && SYS.perfiles.find(function(p){return p.id===u.perfil_id;});
+    var perfilNombre = perfil ? perfil.nombre : 'Sin perfil';
+    var perfilColor = perfil && perfil.built_in ? '#dbeafe' : '#f3e8ff';
+    var perfilTextColor = perfil && perfil.built_in ? '#1e40af' : '#7c3aed';
+    var empresasNombres = u.empresaIds.map(function(eid){
+      var e = SYS.empresas.find(function(x){return x.id===eid;});
+      return e ? e.razon : '?';
     }).join(', ');
-    var esMio=u.id===SESSION.userId;
-    return '<tr>'
-      +'<td><b>'+u.nombre+'</b><br><span style="font-size:11px;color:var(--text3)">'+u.user+'</span></td>'
-      +'<td><span class="badge '+(rolCls[u.rol]||'')+'">'+(rolLabels[u.rol]||u.rol)+'</span></td>'
-      +'<td style="font-size:12px">'+( empNombres||'—')+'</td>'
-      +'<td class="no-print" style="display:flex;gap:4px">'
-        +'<button class="btn btn-sm btn-ghost" onclick="editUsuario(\''+u.id+'\')">Editar</button>'
-        +(!esMio?'<button class="btn btn-sm btn-danger" onclick="delUsuario(\''+u.id+'\')">×</button>':'')
-      +'</td></tr>';
-  }).join('');
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td><b>'+esc(u.nombre)+'</b></td>'
+      +'<td style="font-size:12px;color:var(--text3)"><code>'+esc(u.user)+'</code></td>'
+      +'<td><span class="badge" style="background:'+perfilColor+';color:'+perfilTextColor+';font-size:11px">'+esc(perfilNombre)+'</span></td>'
+      +'<td style="font-size:12px;color:var(--text3)">'+esc(empresasNombres||'—')+'</td>'
+      +'<td style="text-align:center">'+(u.auth_user_id ? '<span style="color:#16a34a">●</span>' : '<span style="color:#94a3b8">○</span>')+'</td>'
+      +'<td style="text-align:right">'
+        +'<button class="btn btn-sm btn-ghost" onclick="editUsuario(\''+u.id+'\')">Editar</button> '
+        +(u.id===SESSION.userId
+          ? '<button class="btn btn-sm btn-ghost" disabled style="opacity:.4;cursor:not-allowed" title="No puedes eliminarte">×</button>'
+          : '<button class="btn btn-sm btn-danger" onclick="eliminarUsuarioCompleto(\''+u.id+'\')">×</button>')
+      +'</td>';
+    tb.appendChild(tr);
+  });
 }
 
 // Poblar selector empresa en modal usuario
@@ -1649,85 +1720,57 @@ function populateMuEmpresa(){ populateMuEmpresas([]); }
 
 // Guardar usuario (nuevo o edición)
 async function saveUsuario(){
-  var id     = document.getElementById('mu-edit-id').value;
-  var nombre = document.getElementById('mu-nombre').value.trim();
-  var email  = document.getElementById('mu-user').value.trim().toLowerCase();
-  var pass   = document.getElementById('mu-pass').value;
-  var rol    = document.getElementById('mu-rol').value;
+  var id        = document.getElementById('mu-edit-id').value;
+  var nombre    = document.getElementById('mu-nombre').value.trim();
+  var email     = document.getElementById('mu-user').value.trim().toLowerCase();
+  var pass      = document.getElementById('mu-pass').value;
+  var perfilId  = document.getElementById('mu-perfil-id').value;
   var empChecks = document.querySelectorAll('#mu-empresas-list input[type=checkbox]:checked');
   var empIds = Array.from(empChecks).map(function(c){return c.value;});
 
   if(!nombre||!email){ msgEl('msg-modal-usuario','err','Nombre y correo son obligatorios.'); return; }
+  if(!perfilId){ msgEl('msg-modal-usuario','err','Selecciona un perfil.'); return; }
   if(!empIds.length){ msgEl('msg-modal-usuario','err','Asigna al menos una empresa.'); return; }
   var dup = SYS.usuarios.find(function(u){return u.user===email && u.id!==id;});
-  if(dup){ msgEl('msg-modal-usuario','err','Ese correo ya existe en el sistema.'); return; }
+  if(dup){ msgEl('msg-modal-usuario','err','Ese correo ya existe.'); return; }
 
-  // ════════════════════════════════════════════════════════════
-  // MODO EDICIÓN
-  // ════════════════════════════════════════════════════════════
   if(id){
     var u = SYS.usuarios.find(function(x){return x.id===id;});
     if(!u){ msgEl('msg-modal-usuario','err','Usuario no encontrado.'); return; }
-
     showLoading('Actualizando usuario...');
     try{
-      // 1. Actualizar nombre/email/rol en tabla usuarios
       var updRes = await supa.from('usuarios').update({
-        nombre: nombre, user_login: email, rol: rol
+        nombre: nombre, user_login: email, perfil_id: perfilId
       }).eq('id', id).select();
-      if(updRes.error){
-        hideLoading();
-        msgEl('msg-modal-usuario','err','Error: '+updRes.error.message);
-        return;
-      }
-      if(!updRes.data || !updRes.data.length){
-        hideLoading();
-        msgEl('msg-modal-usuario','err','No se actualizó. Verifica permisos.');
-        return;
-      }
+      if(updRes.error){ hideLoading(); msgEl('msg-modal-usuario','err','Error: '+updRes.error.message); return; }
+      if(!updRes.data || !updRes.data.length){ hideLoading(); msgEl('msg-modal-usuario','err','No se actualizó.'); return; }
 
-      // 2. Si cambió la contraseña, llamar Edge Function
       if(pass && pass.length >= 6 && u.auth_user_id){
         var { data: sess } = await supa.auth.getSession();
         var token = sess && sess.session ? sess.session.access_token : null;
         if(!token){ hideLoading(); msgEl('msg-modal-usuario','err','Sesión inválida.'); return; }
-
         var res = await fetch(SUPA_URL+'/functions/v1/update-password', {
           method:'POST',
-          headers:{
-            'Authorization':'Bearer '+token,
-            'Content-Type':'application/json'
-          },
+          headers:{ 'Authorization':'Bearer '+token, 'Content-Type':'application/json' },
           body: JSON.stringify({ authUserId: u.auth_user_id, newPassword: pass })
         });
         var data = await res.json();
-        if(!res.ok){
-          hideLoading();
-          msgEl('msg-modal-usuario','err','Error contraseña: '+(data.error||'desconocido'));
-          return;
-        }
+        if(!res.ok){ hideLoading(); msgEl('msg-modal-usuario','err','Error contraseña: '+(data.error||'desconocido')); return; }
       } else if(pass && pass.length > 0 && pass.length < 6){
-        hideLoading();
-        msgEl('msg-modal-usuario','err','Contraseña mínima 6 caracteres (o vacía para no cambiar).');
-        return;
+        hideLoading(); msgEl('msg-modal-usuario','err','Contraseña mínima 6 caracteres.'); return;
       }
 
-      // 3. Actualizar relaciones empresa
       await supa.from('usuario_empresa').delete().eq('usuario_id', id);
       if(empIds.length){
         await supa.from('usuario_empresa').insert(
           empIds.map(function(eid){return{usuario_id:id, empresa_id:eid};})
         );
       }
-
-      // 4. Actualizar SYS en memoria
-      u.nombre=nombre; u.user=email; u.rol=rol; u.empresaIds=empIds;
-
+      u.nombre=nombre; u.user=email; u.perfil_id=perfilId; u.empresaIds=empIds;
       hideLoading();
       closeModal('modal-nuevo-usuario');
       renderUsuariosSistema();
       mostrarToast('Usuario actualizado correctamente.','ok');
-
     }catch(e){
       hideLoading();
       console.error('saveUsuario edit:',e);
@@ -1736,44 +1779,26 @@ async function saveUsuario(){
     return;
   }
 
-  // ════════════════════════════════════════════════════════════
-  // MODO CREACIÓN — usa Edge Function create-user
-  // ════════════════════════════════════════════════════════════
   if(!pass || pass.length < 6){
     msgEl('msg-modal-usuario','err','La contraseña debe tener mínimo 6 caracteres.');
     return;
   }
-
   showLoading('Creando usuario...');
   try{
     var { data: sess } = await supa.auth.getSession();
     var token = sess && sess.session ? sess.session.access_token : null;
     if(!token){ hideLoading(); msgEl('msg-modal-usuario','err','Sesión inválida.'); return; }
-
     var res = await fetch(SUPA_URL+'/functions/v1/create-user', {
       method:'POST',
-      headers:{
-        'Authorization':'Bearer '+token,
-        'Content-Type':'application/json'
-      },
+      headers:{ 'Authorization':'Bearer '+token, 'Content-Type':'application/json' },
       body: JSON.stringify({
-        email: email,
-        password: pass,
-        nombre: nombre,
-        rol: rol,
-        empresaIds: empIds
+        email: email, password: pass, nombre: nombre,
+        perfilId: perfilId, empresaIds: empIds
       })
     });
     var data = await res.json();
-    if(!res.ok){
-      hideLoading();
-      msgEl('msg-modal-usuario','err','Error: '+(data.error||'desconocido'));
-      return;
-    }
-
-    // Recargar SYS para reflejar el nuevo usuario
+    if(!res.ok){ hideLoading(); msgEl('msg-modal-usuario','err','Error: '+(data.error||'desconocido')); return; }
     await loadSYS();
-
     hideLoading();
     closeModal('modal-nuevo-usuario');
     document.getElementById('mu-edit-id').value='';
@@ -1781,26 +1806,33 @@ async function saveUsuario(){
     var titulo=document.getElementById('modal-usuario-titulo');
     if(titulo) titulo.textContent='Nuevo Usuario';
     renderUsuariosSistema();
-    mostrarToast('Usuario '+nombre+' creado correctamente. Ya puede iniciar sesión.','ok');
-
+    mostrarToast('Usuario '+nombre+' creado correctamente.','ok');
   }catch(e){
     hideLoading();
     console.error('saveUsuario create:',e);
-    msgEl('msg-modal-usuario','err','Error inesperado: '+(e.message||e));
+    msgEl('msg-modal-usuario','err','Error: '+(e.message||e));
   }
 }
 
-function editUsuario(id){
-  var u=SYS.usuarios.find(function(x){return x.id===id;}); if(!u) return;
-  document.getElementById('mu-edit-id').value=u.id;
-  document.getElementById('mu-nombre').value=u.nombre;
-  document.getElementById('mu-user').value=u.user;
-  document.getElementById('mu-pass').value='';
-  document.getElementById('mu-rol').value=u.rol;
-  populateMuEmpresa();
-  var ids=u.empresaIds||(u.empresaId?[u.empresaId]:[]);
-  populateMuEmpresas(ids);
-  document.getElementById('modal-usuario-titulo').textContent='Editar Usuario';
+function editUsuario(uid){
+  var u = SYS.usuarios.find(function(x){return x.id===uid;});
+  if(!u) return;
+  document.getElementById('mu-edit-id').value = u.id;
+  document.getElementById('mu-nombre').value  = u.nombre;
+  document.getElementById('mu-user').value    = u.user;
+  document.getElementById('mu-pass').value    = '';
+  poblarSelectPerfiles(u.perfil_id);
+  var lista = document.getElementById('mu-empresas-list');
+  if(lista){
+    lista.innerHTML = SYS.empresas.map(function(e){
+      var chk = u.empresaIds.includes(e.id) ? 'checked' : '';
+      return '<label style="display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:4px;cursor:pointer">'
+        +'<input type="checkbox" value="'+e.id+'" '+chk+'>'
+        +'<span>'+esc(e.razon)+'</span></label>';
+    }).join('');
+  }
+  document.getElementById('modal-usuario-titulo').textContent = 'Editar Usuario';
+  document.getElementById('msg-modal-usuario').innerHTML = '';
   openModal('modal-nuevo-usuario');
 }
 
@@ -1863,6 +1895,7 @@ function nav(id, el){
   abrirGrupoActivo(id);
   if(id==='subtipo-plan'){ renderSubtipoPlan(); }
   if(id==='cod-sii'){ renderCodSII(); }
+  if(id==='perfiles'){ renderPerfiles(); }
   if(id==='centros-costos'){ /* próximamente */ }
   if(id==='inicio'){ iniciarAutoRefreshInicio(); } else { detenerAutoRefreshInicio(); }
 }
@@ -3217,7 +3250,7 @@ window.addEventListener('load', async function(){
       if(usr && usr.empresaIds && usr.empresaIds.length){
         var sesLocal = recuperarSesion();
         var empId = sesLocal ? sesLocal.empresaId : usr.empresaIds[0];
-        SESSION = {userId:usr.id,auth_user_id:authUid,empresaId:empId,rol:usr.rol,nombre:usr.nombre};
+        SESSION = {userId:usr.id,auth_user_id:authUid,empresaId:empId,perfil_id:usr.perfil_id,nombre:usr.nombre};
         showLoading('Restaurando sesión...');
         await loadDB();
         hideLoading();
@@ -3259,27 +3292,26 @@ const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
 
 async function loadSYS(){
   try{
-    var [r1,r2,r3,r4] = await Promise.all([
+    var [r1,r2,r3,r4,r5] = await Promise.all([
       supa.from('empresas').select('*').order('razon'),
-      supa.from('usuarios').select('*').order('nombre'),
+      supa.from('usuarios').select('id,nombre,user_login,pass_hash,auth_user_id,perfil_id').order('nombre'),
       supa.from('usuario_empresa').select('*'),
       supa.from('plan_base').select('cod,nom,tipo,aux,desc_').order('cod'),
+      supa.from('perfiles').select('*').order('built_in', {ascending:false}).order('nombre'),
     ]);
-    // Detectar errores de RLS y reportarlos
-    if(r1.error) console.error('ERROR cargando empresas:', r1.error.message);
-    if(r2.error) console.error('ERROR cargando usuarios:', r2.error.message);
-    if(r3.error) console.error('ERROR cargando usuario_empresa:', r3.error.message);
-    if(r4.error) console.error('ERROR cargando plan_base:', r4.error.message);
+    if(r1.error) console.error('ERROR empresas:', r1.error.message);
+    if(r2.error) console.error('ERROR usuarios:', r2.error.message);
+    if(r3.error) console.error('ERROR usuario_empresa:', r3.error.message);
+    if(r4.error) console.error('ERROR plan_base:', r4.error.message);
+    if(r5.error) console.warn('perfiles no disponible:', r5.error.message);
     SYS.empresas = r1.data||[];
     SYS.usuarios = (r2.data||[]).map(function(u){
       var eids=(r3.data||[]).filter(function(x){return x.usuario_id===u.id;}).map(function(x){return x.empresa_id;});
       return{id:u.id,nombre:u.nombre,user:u.user_login,passHash:u.pass_hash,
-             auth_user_id:u.auth_user_id||null,rol:u.rol,empresaIds:eids};
+             auth_user_id:u.auth_user_id||null,perfil_id:u.perfil_id||null,empresaIds:eids};
     });
     SYS.planBase = (r4.data||[]).map(function(c){return{cod:c.cod,nom:c.nom,tipo:c.tipo,aux:c.aux,desc:c.desc_||''};});
-    if(SYS.usuarios.length===0 && !r2.error){
-      console.warn('SYS.usuarios vacío pero sin error — verificar tabla usuarios en Supabase');
-    }
+    SYS.perfiles = r5.data||[];
   }catch(e){console.error('loadSYS:',e);}
 }
 async function saveDB(){if(!SESSION.empresaId)return;try{await supa.from('empresa_config').upsert({empresa_id:SESSION.empresaId,num_asiento:DB.numAsiento});}catch(e){}}
@@ -3344,7 +3376,7 @@ function initNavListeners(){document.querySelectorAll('.nav-item[data-sec]').for
 
 // ══ SESIÓN + WATCHDOG ════════════════════════════════════════
 var SESSION_KEY='sc_session';var INACTIVITY_MS=20*60*1000;var _inactivityTimer=null;
-function guardarSesion(){try{sessionStorage.setItem(SESSION_KEY,JSON.stringify({userId:SESSION.userId,empresaId:SESSION.empresaId,rol:SESSION.rol,nombre:SESSION.nombre,ts:Date.now()}));}catch(e){}}
+function guardarSesion(){try{sessionStorage.setItem(SESSION_KEY,JSON.stringify({userId:SESSION.userId,empresaId:SESSION.empresaId,perfil_id:SESSION.perfil_id,nombre:SESSION.nombre,ts:Date.now()}));}catch(e){}}
 function limpiarSesion(){try{sessionStorage.removeItem(SESSION_KEY);}catch(e){}}
 function recuperarSesion(){try{var raw=sessionStorage.getItem(SESSION_KEY);if(!raw)return null;var s=JSON.parse(raw);if(!s||!s.userId)return null;if(Date.now()-s.ts>INACTIVITY_MS){limpiarSesion();return null;}return s;}catch(e){return null;}}
 function resetInactivityTimer(){if(_inactivityTimer)clearTimeout(_inactivityTimer);guardarSesion();_inactivityTimer=setTimeout(function(){if(!SESSION.userId)return;mostrarToast('Sesión cerrada por inactividad','warn');setTimeout(function(){doLogout();},1500);},INACTIVITY_MS);}
@@ -3495,8 +3527,10 @@ async function eliminarUsuarioCompleto(uid){
   var u = SYS.usuarios.find(function(x){return x.id===uid;});
   if(!u){ mostrarToast('Usuario no encontrado','err'); return; }
   if(uid===SESSION.userId){ mostrarToast('No puedes eliminarte a ti mismo','err'); return; }
-  if(u.rol==='admin' && SYS.usuarios.filter(function(x){return x.rol==='admin';}).length<=1){
-    mostrarToast('No puedes eliminar el último administrador','err'); return;
+  var esAdminBuiltIn = u.perfil_id==='p_admin';
+  if(esAdminBuiltIn){
+    var otrosAdmins = SYS.usuarios.filter(function(x){return x.perfil_id==='p_admin' && x.id!==u.id;}).length;
+    if(otrosAdmins===0){ mostrarToast('No puedes eliminar el último administrador','err'); return; }
   }
   if(!confirm('¿Eliminar al usuario '+u.nombre+'? Esta acción no se puede deshacer.')) return;
 
@@ -3572,6 +3606,210 @@ async function eliminarEmpresa(eid){
     console.error('eliminarEmpresa:',e);
     mostrarToast('Error: '+(e.message||e),'err');
   }
+}
+
+
+// ══ MÓDULO PERFILES ══════════════════════════════════════════
+var SECCIONES_DISPONIBLES = [
+  {key:'inicio',         label:'Inicio'},
+  {key:'cuentas',        label:'Plan de Cuentas'},
+  {key:'diario',         label:'Ingreso Comprobante'},
+  {key:'mayor',          label:'Libro Mayor'},
+  {key:'auxiliares',     label:'Auxiliares / Terceros'},
+  {key:'balance8',       label:'Balance 8 Columnas'},
+  {key:'eerr',           label:'Estado de Resultado'},
+  {key:'subtipo-plan',   label:'Sub Tipo Plan'},
+  {key:'cod-sii',        label:'Códigos SII'},
+  {key:'centros-costos', label:'Centros de Costos'},
+  {key:'perfiles',       label:'Perfiles'},
+  {key:'sistema',        label:'Gestión del Sistema'},
+  {key:'config',         label:'Configuración Sistema'}
+];
+
+async function renderPerfiles(){
+  var tb = document.getElementById('tbody-perfiles');
+  if(!tb) return;
+  if(!SYS.perfiles || !SYS.perfiles.length){
+    tb.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text3)">No hay perfiles. Ejecuta el SQL de migración.</td></tr>';
+    return;
+  }
+  tb.innerHTML = '';
+  SYS.perfiles.forEach(function(p){
+    var numUsuarios = SYS.usuarios.filter(function(u){return u.perfil_id===p.id;}).length;
+    var permActivos = Object.keys(p.permisos||{}).filter(function(k){return p.permisos[k];}).length;
+    var totalSecs = SECCIONES_DISPONIBLES.length;
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td><b>'+esc(p.nombre)+'</b></td>'
+      +'<td style="font-size:12px;color:var(--text3)">'+esc(p.descripcion||'—')+'</td>'
+      +'<td style="text-align:center;font-size:13px">'+numUsuarios+'</td>'
+      +'<td style="text-align:center;font-size:12px">'+permActivos+'/'+totalSecs+'</td>'
+      +'<td style="text-align:center">'
+        +(p.built_in
+          ? '<span class="badge" style="background:#dbeafe;color:#1e40af;font-size:10px">Sistema</span>'
+          : '<span class="badge" style="background:#f3e8ff;color:#7c3aed;font-size:10px">Personalizado</span>')
+      +'</td>'
+      +'<td style="text-align:right">'
+        +'<button class="btn btn-sm btn-ghost" onclick="editPerfil(\''+p.id+'\')">Editar</button> '
+        +(p.built_in || numUsuarios>0
+          ? '<button class="btn btn-sm btn-ghost" disabled title="'+(p.built_in?'Perfil del sistema':'Tiene usuarios asignados')+'" style="opacity:.4;cursor:not-allowed">×</button>'
+          : '<button class="btn btn-sm btn-danger" onclick="eliminarPerfil(\''+p.id+'\')">×</button>')
+      +'</td>';
+    tb.appendChild(tr);
+  });
+}
+
+function openModalPerfil(){
+  document.getElementById('mp-edit-id').value = '';
+  document.getElementById('mp-nombre').value = '';
+  document.getElementById('mp-descripcion').value = '';
+  document.getElementById('modal-perfil-titulo').textContent = 'Nuevo Perfil';
+  document.getElementById('msg-modal-perfil').innerHTML = '';
+  renderPermisosGrid({});
+  openModal('modal-perfil');
+}
+
+function editPerfil(pid){
+  var p = SYS.perfiles.find(function(x){return x.id===pid;});
+  if(!p) return;
+  document.getElementById('mp-edit-id').value = p.id;
+  document.getElementById('mp-nombre').value = p.nombre;
+  document.getElementById('mp-nombre').disabled = !!p.built_in;
+  document.getElementById('mp-descripcion').value = p.descripcion || '';
+  document.getElementById('modal-perfil-titulo').textContent = (p.built_in?'Editar Permisos: ':'Editar: ')+p.nombre;
+  document.getElementById('msg-modal-perfil').innerHTML = p.built_in
+    ? '<div style="background:#fef3c7;color:#92400e;padding:10px;border-radius:6px;font-size:12px;margin-bottom:12px">⚠️ Perfil del sistema. Solo se pueden editar los permisos.</div>'
+    : '';
+  renderPermisosGrid(p.permisos||{});
+  openModal('modal-perfil');
+}
+
+function renderPermisosGrid(permisos){
+  var grid = document.getElementById('mp-permisos-grid');
+  if(!grid) return;
+  grid.innerHTML = SECCIONES_DISPONIBLES.map(function(s){
+    var checked = permisos[s.key] ? 'checked' : '';
+    return '<label style="display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--border);border-radius:6px;cursor:pointer;background:var(--surface)">'
+      +'<input type="checkbox" data-key="'+s.key+'" '+checked+' style="cursor:pointer">'
+      +'<span style="font-size:13px">'+s.label+'</span>'
+      +'</label>';
+  }).join('');
+}
+
+async function savePerfil(){
+  var id          = document.getElementById('mp-edit-id').value;
+  var nombre      = document.getElementById('mp-nombre').value.trim();
+  var descripcion = document.getElementById('mp-descripcion').value.trim();
+  if(!nombre){ msgEl('msg-modal-perfil','err','El nombre es obligatorio.'); return; }
+
+  // Capturar permisos del grid
+  var permisos = {};
+  document.querySelectorAll('#mp-permisos-grid input[type=checkbox]').forEach(function(cb){
+    permisos[cb.getAttribute('data-key')] = cb.checked;
+  });
+
+  // Validar duplicados
+  var dup = SYS.perfiles.find(function(p){return p.nombre.toLowerCase()===nombre.toLowerCase() && p.id!==id;});
+  if(dup){ msgEl('msg-modal-perfil','err','Ese nombre ya existe en otro perfil.'); return; }
+
+  showLoading('Guardando perfil...');
+  try{
+    if(id){
+      // ── EDICIÓN
+      var p = SYS.perfiles.find(function(x){return x.id===id;});
+      if(!p){ hideLoading(); msgEl('msg-modal-perfil','err','Perfil no encontrado.'); return; }
+      var updateData = { permisos: permisos };
+      if(!p.built_in){
+        updateData.nombre = nombre;
+        updateData.descripcion = descripcion;
+      }
+      var updRes = await supa.from('perfiles').update(updateData).eq('id', id).select();
+      if(updRes.error){ hideLoading(); msgEl('msg-modal-perfil','err','Error: '+updRes.error.message); return; }
+      if(!updRes.data || !updRes.data.length){ hideLoading(); msgEl('msg-modal-perfil','err','No se actualizó.'); return; }
+      // Actualizar SYS
+      p.permisos = permisos;
+      if(!p.built_in){ p.nombre = nombre; p.descripcion = descripcion; }
+      hideLoading();
+      closeModal('modal-perfil');
+      renderPerfiles();
+      mostrarToast('Perfil actualizado correctamente.','ok');
+    } else {
+      // ── CREACIÓN
+      var nuevoId = 'p_'+Date.now();
+      var insRes = await supa.from('perfiles').insert({
+        id: nuevoId, nombre: nombre, descripcion: descripcion,
+        permisos: permisos, built_in: false
+      }).select();
+      if(insRes.error){ hideLoading(); msgEl('msg-modal-perfil','err','Error: '+insRes.error.message); return; }
+      if(!insRes.data || !insRes.data.length){ hideLoading(); msgEl('msg-modal-perfil','err','No se creó.'); return; }
+      SYS.perfiles.push({id:nuevoId, nombre:nombre, descripcion:descripcion, permisos:permisos, built_in:false});
+      hideLoading();
+      closeModal('modal-perfil');
+      renderPerfiles();
+      mostrarToast('Perfil "'+nombre+'" creado correctamente.','ok');
+    }
+  }catch(e){
+    hideLoading();
+    console.error('savePerfil:',e);
+    msgEl('msg-modal-perfil','err','Error: '+(e.message||e));
+  }
+}
+
+async function eliminarPerfil(pid){
+  var p = SYS.perfiles.find(function(x){return x.id===pid;});
+  if(!p){ mostrarToast('Perfil no encontrado','err'); return; }
+  if(p.built_in){ mostrarToast('No puedes eliminar perfiles del sistema','err'); return; }
+  var numUsuarios = SYS.usuarios.filter(function(u){return u.perfil_id===pid;}).length;
+  if(numUsuarios>0){
+    mostrarToast('Este perfil tiene '+numUsuarios+' usuario(s) asignado(s)','err'); return;
+  }
+  if(!confirm('¿Eliminar el perfil "'+p.nombre+'"? Esta acción no se puede deshacer.')) return;
+  showLoading('Eliminando perfil...');
+  try{
+    var delRes = await supa.from('perfiles').delete().eq('id', pid);
+    if(delRes.error) throw delRes.error;
+    SYS.perfiles = SYS.perfiles.filter(function(x){return x.id!==pid;});
+    hideLoading();
+    renderPerfiles();
+    mostrarToast('Perfil eliminado correctamente.','ok');
+  }catch(e){
+    hideLoading();
+    console.error('eliminarPerfil:',e);
+    mostrarToast('Error: '+(e.message||e),'err');
+  }
+}
+// ═════════════════════════════════════════════════════════════
+
+function poblarSelectPerfiles(selectedId){
+  var sel = document.getElementById('mu-perfil-id');
+  if(!sel) return;
+  if(!SYS.perfiles || !SYS.perfiles.length){
+    sel.innerHTML = '<option value="">No hay perfiles definidos</option>';
+    return;
+  }
+  sel.innerHTML = '<option value="">— Selecciona perfil —</option>' +
+    SYS.perfiles.map(function(p){
+      var s = (p.id===selectedId) ? ' selected' : '';
+      return '<option value="'+p.id+'"'+s+'>'+esc(p.nombre)+'</option>';
+    }).join('');
+}
+
+function openModalUsuario(){
+  document.getElementById('mu-edit-id').value = '';
+  document.getElementById('mu-nombre').value  = '';
+  document.getElementById('mu-user').value    = '';
+  document.getElementById('mu-pass').value    = '';
+  poblarSelectPerfiles('');
+  var lista = document.getElementById('mu-empresas-list');
+  if(lista){
+    lista.innerHTML = SYS.empresas.map(function(e){
+      return '<label style="display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:4px;cursor:pointer">'
+        +'<input type="checkbox" value="'+e.id+'">'
+        +'<span>'+esc(e.razon)+'</span></label>';
+    }).join('');
+  }
+  document.getElementById('modal-usuario-titulo').textContent = 'Nuevo Usuario';
+  document.getElementById('msg-modal-usuario').innerHTML = '';
+  openModal('modal-nuevo-usuario');
 }
 </script>
 </body>
