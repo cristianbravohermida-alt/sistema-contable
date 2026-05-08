@@ -377,12 +377,7 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
 <div id="sec-inicio" class="section active">
   <div class="topbar">
     <div><div class="page-title">Inicio</div><div class="page-sub" id="inicio-fecha"></div></div>
-    <div class="topbar-actions">
-      <button class="btn btn-sm" onclick="renderInicio()">
-        <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-        Actualizar
-      </button>
-    </div>
+    
   </div>
   <div class="content">
     <div style="margin-bottom:24px">
@@ -2982,8 +2977,6 @@ window.addEventListener('load', async function(){
   loadSYS();
   await initSistemaSiVacio();
   document.getElementById('login-screen').classList.add('show');
-  // Pre-llenar usuario para demo (solo si hay exactamente 1 usuario)
-  if(SYS.usuarios.length===1){ document.getElementById('li-user').value=SYS.usuarios[0].user; }
 });
 
 // Enter en login
@@ -3052,7 +3045,21 @@ function mostrarToast(msg,tipo){var t=document.createElement('div');var bg=tipo=
 
 // ══ AUTO-REFRESH INICIO ══════════════════════════════════════
 var _inicioRefreshTimer=null;var _INICIO_REFRESH_MS=60*60*1000;
-function iniciarAutoRefreshInicio(){detenerAutoRefreshInicio();renderInicio();_inicioRefreshTimer=setInterval(function(){var sec=document.getElementById('sec-inicio');if(sec&&sec.classList.contains('active')){renderInicio();mostrarToast('Datos actualizados','ok');}},_INICIO_REFRESH_MS);}
+function iniciarAutoRefreshInicio(){
+  detenerAutoRefreshInicio();
+  renderInicio(); // carga inmediata
+  // Programar próxima actualización a las 00:01 del día siguiente
+  function programarSiguiente(){
+    var ahora=new Date();
+    var manana=new Date(ahora.getFullYear(),ahora.getMonth(),ahora.getDate()+1,0,1,0,0);
+    var msHastaMedianoche=manana-ahora;
+    _inicioRefreshTimer=setTimeout(function(){
+      renderInicio();
+      programarSiguiente(); // reprogramar para el día siguiente
+    }, msHastaMedianoche);
+  }
+  programarSiguiente();
+}
 function detenerAutoRefreshInicio(){if(_inicioRefreshTimer){clearInterval(_inicioRefreshTimer);_inicioRefreshTimer=null;}}
 // ═════════════════════════════════════════════════════════════
 
@@ -3091,23 +3098,55 @@ function renderResumenEmpresa(){
     +'</div><div style="margin-top:10px;font-size:11px;color:var(--text3)">RUT: '+emp.rut+'</div>';
 }
 function renderCalendarioTributario(){
-  var el=document.getElementById('inicio-calendario');if(!el)return;
-  var ahora=new Date();var mes=ahora.getMonth()+1;var anio=ahora.getFullYear();
-  var venc=[{dia:12,desc:'IVA F29 — 1ª categoría'},{dia:13,desc:'Ret. honorarios F50'},{dia:15,desc:'Cotizaciones AFP/Salud'},{dia:20,desc:'IVA F29 — simplificados'},{dia:28,desc:'Libro remuneraciones'}];
-  var esp={4:[{dia:30,desc:'Renta Anual F22'}],5:[{dia:31,desc:'DJ 1887 honorarios'}],7:[{dia:31,desc:'DJ 1879 retenciones'}]};
-  var todos=venc.slice();if(esp[mes])todos=todos.concat(esp[mes]);todos.sort(function(a,b){return a.dia-b.dia;});
+  var el=document.getElementById('inicio-calendario'); if(!el) return;
+  var ahora=new Date();
+  var ahora_solo=new Date(ahora.getFullYear(),ahora.getMonth(),ahora.getDate()); // medianoche hoy
+  var mes=ahora.getMonth()+1;
+  var anio=ahora.getFullYear();
+
+  // Vencimientos mensuales fijos SII Chile (días hábiles confirmados)
+  var venc=[
+    {dia:12, desc:'Cotizaciones AFP, Salud y AFC (Previred)'},
+    {dia:12, desc:'IVA F29 — Grandes contribuyentes'},
+    {dia:20, desc:'IVA F29 — Resto de contribuyentes'},
+    {dia:20, desc:'Ret. honorarios F50'},
+    {dia:28, desc:'Pago remuneraciones y finiquitos'},
+  ];
+
+  // Vencimientos especiales por mes
+  var esp={
+    1: [{dia:12, desc:'Inicio Operación Renta'}],
+    3: [{dia:31, desc:'DJ 1887 — honorarios año anterior'}],
+    4: [{dia:30, desc:'Renta Anual F22 — plazo general'}],
+    5: [{dia:30, desc:'DJ 1887 — honorarios (plazo extendido)'}],
+    6: [{dia:30, desc:'DJ 1879 — retenciones año anterior'}],
+    7: [{dia:31, desc:'F22 fuera de plazo — recargo'}],
+    10:[{dia:31, desc:'PPM voluntario — plazo recargo'}],
+    12:[{dia:31, desc:'Cierre ejercicio contable'}],
+  };
+
+  var todos=venc.slice();
+  if(esp[mes]) todos=todos.concat(esp[mes]);
+  todos.sort(function(a,b){return a.dia-b.dia;});
+
+  // Calcular días restantes usando solo fechas (sin hora) para evitar errores
   el.innerHTML='<div style="display:flex;flex-direction:column;gap:6px">'+todos.map(function(v){
-    var dr=Math.ceil((new Date(anio,mes-1,v.dia)-ahora)/864e5);
+    var fechaVenc=new Date(anio,mes-1,v.dia); // medianoche del día vencimiento
+    var dr=Math.round((fechaVenc-ahora_solo)/(1000*60*60*24));
     var clr=dr<0?'var(--text3)':dr<=3?'#ef4444':dr<=7?'#d97706':'var(--text2)';
     var bgB=dr<0?'#f1f5f9':dr<=3?'#fee2e2':dr<=7?'#fef3c7':'#f0fdf4';
     var clrB=dr<0?'#94a3b8':dr<=3?'#dc2626':dr<=7?'#d97706':'#16a34a';
     var badge=dr<0?'Vencido':dr===0?'¡Hoy!':dr===1?'Mañana':'En '+dr+'d';
-    return '<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:6px;background:var(--surface2)"><div style="min-width:24px;font-size:13px;font-weight:700;color:var(--accent);text-align:center">'+(v.dia<10?'0':'')+v.dia+'</div><div style="flex:1;font-size:12px;color:'+clr+'">'+v.desc+'</div><div style="font-size:10px;font-weight:600;padding:2px 6px;border-radius:4px;background:'+bgB+';color:'+clrB+'">'+badge+'</div></div>';
+    return '<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:6px;background:var(--surface2)">'
+      +'<div style="min-width:24px;font-size:13px;font-weight:700;color:var(--accent);text-align:center">'+(v.dia<10?'0':'')+v.dia+'</div>'
+      +'<div style="flex:1;font-size:12px;color:'+clr+'">'+v.desc+'</div>'
+      +'<div style="font-size:10px;font-weight:600;padding:2px 6px;border-radius:4px;white-space:nowrap;background:'+bgB+';color:'+clrB+'">'+badge+'</div>'
+      +'</div>';
   }).join('')+'</div>';
 }
 function renderLinksUtiles(){
   var el=document.getElementById('inicio-links');if(!el)return;
-  var links=[{icon:'🏛️',label:'SII',url:'https://www.sii.cl',desc:'Impuestos Internos'},{icon:'👷',label:'Dir. Trabajo',url:'https://www.dt.gob.cl',desc:'Trámites laborales'},{icon:'💰',label:'Previred',url:'https://www.previred.com',desc:'Cotizaciones'},{icon:'📰',label:'Diario Financiero',url:'https://www.df.cl',desc:'Noticias financieras'},{icon:'🏦',label:'Banco Central',url:'https://www.bcentral.cl',desc:'Indicadores'},{icon:'📋',label:'CMF',url:'https://www.cmfchile.cl',desc:'Mercado Financiero'},{icon:'💼',label:'Reg. Empresas',url:'https://www.registroempresa.cl',desc:'Trámites'},{icon:'📊',label:'INE',url:'https://www.ine.gob.cl',desc:'Estadísticas'}];
+  var links=[{icon:'🏛️',label:'SII',url:'https://www.sii.cl',desc:'Impuestos Internos'},{icon:'👷',label:'Dir. Trabajo',url:'https://www.dt.gob.cl',desc:'Trámites laborales'},{icon:'💰',label:'Previred',url:'https://www.previred.com',desc:'Cotizaciones'},{icon:'📰',label:'Diario Financiero',url:'https://www.df.cl',desc:'Noticias financieras'},{icon:'🏦',label:'Banco Central',url:'https://www.bcentral.cl',desc:'Indicadores'},{icon:'📋',label:'CMF',url:'https://www.cmfchile.cl',desc:'Mercado Financiero'},{icon:'📊',label:'INE',url:'https://www.ine.gob.cl',desc:'Estadísticas'}];
   el.innerHTML=links.map(function(l){return '<a href="'+l.url+'" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius);border:1px solid var(--border);text-decoration:none;background:var(--surface);transition:border-color .15s" onmouseover="this.style.borderColor=\'var(--accent)\'" onmouseout="this.style.borderColor=\'var(--border)\'"><span style="font-size:18px">'+l.icon+'</span><div><div style="font-size:13px;font-weight:600;color:var(--text)">'+l.label+'</div><div style="font-size:11px;color:var(--text3)">'+l.desc+'</div></div></a>';}).join('');
 }
 // ═════════════════════════════════════════════════════════════
