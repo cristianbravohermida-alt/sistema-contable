@@ -1324,76 +1324,49 @@ async function doLogin(){
   errEl.classList.remove('show');
   if(!user||!pass){ errEl.textContent='Completa usuario y contraseña.'; errEl.classList.add('show'); return; }
 
-  // ── Rate limiting: max 5 intentos, lockout 15 min
+  // Rate limiting
   var rlKey='sc_rl_'+user;
   var rl=null; try{ rl=JSON.parse(sessionStorage.getItem(rlKey)||'null'); }catch(e){}
   if(rl && rl.lockUntil && Date.now()<rl.lockUntil){
     var mins=Math.ceil((rl.lockUntil-Date.now())/60000);
-    errEl.textContent='Cuenta bloqueada por '+mins+' min. Demasiados intentos.';
+    errEl.textContent='Cuenta bloqueada por '+mins+' min.';
     errEl.classList.add('show'); return;
   }
 
-  showLoading('Verificando credenciales...');
+  showLoading('Verificando...');
 
-  // ── MODO A: Supabase Auth (para usuarios migrados con auth_user_id)
-  var usrConAuth = SYS.usuarios.find(function(u){
-    return (u.user===user) && u.auth_user_id;
-  });
-
-  if(usrConAuth){
-    try{
-      var { data, error } = await supa.auth.signInWithPassword({ email: user, password: pass });
-      if(error){
-        hideLoading();
-        var intentos=(rl&&!rl.lockUntil?rl.intentos:0)||0; intentos++;
-        var lockUntil=intentos>=5?Date.now()+15*60*1000:null;
-        try{ sessionStorage.setItem(rlKey,JSON.stringify({intentos:intentos,lockUntil:lockUntil})); }catch(e){}
-        errEl.textContent = lockUntil
-          ? 'Demasiados intentos. Cuenta bloqueada 15 minutos.'
-          : 'Usuario o contraseña incorrectos. ('+(5-intentos)+' intentos restantes)';
-        errEl.classList.add('show'); return;
-      }
-      try{ sessionStorage.removeItem(rlKey); }catch(e){}
-      var usr=SYS.usuarios.find(function(u){return u.auth_user_id===data.user.id;});
-      if(!usr||!usr.empresaIds||!usr.empresaIds.length){
-        await supa.auth.signOut(); hideLoading();
-        errEl.textContent='Usuario sin empresas asignadas.'; errEl.classList.add('show'); return;
-      }
-      SESSION={userId:usr.id,auth_user_id:data.user.id,empresaId:usr.empresaIds[0],rol:usr.rol,nombre:usr.nombre};
-      await loadDB(); hideLoading();
-      document.getElementById('login-screen').classList.remove('show');
-      document.getElementById('app-layout').style.display='flex';
-      document.getElementById('li-pass').value='';
-      guardarSesion(); iniciarWatchdogSesion(); initNavListeners(); initAppPostLogin();
-      return;
-    }catch(e){
-      hideLoading();
-      errEl.textContent='Error de conexión. Intenta nuevamente.'; errEl.classList.add('show'); return;
-    }
-  }
-
-  // ── MODO B: Login local con hash (usuarios aún no migrados a Supabase Auth)
+  // Calcular hash de la contraseña ingresada
   var hash = await sha256(pass);
+  console.log('DEBUG user:', user);
+  console.log('DEBUG hash calculado:', hash);
+  console.log('DEBUG SYS.usuarios:', SYS.usuarios.map(function(u){return {user:u.user, hash:u.passHash};}));
+
+  // Buscar usuario por hash
   var usr = SYS.usuarios.find(function(u){
-    return (u.user===user) && u.passHash===hash;
+    return u.user === user && u.passHash === hash;
   });
+
   if(!usr){
     hideLoading();
     var intentos=(rl&&!rl.lockUntil?rl.intentos:0)||0; intentos++;
     var lockUntil=intentos>=5?Date.now()+15*60*1000:null;
     try{ sessionStorage.setItem(rlKey,JSON.stringify({intentos:intentos,lockUntil:lockUntil})); }catch(e){}
     errEl.textContent = lockUntil
-      ? 'Demasiados intentos. Cuenta bloqueada 15 minutos.'
+      ? 'Demasiados intentos. Bloqueado 15 min.'
       : 'Usuario o contraseña incorrectos. ('+(5-intentos)+' intentos restantes)';
     errEl.classList.add('show'); return;
   }
+
   if(!usr.empresaIds||!usr.empresaIds.length){
     hideLoading();
-    errEl.textContent='Este usuario no tiene empresas asignadas.'; errEl.classList.add('show'); return;
+    errEl.textContent='Usuario sin empresas asignadas.';
+    errEl.classList.add('show'); return;
   }
+
   try{ sessionStorage.removeItem(rlKey); }catch(e){}
   SESSION={userId:usr.id,auth_user_id:null,empresaId:usr.empresaIds[0],rol:usr.rol,nombre:usr.nombre};
-  await loadDB(); hideLoading();
+  await loadDB();
+  hideLoading();
   document.getElementById('login-screen').classList.remove('show');
   document.getElementById('app-layout').style.display='flex';
   document.getElementById('li-pass').value='';
