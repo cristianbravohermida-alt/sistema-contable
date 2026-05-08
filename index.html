@@ -449,28 +449,30 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
 </div>
 
 <!-- MODAL PERFIL -->
-<div id="modal-perfil" class="modal">
-  <div class="modal-content" style="max-width:640px">
-    <div class="modal-header">
-      <h3 id="modal-perfil-titulo">Nuevo Perfil</h3>
-      <button class="modal-close" onclick="closeModal('modal-perfil')">×</button>
+<div class="modal-overlay" id="modal-perfil">
+  <div class="modal" style="width:640px;max-width:95vw">
+    <div class="modal-head">
+      <div class="modal-title" id="modal-perfil-titulo">Nuevo Perfil</div>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-perfil')">
+        <svg viewBox="0 0 24 24" width="16" height="16"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
     </div>
     <div class="modal-body">
       <input type="hidden" id="mp-edit-id" value="">
       <div id="msg-modal-perfil"></div>
       <div class="form-grid cols2" style="gap:14px">
-        <div class="field span2"><label>Nombre del Perfil *</label><input id="mp-nombre" placeholder="Ej: Auditor"></div>
+        <div class="field span2"><label>Nombre del perfil *</label><input id="mp-nombre" placeholder="Ej: Auditor"></div>
         <div class="field span2"><label>Descripción</label><input id="mp-descripcion" placeholder="Breve descripción del perfil"></div>
       </div>
       <div style="margin-top:18px">
         <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em">Permisos de Acceso</div>
-        <div style="font-size:11px;color:var(--text3);margin-bottom:10px">Selecciona las secciones que este perfil podrá ver:</div>
-        <div id="mp-permisos-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px"></div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:10px">Selecciona las secciones que este perfil podrá ver en el menú:</div>
+        <div id="mp-permisos-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;max-height:50vh;overflow-y:auto;padding:4px"></div>
       </div>
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('modal-perfil')">Cancelar</button>
-      <button class="btn btn-primary" onclick="savePerfil()">Guardar</button>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('modal-perfil')">Cancelar</button>
+      <button class="btn btn-primary" onclick="savePerfil()">Guardar perfil</button>
     </div>
   </div>
 </div>
@@ -3660,21 +3662,30 @@ async function renderPerfiles(){
 
 function openModalPerfil(){
   document.getElementById('mp-edit-id').value = '';
-  document.getElementById('mp-nombre').value = '';
+  var nombreInput = document.getElementById('mp-nombre');
+  nombreInput.value = '';
+  nombreInput.disabled = false;        // RESET importante
+  nombreInput.removeAttribute('readonly');
   document.getElementById('mp-descripcion').value = '';
+  document.getElementById('mp-descripcion').disabled = false;
   document.getElementById('modal-perfil-titulo').textContent = 'Nuevo Perfil';
   document.getElementById('msg-modal-perfil').innerHTML = '';
   renderPermisosGrid({});
   openModal('modal-perfil');
+  // Foco en el campo nombre
+  setTimeout(function(){ nombreInput.focus(); }, 50);
 }
 
 function editPerfil(pid){
   var p = SYS.perfiles.find(function(x){return x.id===pid;});
   if(!p) return;
   document.getElementById('mp-edit-id').value = p.id;
-  document.getElementById('mp-nombre').value = p.nombre;
-  document.getElementById('mp-nombre').disabled = !!p.built_in;
-  document.getElementById('mp-descripcion').value = p.descripcion || '';
+  var nombreInput = document.getElementById('mp-nombre');
+  nombreInput.value = p.nombre;
+  nombreInput.disabled = !!p.built_in;
+  var descInput = document.getElementById('mp-descripcion');
+  descInput.value = p.descripcion || '';
+  descInput.disabled = !!p.built_in;
   document.getElementById('modal-perfil-titulo').textContent = (p.built_in?'Editar Permisos: ':'Editar: ')+p.nombre;
   document.getElementById('msg-modal-perfil').innerHTML = p.built_in
     ? '<div style="background:#fef3c7;color:#92400e;padding:10px;border-radius:6px;font-size:12px;margin-bottom:12px">⚠️ Perfil del sistema. Solo se pueden editar los permisos.</div>'
@@ -3686,13 +3697,49 @@ function editPerfil(pid){
 function renderPermisosGrid(permisos){
   var grid = document.getElementById('mp-permisos-grid');
   if(!grid) return;
-  grid.innerHTML = SECCIONES_DISPONIBLES.map(function(s){
-    var checked = permisos[s.key] ? 'checked' : '';
-    return '<label style="display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--border);border-radius:6px;cursor:pointer;background:var(--surface)">'
-      +'<input type="checkbox" data-key="'+s.key+'" '+checked+' style="cursor:pointer">'
-      +'<span style="font-size:13px">'+s.label+'</span>'
-      +'</label>';
-  }).join('');
+  // Estructura por grupos como el menú lateral
+  var grupos = [
+    { titulo:null, items:[ {key:'inicio', label:'Inicio'} ] },
+    { titulo:'Ingreso Contable', items:[ {key:'diario', label:'Ingreso Comprobante'} ] },
+    { titulo:'Libros Auxiliares', items:[ {key:'auxiliares', label:'Auxiliares / Terceros'} ] },
+    { titulo:'Libros Contables', items:[ {key:'mayor', label:'Libro Mayor'} ] },
+    { titulo:'Estados Financieros', items:[
+        {key:'balance8', label:'Balance 8 Columnas'},
+        {key:'eerr',     label:'Estado de Resultado'},
+    ]},
+    { titulo:'Configuración › Administración', items:[
+        {key:'cuentas',        label:'Plan de Cuentas'},
+        {key:'auxiliares',     label:'Auxiliares / Terceros'},
+        {key:'subtipo-plan',   label:'Sub Tipo Plan'},
+        {key:'cod-sii',        label:'Códigos SII'},
+        {key:'centros-costos', label:'Centros de Costos'},
+        {key:'perfiles',       label:'Perfiles'},
+    ]},
+    { titulo:'Configuración › Sistema', items:[
+        {key:'sistema', label:'Gestión del Sistema'},
+        {key:'config',  label:'Configuración Sistema'},
+    ]}
+  ];
+
+  var html_html = '';
+  grupos.forEach(function(g){
+    if(g.titulo){
+      html_html += '<div class="span2" style="grid-column:1/-1;margin-top:14px;font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border);padding-bottom:4px">'
+        + esc(g.titulo) + '</div>';
+    }
+    g.items.forEach(function(s){
+      // Detectar duplicados (auxiliares está en 2 grupos, usar key único)
+      var inputId = 'perm_'+g.titulo+'_'+s.key;
+      inputId = inputId.replace(/[^a-z0-9_]/gi,'_');
+      var checked = permisos[s.key] ? 'checked' : '';
+      html_html += '<label style="display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--border);border-radius:6px;cursor:pointer;background:var(--surface);transition:all .15s" '
+        + 'onmouseover="this.style.background=\'#f8fafc\'" onmouseout="this.style.background=\'\'">'
+        + '<input type="checkbox" data-key="'+s.key+'" '+checked+' style="cursor:pointer;width:16px;height:16px">'
+        + '<span style="font-size:13px">'+esc(s.label)+'</span>'
+        + '</label>';
+    });
+  });
+  grid.innerHTML = html_html;
 }
 
 async function savePerfil(){
@@ -3701,10 +3748,11 @@ async function savePerfil(){
   var descripcion = document.getElementById('mp-descripcion').value.trim();
   if(!nombre){ msgEl('msg-modal-perfil','err','El nombre es obligatorio.'); return; }
 
-  // Capturar permisos del grid
+  // Capturar permisos del grid (si el mismo key tiene múltiples checkboxes — auxiliares —, basta uno marcado)
   var permisos = {};
   document.querySelectorAll('#mp-permisos-grid input[type=checkbox]').forEach(function(cb){
-    permisos[cb.getAttribute('data-key')] = cb.checked;
+    var k = cb.getAttribute('data-key');
+    permisos[k] = (permisos[k] === true) ? true : cb.checked;
   });
 
   // Validar duplicados
