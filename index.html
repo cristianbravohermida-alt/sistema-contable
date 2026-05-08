@@ -23,30 +23,37 @@ a{color:var(--accent);text-decoration:none}
 
 /* LAYOUT */
 .layout{display:flex;min-height:100vh}
-.sidebar{width:220px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:100}
+.sidebar{width:220px;background:#161c2d;border-right:1px solid #0d1117;display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:100}
 .main{margin-left:220px;flex:1;display:flex;flex-direction:column;min-height:100vh}
 
 /* SIDEBAR */
-.sidebar-brand{padding:18px 16px 14px;border-bottom:1px solid var(--border)}
+.sidebar-brand{padding:18px 16px 14px;border-bottom:1px solid rgba(255,255,255,.08)}
 .brand-icon{width:32px;height:32px;background:var(--accent);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;margin-bottom:8px}
 .brand-icon svg{color:#fff;fill:none;stroke:currentColor;stroke-width:2}
 .brand-name{font-size:13px;font-weight:600;color:var(--text)}
-.brand-sub{font-size:11px;color:var(--text3);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand-sub{font-size:11px;color:rgba(255,255,255,.5);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .nav-section{padding:12px 8px 4px;font-size:10px;font-weight:600;color:var(--text3);letter-spacing:.06em;text-transform:uppercase}
-.nav-item{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:var(--radius);margin:1px 8px;cursor:pointer;font-size:13px;color:var(--text2);transition:all .12s;user-select:none}
-.nav-item:hover{background:var(--surface2);color:var(--text)}
-.nav-item.active{background:var(--accent-bg);color:var(--accent);font-weight:500}
+.nav-item{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:var(--radius);margin:1px 8px;cursor:pointer;font-size:13px;color:rgba(255,255,255,.75);transition:all .12s;user-select:none}
+.nav-item:hover{background:rgba(255,255,255,.08);color:#fff}
+.nav-item.active{background:rgba(37,99,235,.35);color:#93c5fd;font-weight:500}
 .nav-item svg{width:16px;height:16px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:2}
-.nav-group-btn{display:flex;align-items:center;gap:9px;padding:8px 10px;margin:1px 8px;border-radius:var(--radius);cursor:pointer;font-size:13px;font-weight:500;color:var(--text2);transition:all .12s;user-select:none}
-.nav-group-btn:hover{background:var(--surface2);color:var(--text)}
+.nav-group-btn{display:flex;align-items:center;gap:9px;padding:8px 10px;margin:1px 8px;border-radius:var(--radius);cursor:pointer;font-size:13px;font-weight:500;color:rgba(255,255,255,.75);transition:all .12s;user-select:none}
+.nav-group-btn:hover{background:rgba(255,255,255,.08);color:#fff}
 .nav-group-btn svg.icon{width:16px;height:16px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:2}
 .nav-group-btn .chev{width:13px;height:13px;margin-left:auto;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:2;transition:transform .2s}
 .nav-group-btn.open .chev{transform:rotate(90deg)}
-.nav-group-btn.open{color:var(--text)}
+.nav-group-btn.open{color:#fff}
 .nav-sub{display:none;padding-left:6px}
 .nav-sub.open{display:block}
-.nav-sub .nav-item{font-size:12.5px;padding:6px 10px;margin:1px 4px}
-.nav-sub .nav-item.active{background:var(--accent-bg);color:var(--accent)}
+.nav-sub .nav-item{font-size:12.5px;padding:6px 10px;margin:1px 4px;color:rgba(255,255,255,.6)}
+.nav-sub .nav-item:hover{background:rgba(255,255,255,.08);color:#fff}
+.nav-sub .nav-item.active{background:rgba(37,99,235,.35);color:#93c5fd;font-weight:500}
+/* Scrollbar sidebar */
+.sidebar-scroll{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:8px}
+.sidebar-scroll::-webkit-scrollbar{width:4px}
+.sidebar-scroll::-webkit-scrollbar-track{background:transparent}
+.sidebar-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:4px}
+.sidebar-scroll::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.3)}
 /* Menú colapsable */
 .nav-group{}
 .nav-group-header{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:var(--radius);margin:1px 8px;cursor:pointer;font-size:13px;color:var(--text2);transition:all .12s;user-select:none;font-weight:500}
@@ -290,11 +297,12 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
     </select>
   </div>
 
-  <!-- ══ DASHBOARD ══ -->
-  <div class="nav-item active" data-sec="cuentas" style="margin:4px 8px;font-weight:500">
+  <!-- ══ INICIO ══ -->
+  <div class="nav-item active" data-sec="inicio" style="margin:4px 8px;font-weight:600;color:#94a3b8">
     <svg class="icon" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-    Dashboard
+    Inicio
   </div>
+  <div class="sidebar-scroll">
   <div class="nav-group" id="grp-tesoreria">
     <div class="nav-group-btn" id="grp-tesoreria-btn" onclick="toggleGrp('tesoreria')">
       <svg class="icon" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Tesorería<svg class="chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
@@ -367,6 +375,7 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
   </div>
   <div id="nav-sec-sistema" style="display:none"></div>
   <div id="nav-sistema" style="display:none"></div>
+  </div>
   <div class="sidebar-footer" style="padding:10px 12px">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
       <div id="sb-avatar" style="width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">A</div>
@@ -387,7 +396,64 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
 <div class="main">
 
 <!-- ===== PLAN DE CUENTAS ===== -->
-<div id="sec-cuentas" class="section active">
+
+  <div id="sec-inicio" class="section">
+    <div class="topbar">
+      <div>
+        <div class="page-title">Inicio</div>
+        <div class="page-sub" id="inicio-fecha"></div>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-sm" onclick="renderInicio()">
+          <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          Actualizar
+        </button>
+      </div>
+    </div>
+    <div class="content">
+
+      <!-- Indicadores -->
+      <div style="margin-bottom:24px">
+        <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">Indicadores Económicos</div>
+        <div id="inicio-indicadores" class="stats-grid" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px"></div>
+      </div>
+
+      <!-- Noticias en 3 columnas -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px">
+
+        <!-- Tributarias -->
+        <div class="card" style="padding:16px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border)">
+            <span style="font-size:18px">🏛️</span>
+            <div style="font-size:13px;font-weight:700;color:var(--text)">Noticias Tributarias</div>
+            <div style="margin-left:auto;font-size:10px;color:var(--text3)">SII</div>
+          </div>
+          <div id="inicio-noticias-tributarias"></div>
+        </div>
+
+        <!-- Laborales -->
+        <div class="card" style="padding:16px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border)">
+            <span style="font-size:18px">👷</span>
+            <div style="font-size:13px;font-weight:700;color:var(--text)">Noticias Laborales</div>
+            <div style="margin-left:auto;font-size:10px;color:var(--text3)">DT</div>
+          </div>
+          <div id="inicio-noticias-laborales"></div>
+        </div>
+
+        <!-- Financieras -->
+        <div class="card" style="padding:16px">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border)">
+            <span style="font-size:18px">📰</span>
+            <div style="font-size:13px;font-weight:700;color:var(--text)">Noticias Financieras</div>
+            <div style="margin-left:auto;font-size:10px;color:var(--text3)">DF</div>
+          </div>
+          <div id="inicio-noticias-financieras"></div>
+        </div>
+
+      </div>
+    </div>
+<div id="sec-cuentas" class="section">
   <div class="topbar">
     <div><div class="page-title">Plan de Cuentas</div><div class="page-sub">Gestión del catálogo de cuentas contables</div></div>
     <div class="topbar-actions">
@@ -404,7 +470,7 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
     <div id="msg-cuentas"></div>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Tipo Plan</th><th>Código</th><th>Cód. SII</th><th>Concepto Partida</th><th>Nombre</th><th>Subtipo Plan</th><th>Subtipo Flujo</th><th>Cta Cobrar</th><th>Cta Pagar</th><th>Disp. Pago</th><th class="num">Saldo</th><th class="no-print"></th></tr></thead>
+        <thead><tr><th>Código</th><th>Nombre</th><th>Tipo</th><th>Naturaleza</th><th>Auxiliar</th><th class="num">Saldo Actual</th><th class="no-print"></th></tr></thead>
         <tbody id="tbody-cuentas"></tbody>
       </table>
     </div>
@@ -412,6 +478,7 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
 </div>
 
 <!-- ===== LIBRO DIARIO ===== -->
+
 <div id="sec-diario" class="section">
   <div class="topbar">
     <div><div class="page-title">Libro Diario</div><div class="page-sub">Registro de asientos contables</div></div>
@@ -433,6 +500,7 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
 </div>
 
 <!-- ===== LIBRO MAYOR ===== -->
+
 <div id="sec-mayor" class="section">
   <div class="topbar">
     <div><div class="page-title">Libro Mayor</div><div class="page-sub">Movimientos por cuenta contable</div></div>
@@ -451,6 +519,7 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
 </div>
 
 <!-- ===== TERCEROS ===== -->
+
 <div id="sec-auxiliares" class="section">
   <div class="topbar">
     <div><div class="page-title">Directorio de Auxiliares</div><div class="page-sub">Clientes, proveedores y otras contrapartes</div></div>
@@ -562,6 +631,7 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
 </div>
 
 <!-- ===== BALANCE 8 COLUMNAS ===== -->
+
 <div id="sec-balance8" class="section">
   <div class="topbar">
     <div><div class="page-title">Balance de Comprobación — 8 Columnas</div><div class="page-sub">Informe de sumas, saldos y clasificación</div></div>
@@ -653,6 +723,7 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
 </div>
 
 <!-- ===== ESTADO DE RESULTADO ===== -->
+
 <div id="sec-eerr" class="section">
   <div class="topbar">
     <div><div class="page-title">Estado de Resultado</div><div class="page-sub">Ingresos, costos y gastos del período</div></div>
@@ -715,6 +786,7 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
 </div>
 
 <!-- ===== GESTIÓN DEL SISTEMA ===== -->
+
 <div id="sec-sistema" class="section">
   <div class="topbar">
     <div><div class="page-title">Gestión del Sistema</div><div class="page-sub">Empresas y usuarios</div></div>
@@ -822,6 +894,7 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
 </div>
 
 <!-- ===== CONFIGURACIÓN ===== -->
+
 <div id="sec-config" class="section">
   <div class="topbar">
     <div><div class="page-title">Configuración</div><div class="page-sub">Datos de la empresa y opciones del sistema</div></div>
@@ -916,10 +989,10 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
     </div>
     <div class="modal-body">
       <div id="msg-modal-cuenta"></div>
-      <div class="form-grid cols3" style="gap:14px">
-        <div class="field"><label>Tipo Plan *</label>
-          <select id="mc-tipo-plan" onchange="filtrarSubtiposPlan(this.value)">
-            <option value="">— Seleccionar —</option>
+      <div class="form-grid cols2" style="gap:14px">
+        <div class="field"><label>Código *</label><input id="mc-cod" placeholder="ej: 1.1.01"></div>
+        <div class="field"><label>Tipo *</label>
+          <select id="mc-tipo">
             <option value="Activo">Activo</option>
             <option value="Pasivo">Pasivo</option>
             <option value="Patrimonio">Patrimonio</option>
@@ -928,38 +1001,13 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
             <option value="Costo">Costo</option>
           </select>
         </div>
-        <div class="field"><label>Código *</label><input id="mc-cod" placeholder="ej: 1.1.01"></div>
-        <div class="field"><label>Código SII</label>
-          <select id="mc-cod-sii">
-            <option value="">— Seleccionar —</option>
-          </select>
-        </div>
-        <div class="field span3"><label>Concepto Partida</label><input id="mc-concepto" placeholder="Concepto según SII"></div>
-        <div class="field span3"><label>Nombre de la cuenta *</label><input id="mc-nom" placeholder="ej: Caja y Bancos"></div>
-        <div class="field"><label>Subtipo Plan</label>
-          <select id="mc-subtipo-plan">
-            <option value="">— Seleccione Tipo Plan primero —</option>
-          </select>
-        </div>
-        <div class="field"><label>Subtipo Flujo</label>
-          <select id="mc-subtipo-flujo">
-            <option value="">— Ninguno —</option>
-            <option value="Operacion">Operación</option>
-            <option value="Inversion">Inversión</option>
-            <option value="Financiamiento">Financiamiento</option>
-          </select>
-        </div>
+        <div class="field span2"><label>Nombre de la cuenta *</label><input id="mc-nom" placeholder="ej: Caja y Bancos"></div>
+        <div class="field span2"><label>Descripción (opcional)</label><input id="mc-desc" placeholder="Descripción adicional"></div>
         <div class="field"><label>Cuenta con auxiliares</label>
           <select id="mc-aux">
             <option value="0">No</option>
-            <option value="1">Sí</option>
+            <option value="1">Sí — permite auxiliares</option>
           </select>
-        </div>
-        <div class="field"><label>Cta. Cobrar (auxiliar)</label><input id="mc-cta-cobrar" placeholder="Cod. cuenta cobrar"></div>
-        <div class="field"><label>Cta. Pagar (auxiliar)</label><input id="mc-cta-pagar" placeholder="Cod. cuenta pagar"></div>
-        <div class="field" style="display:flex;align-items:center;gap:10px;padding-top:22px">
-          <input type="checkbox" id="mc-disp-pago" style="width:16px;height:16px;accent-color:var(--accent)">
-          <label for="mc-disp-pago" style="margin:0;cursor:pointer">Disp. Pago</label>
         </div>
       </div>
     </div>
@@ -1034,6 +1082,8 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
       <button class="btn" onclick="closeModal('modal-ver-asiento')">Cerrar</button>
     </div>
   </div>
+</div>
+
 
   <!-- ══ SUB TIPO PLAN ══ -->
   <div id="sec-subtipo-plan" class="section">
@@ -1467,13 +1517,11 @@ function initAppPostLogin(){
   // Navegar a la sección inicial
   document.querySelectorAll('.section').forEach(function(s){s.classList.remove('active');});
   document.querySelectorAll('.nav-item').forEach(function(b){b.classList.remove('active');});
-  var startSec = SESSION.rol==='lectura' ? 'balance8' : 'cuentas';
-  abrirGrupoActivo(startSec);
+  var startSec = 'inicio';
   var startNav = findNavItem(startSec);
   if(startNav) startNav.classList.add('active');
   document.getElementById('sec-'+startSec).classList.add('active');
-  if(startSec==='balance8'){ initB8Selects(); toggleB8Modo(); renderBalance8(); }
-  else { renderCuentas(); renderStatsCuentas(); renderDiario(); loadConfigForm(); }
+  renderInicio();
 }
 
 // ── Restricciones de rol
@@ -1772,6 +1820,7 @@ function nav(id, el){
   document.getElementById('sec-'+id).classList.add('active');
   if(el) el.classList.add('active');
   abrirGrupoActivo(id);
+  if(id==='inicio'){ renderInicio(); }
   if(id==='cuentas'){ renderCuentas(); renderStatsCuentas(); }
   if(id==='diario'){ renderDiario(); }
   if(id==='mayor'){ populateMayorSel(); renderMayor(); }
@@ -3787,6 +3836,115 @@ async function renderCodSII(){
 }
 // ═════════════════════════════════════════════════════════════
 
+
+// == INICIO - INDICADORES Y NOTICIAS ========================
+async function renderInicio(){
+  // Fecha
+  var fechaEl=document.getElementById('inicio-fecha');
+  if(fechaEl){
+    var ahora=new Date();
+    fechaEl.textContent=ahora.toLocaleDateString('es-CL',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  }
+
+  // ── Indicadores económicos desde mindicador.cl
+  var indEl=document.getElementById('inicio-indicadores');
+  if(indEl){
+    indEl.innerHTML='<div class="stat" style="border:1px solid var(--border)"><div class="stat-label">Cargando...</div><div class="stat-value">--</div></div>'.repeat(6);
+    try{
+      var inds=[
+        {key:'uf',     label:'UF',          icon:'📊'},
+        {key:'dolar',  label:'Dólar USD',   icon:'🇺🇸'},
+        {key:'euro',   label:'Euro',        icon:'🇪🇺'},
+        {key:'utm',    label:'UTM',         icon:'📋'},
+        {key:'ipc',    label:'IPC',         icon:'📈'},
+        {key:'libra_cobre', label:'Cobre (lb)', icon:'🔶'},
+      ];
+      var results=await Promise.allSettled(inds.map(function(ind){
+        return fetch('https://mindicador.cl/api/'+ind.key)
+          .then(function(r){return r.json();})
+          .then(function(d){
+            return {label:ind.label, icon:ind.icon,
+              valor: d.serie&&d.serie[0]?d.serie[0].valor:null,
+              fecha: d.serie&&d.serie[0]?d.serie[0].fecha:null,
+              unidad: d.unidad_medida||''};
+          });
+      }));
+      indEl.innerHTML=results.map(function(res){
+        if(res.status==='fulfilled'&&res.value.valor!==null){
+          var v=res.value.valor;
+          var esPorc = res.value.unidad && res.value.unidad.toLowerCase().includes('porcentaje');
+          var fmt = esPorc
+            ? v.toFixed(2)+'%'
+            : (res.value.label==='Cobre (lb)'
+              ? '$'+v.toLocaleString('es-CL',{minimumFractionDigits:2,maximumFractionDigits:2})
+              : '$'+v.toLocaleString('es-CL',{minimumFractionDigits:2,maximumFractionDigits:2}));
+          var fecha=res.value.fecha?new Date(res.value.fecha).toLocaleDateString('es-CL',{day:'2-digit',month:'2-digit',year:'numeric'}):'';
+          return '<div class="stat" style="border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px">'
+            +'<div class="stat-label" style="display:flex;align-items:center;gap:5px"><span>'+res.value.icon+'</span>'+res.value.label+'</div>'
+            +'<div class="stat-value text-blue" style="font-size:20px;margin:4px 0">'+fmt+'</div>'
+            +(fecha?'<div style="font-size:10px;color:var(--text3)">'+fecha+'</div>':'')
+            +'</div>';
+        }
+        return '<div class="stat" style="border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px">'
+          +'<div class="stat-label">'+res.value.label+'</div>'
+          +'<div class="stat-value" style="color:var(--text3)">N/D</div></div>';
+      }).join('');
+    }catch(e){
+      indEl.innerHTML='<div style="color:var(--text3);padding:12px;font-size:13px">No se pudieron cargar los indicadores. Verifica tu conexión.</div>';
+    }
+  }
+
+  // ── Noticias via RSS2JSON
+  var proxy='https://api.rss2json.com/v1/api.json?count=10&rss_url=';
+  var feedsConfig=[
+    {id:'inicio-noticias-tributarias',  label:'Tributarias',  feeds:['https://www.sii.cl/rss/novedades.rss']},
+    {id:'inicio-noticias-laborales',    label:'Laborales',    feeds:['https://www.dt.gob.cl/portal/1629/propertyvalue-22929.xml']},
+    {id:'inicio-noticias-financieras',  label:'Financieras',  feeds:['https://feeds.df.cl/noticias/rss']},
+  ];
+
+  async function cargarFeeds(feeds){
+    var items=[];
+    for(var i=0;i<feeds.length;i++){
+      try{
+        var res=await fetch(proxy+encodeURIComponent(feeds[i]));
+        var d=await res.json();
+        if(d.items) items=items.concat(d.items);
+      }catch(e){}
+    }
+    return items.sort(function(a,b){return new Date(b.pubDate)-new Date(a.pubDate);});
+  }
+
+  function mostrarNoticias(id,items){
+    var el=document.getElementById(id); if(!el) return;
+    if(!items||!items.length){
+      el.innerHTML='<div style="color:var(--text3);font-size:13px;padding:12px 0">Sin noticias disponibles en este momento.</div>';
+      return;
+    }
+    el.innerHTML=items.slice(0,6).map(function(item){
+      var fecha=item.pubDate?new Date(item.pubDate).toLocaleDateString('es-CL',{day:'2-digit',month:'2-digit',year:'numeric'}):'';
+      var desc=(item.description||'').replace(/<[^>]+>/g,'').trim();
+      desc=desc.length>140?desc.substring(0,140)+'...':desc;
+      return '<div style="padding:10px 0;border-bottom:1px solid var(--border)">'
+        +'<a href="'+item.link+'" target="_blank" rel="noopener noreferrer" '
+        +'style="font-size:13px;font-weight:600;color:var(--accent);text-decoration:none;line-height:1.4;display:block;margin-bottom:4px">'
+        +item.title+'</a>'
+        +(desc?'<div style="font-size:11px;color:var(--text2);line-height:1.5;margin-bottom:4px">'+desc+'</div>':'')
+        +(fecha?'<div style="font-size:10px;color:var(--text3)">'+fecha+'</div>':'')
+        +'</div>';
+    }).join('');
+  }
+
+  // Cargar todas las secciones de noticias
+  feedsConfig.forEach(function(cfg){
+    var el=document.getElementById(cfg.id);
+    if(el) el.innerHTML='<div style="text-align:center;padding:20px;color:var(--text3)"><div style="display:inline-block;width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite"></div></div>';
+    cargarFeeds(cfg.feeds)
+      .then(function(items){mostrarNoticias(cfg.id,items);})
+      .catch(function(){if(el) el.innerHTML='<div style="color:var(--text3);font-size:13px;padding:8px">No se pudieron cargar las noticias.</div>';});
+  });
+}
+// ===========================================================
+
 // ============================================================
 // INIT
 // ============================================================
@@ -4032,4 +4190,5 @@ async function actualizarPlanBase(){
 
 
 </script>
-</body></html>
+</body>
+</html>
