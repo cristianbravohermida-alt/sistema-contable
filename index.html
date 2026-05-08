@@ -256,7 +256,7 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
     <div class="login-title">SistemaContable</div>
     <div class="login-sub">Ingresa tus credenciales</div>
     <div class="login-err" id="login-err">Usuario o contraseña incorrectos.</div>
-    <div class="login-field"><label>Usuario</label><input id="li-user" type="text" placeholder="usuario@empresa.cl" autocomplete="username"></div>
+    <div class="login-field"><label>Usuario</label><input id="li-user" type="text" placeholder="correo@empresa.cl" autocomplete="email" autocomplete="username"></div>
     <div class="login-field"><label>Contraseña</label><input id="li-pass" type="password" placeholder="••••••••" autocomplete="current-password"></div>
     <button class="login-btn" onclick="doLogin()">Ingresar</button>
     <p style="text-align:center;font-size:11px;color:var(--text3);margin-top:16px">Acceso inicial: admin / admin123</p>
@@ -1073,6 +1073,19 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
 
 
 <script>
+
+// ══ SANITIZACIÓN XSS ════════════════════════════════════════
+function esc(str){
+  if(str===null||str===undefined) return '';
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#039;');
+}
+// ═════════════════════════════════════════════════════════════
+
 // ══ LOADING ══════════════════════════════════════════════════
 function showLoading(msg){
   var ov=document.getElementById('loading-overlay');
@@ -1305,36 +1318,86 @@ function _precargarEmpresa2(empId){
 
 // ── LOGIN
 async function doLogin(){
-  var user  = document.getElementById('li-user').value.trim();
+  var user  = document.getElementById('li-user').value.trim().toLowerCase();
   var pass  = document.getElementById('li-pass').value;
   var errEl = document.getElementById('login-err');
   errEl.classList.remove('show');
   if(!user||!pass){ errEl.textContent='Completa usuario y contraseña.'; errEl.classList.add('show'); return; }
-  var hash = await sha256(pass);
-  var usr = SYS.usuarios.find(function(u){ return u.user===user && u.passHash===hash; });
-  if(!usr){ errEl.textContent='Usuario o contraseña incorrectos.'; errEl.classList.add('show'); return; }
-  // Normalizar: si el usuario tiene el campo viejo empresaId, convertir a array
-  if(usr.empresaId && !usr.empresaIds){ usr.empresaIds=[usr.empresaId]; delete usr.empresaId; saveSYS(); }
-  if(!usr.empresaIds || !usr.empresaIds.length){ alert('Este usuario no tiene empresas asignadas.'); return; }
-  SESSION = { userId:usr.id, empresaId:usr.empresaIds[0], rol:usr.rol, nombre:usr.nombre };
-  loadDB();
-  // Si empresa no tiene cuentas → copiar plan base
-  // Cuentas desde Supabase via loadDB()
-  document.getElementById('login-screen').classList.remove('show');
-  document.getElementById('app-layout').style.display = 'flex';
-  document.getElementById('li-pass').value = '';
-  guardarSesion();
-  iniciarWatchdogSesion();
-  initNavListeners();
-  initAppPostLogin();
+
+  // ── Rate limiting: max 5 intentos, lockout 15 min
+  var rlKey='sc_rl_'+user;
+  var rl=null; try{ rl=JSON.parse(sessionStorage.getItem(rlKey)||'null'); }catch(e){}
+  if(rl && rl.lockUntil && Date.now()<rl.lockUntil){
+    var mins=Math.ceil((rl.lockUntil-Date.now())/60000);
+    errEl.textContent='Cuenta bloqueada por '+mins+' min. Demasiados intentos.';
+    errEl.classList.add('show'); return;
+  }
+
+  showLoading('Verificando credenciales...');
+
+  try{
+    // ── Autenticación via Supabase Auth (JWT real)
+    var { data, error } = await supa.auth.signInWithPassword({ email: user, password: pass });
+
+    if(error){
+      hideLoading();
+      // Registrar intento fallido
+      var intentos=(rl&&!rl.lockUntil?rl.intentos:0)||0;
+      intentos++;
+      var lockUntil = intentos>=5 ? Date.now()+15*60*1000 : null;
+      try{ sessionStorage.setItem(rlKey, JSON.stringify({intentos:intentos,lockUntil:lockUntil})); }catch(e){}
+      if(lockUntil){
+        errEl.textContent='Demasiados intentos. Cuenta bloqueada 15 minutos.';
+      } else {
+        errEl.textContent='Usuario o contraseña incorrectos. ('+(5-intentos)+' intentos restantes)';
+      }
+      errEl.classList.add('show'); return;
+    }
+
+    // Login exitoso → limpiar rate limit
+    try{ sessionStorage.removeItem(rlKey); }catch(e){}
+
+    // Buscar el usuario del sistema vinculado al auth_user_id
+    var usr = SYS.usuarios.find(function(u){ return u.auth_user_id === data.user.id; });
+    if(!usr){
+      await supa.auth.signOut();
+      hideLoading();
+      errEl.textContent='Usuario no tiene acceso al sistema. Contacte al administrador.';
+      errEl.classList.add('show'); return;
+    }
+    if(!usr.empresaIds || !usr.empresaIds.length){
+      await supa.auth.signOut();
+      hideLoading();
+      errEl.textContent='Este usuario no tiene empresas asignadas.';
+      errEl.classList.add('show'); return;
+    }
+
+    SESSION = { userId:usr.id, auth_user_id:data.user.id, empresaId:usr.empresaIds[0], rol:usr.rol, nombre:usr.nombre };
+    await loadDB();
+    hideLoading();
+    document.getElementById('login-screen').classList.remove('show');
+    document.getElementById('app-layout').style.display = 'flex';
+    document.getElementById('li-pass').value = '';
+    guardarSesion();
+    iniciarWatchdogSesion();
+    initNavListeners();
+    initAppPostLogin();
+
+  }catch(e){
+    hideLoading();
+    console.error('Login error:', e);
+    errEl.textContent='Error de conexión. Intenta nuevamente.';
+    errEl.classList.add('show');
+  }
 }
 
 // ── LOGOUT
-function doLogout(){
+async function doLogout(){
   detenerWatchdogSesion();
   detenerAutoRefreshInicio();
   limpiarSesion();
-  SESSION = {userId:null,empresaId:null,rol:null,nombre:null};
+  try{ await supa.auth.signOut(); }catch(e){}
+  SESSION = {userId:null,auth_user_id:null,empresaId:null,rol:null,nombre:null};
   DB = {config:{empresa:'',rut:'',giro:'',dir:'',periodo:''},cuentas:[],asientos:[],numAsiento:1,terceros:[]};
   document.getElementById('app-layout').style.display = 'none';
   initNavListeners();
@@ -3001,25 +3064,38 @@ function cambiarEmpresaDesdeSelector(empId){
 window.addEventListener('load', async function(){
   try{
     showLoading('Conectando...');
-    // Paralelizar: loadSYS + cargarCodSII al mismo tiempo
+    // Cargar datos del sistema y cod_sii en paralelo
     await Promise.all([loadSYS(), cargarCodSII()]);
     await initSistemaSiVacio();
     hideLoading();
     initNavListeners();
-    // Intentar recuperar sesión previa
-    var sesion = recuperarSesion();
-    if(sesion && SYS.usuarios.find(function(u){ return u.id===sesion.userId; })){
-      SESSION = {userId:sesion.userId, empresaId:sesion.empresaId, rol:sesion.rol, nombre:sesion.nombre};
-      showLoading('Restaurando sesión...');
-      await loadDB();
-      hideLoading();
-      document.getElementById('login-screen').classList.remove('show');
-      document.getElementById('app-layout').style.display = 'flex';
-      iniciarWatchdogSesion();
-      initAppPostLogin();
-    } else {
-      document.getElementById('login-screen').classList.add('show');
+
+    // Intentar restaurar sesión: primero via Supabase Auth, luego via sessionStorage
+    var { data: authData } = await supa.auth.getSession();
+    var sesionLocal = recuperarSesion();
+
+    if(authData && authData.session && authData.session.user){
+      // Sesión Supabase Auth activa → restaurar
+      var authUid = authData.session.user.id;
+      var usr = SYS.usuarios.find(function(u){ return u.auth_user_id === authUid; });
+      if(usr && usr.empresaIds && usr.empresaIds.length){
+        var empId = sesionLocal ? sesionLocal.empresaId : usr.empresaIds[0];
+        SESSION = {userId:usr.id, auth_user_id:authUid, empresaId:empId, rol:usr.rol, nombre:usr.nombre};
+        showLoading('Restaurando sesión...');
+        await loadDB();
+        hideLoading();
+        document.getElementById('login-screen').classList.remove('show');
+        document.getElementById('app-layout').style.display = 'flex';
+        iniciarWatchdogSesion();
+        initAppPostLogin();
+        return;
+      }
     }
+
+    // Sin sesión válida → mostrar login
+    await supa.auth.signOut();
+    document.getElementById('login-screen').classList.add('show');
+
   }catch(e){
     console.error('Load error:',e);
     hideLoading();
@@ -3040,7 +3116,6 @@ const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
 
 async function loadSYS(){
   try{
-    // Paralelizar: empresas + usuarios + usuario_empresa al mismo tiempo
     var [r1,r2,r3,r4] = await Promise.all([
       supa.from('empresas').select('*').order('razon'),
       supa.from('usuarios').select('*').order('nombre'),
@@ -3050,7 +3125,8 @@ async function loadSYS(){
     SYS.empresas = r1.data||[];
     SYS.usuarios = (r2.data||[]).map(function(u){
       var eids=(r3.data||[]).filter(function(x){return x.usuario_id===u.id;}).map(function(x){return x.empresa_id;});
-      return{id:u.id,nombre:u.nombre,user:u.user_login,passHash:u.pass_hash,rol:u.rol,empresaIds:eids};
+      return{id:u.id,nombre:u.nombre,user:u.user_login,passHash:u.pass_hash,
+             auth_user_id:u.auth_user_id||null,rol:u.rol,empresaIds:eids};
     });
     SYS.planBase = (r4.data||[]).map(function(c){return{cod:c.cod,nom:c.nom,tipo:c.tipo,aux:c.aux,desc:c.desc_||''};});
   }catch(e){console.error('loadSYS:',e);}
