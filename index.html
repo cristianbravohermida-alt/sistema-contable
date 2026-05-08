@@ -256,7 +256,7 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
     <div class="login-title">SistemaContable</div>
     <div class="login-sub">Ingresa tus credenciales</div>
     <div class="login-err" id="login-err">Usuario o contraseña incorrectos.</div>
-    <div class="login-field"><label>Usuario</label><input id="li-user" type="text" placeholder="usuario o correo@empresa.cl" autocomplete="username"></div>
+    <div class="login-field"><label>Usuario</label><input id="li-user" type="text" placeholder="tucorreo@empresa.cl" autocomplete="email" autocomplete="username"></div>
     <div class="login-field"><label>Contraseña</label><input id="li-pass" type="password" placeholder="••••••••" autocomplete="current-password"></div>
     <button class="login-btn" onclick="doLogin()">Ingresar</button>
 
@@ -1138,22 +1138,9 @@ function saveSYS(){ try{ localStorage.setItem(SYS_KEY, JSON.stringify(SYS)); }ca
 
 // ── Primera vez: crear superadmin + plan base
 async function initSistemaSiVacio(){
-  if(SYS.usuarios.length > 0) return;
-  SYS.planBase = cargarPlanRobles(true);
-  var t = Date.now();
-  var emp1='e_'+t, emp2='e_'+(t+1);
-  SYS.empresas.push({id:emp1,rut:'76.123.456-7',razon:'Comercial Demo S.A.',
-    giro:'Comercio al por mayor y menor',dir:'Av. Providencia 1234, Santiago',
-    periodo:'Enero – Diciembre 2025'});
-  SYS.empresas.push({id:emp2,rut:'76.987.654-3',razon:'Comercial Las Condes Ltda.',
-    giro:'Retail y distribucion',dir:'Av. Apoquindo 4500, Las Condes',
-    periodo:'Enero – Diciembre 2025'});
-  var hash = await sha256('Admin2026!#');
-  SYS.usuarios.push({id:'u_1',nombre:'Administrador',user:'admin',
-    passHash:hash,rol:'admin',empresaIds:[emp1,emp2]});
-  _precargarEmpresa1(emp1);
-  _precargarEmpresa2(emp2);
-  saveSYS();
+  // Producción: NUNCA crear datos demo automáticamente
+  // Si el sistema arranca vacío, el admin debe crear los datos manualmente
+  return;
 }
 
 
@@ -1318,14 +1305,14 @@ function _precargarEmpresa2(empId){
 
 // ── LOGIN
 async function doLogin(){
-  var user  = document.getElementById('li-user').value.trim().toLowerCase();
+  var email = document.getElementById('li-user').value.trim().toLowerCase();
   var pass  = document.getElementById('li-pass').value;
   var errEl = document.getElementById('login-err');
   errEl.classList.remove('show');
-  if(!user||!pass){ errEl.textContent='Completa usuario y contraseña.'; errEl.classList.add('show'); return; }
+  if(!email||!pass){ errEl.textContent='Completa correo y contraseña.'; errEl.classList.add('show'); return; }
 
-  // Rate limiting
-  var rlKey='sc_rl_'+user;
+  // Rate limiting: max 5 intentos, lockout 15 min
+  var rlKey='sc_rl_'+email;
   var rl=null; try{ rl=JSON.parse(sessionStorage.getItem(rlKey)||'null'); }catch(e){}
   if(rl && rl.lockUntil && Date.now()<rl.lockUntil){
     var mins=Math.ceil((rl.lockUntil-Date.now())/60000);
@@ -1333,44 +1320,59 @@ async function doLogin(){
     errEl.classList.add('show'); return;
   }
 
-  showLoading('Verificando...');
+  showLoading('Verificando credenciales...');
 
-  // Calcular hash de la contraseña ingresada
-  var hash = await sha256(pass);
-  console.log('DEBUG user buscado:', user);
-  console.log('DEBUG hash calculado:', hash);
-  console.log('DEBUG usuarios en SYS:', SYS.usuarios.map(function(u){return {user:u.user, passHash:u.passHash, auth_id:u.auth_user_id};}));
+  try{
+    // Login via Supabase Auth
+    var { data, error } = await supa.auth.signInWithPassword({ email: email, password: pass });
+    if(error){
+      hideLoading();
+      var intentos=(rl&&!rl.lockUntil?rl.intentos:0)||0; intentos++;
+      var lockUntil=intentos>=5?Date.now()+15*60*1000:null;
+      try{ sessionStorage.setItem(rlKey,JSON.stringify({intentos:intentos,lockUntil:lockUntil})); }catch(e){}
+      errEl.textContent = lockUntil
+        ? 'Demasiados intentos. Cuenta bloqueada 15 minutos.'
+        : 'Correo o contraseña incorrectos. ('+(5-intentos)+' intentos restantes)';
+      errEl.classList.add('show'); return;
+    }
 
-  // Buscar usuario por hash
-  var usr = SYS.usuarios.find(function(u){
-    return u.user === user && u.passHash === hash;
-  });
+    try{ sessionStorage.removeItem(rlKey); }catch(e){}
 
-  if(!usr){
+    // Recargar SYS con la sesión Auth activa (RLS ahora permite leer)
+    await loadSYS();
+
+    // Buscar el usuario del sistema vinculado al auth_user_id
+    var usr = SYS.usuarios.find(function(u){ return u.auth_user_id === data.user.id; });
+    if(!usr){
+      await supa.auth.signOut();
+      hideLoading();
+      errEl.textContent='Usuario sin acceso al sistema. Contacta al administrador.';
+      errEl.classList.add('show'); return;
+    }
+    if(!usr.empresaIds || !usr.empresaIds.length){
+      await supa.auth.signOut();
+      hideLoading();
+      errEl.textContent='Usuario sin empresas asignadas.';
+      errEl.classList.add('show'); return;
+    }
+
+    SESSION = { userId:usr.id, auth_user_id:data.user.id, empresaId:usr.empresaIds[0], rol:usr.rol, nombre:usr.nombre };
+    await loadDB();
     hideLoading();
-    var intentos=(rl&&!rl.lockUntil?rl.intentos:0)||0; intentos++;
-    var lockUntil=intentos>=5?Date.now()+15*60*1000:null;
-    try{ sessionStorage.setItem(rlKey,JSON.stringify({intentos:intentos,lockUntil:lockUntil})); }catch(e){}
-    errEl.textContent = lockUntil
-      ? 'Demasiados intentos. Bloqueado 15 min.'
-      : 'Usuario o contraseña incorrectos. ('+(5-intentos)+' intentos restantes)';
-    errEl.classList.add('show'); return;
-  }
+    document.getElementById('login-screen').classList.remove('show');
+    document.getElementById('app-layout').style.display = 'flex';
+    document.getElementById('li-pass').value = '';
+    guardarSesion();
+    iniciarWatchdogSesion();
+    initNavListeners();
+    initAppPostLogin();
 
-  if(!usr.empresaIds||!usr.empresaIds.length){
+  }catch(e){
     hideLoading();
-    errEl.textContent='Usuario sin empresas asignadas.';
-    errEl.classList.add('show'); return;
+    console.error('Login error:', e);
+    errEl.textContent='Error de conexión. Intenta nuevamente.';
+    errEl.classList.add('show');
   }
-
-  try{ sessionStorage.removeItem(rlKey); }catch(e){}
-  SESSION={userId:usr.id,auth_user_id:null,empresaId:usr.empresaIds[0],rol:usr.rol,nombre:usr.nombre};
-  await loadDB();
-  hideLoading();
-  document.getElementById('login-screen').classList.remove('show');
-  document.getElementById('app-layout').style.display='flex';
-  document.getElementById('li-pass').value='';
-  guardarSesion(); iniciarWatchdogSesion(); initNavListeners(); initAppPostLogin();
 }
 
 // ── LOGOUT
@@ -1602,52 +1604,32 @@ async function saveUsuario(){
   var empChecks = document.querySelectorAll('#mu-empresas-list input[type=checkbox]:checked');
   var empIds = Array.from(empChecks).map(function(c){return c.value;});
 
-  if(!nombre||!email){ msgEl('msg-modal-usuario','err','Nombre y email son obligatorios.'); return; }
+  if(!nombre||!email){ msgEl('msg-modal-usuario','err','Nombre y correo son obligatorios.'); return; }
   if(!empIds.length){ msgEl('msg-modal-usuario','err','Asigna al menos una empresa.'); return; }
   var dup = SYS.usuarios.find(function(u){return u.user===email && u.id!==id;});
-  if(dup){ msgEl('msg-modal-usuario','err','Ese usuario ya existe en el sistema.'); return; }
+  if(dup){ msgEl('msg-modal-usuario','err','Ese correo ya existe en el sistema.'); return; }
 
-  // ══════════════════════════════════════════════════════════
-  // MODO EDICIÓN (usuario existente)
-  // ══════════════════════════════════════════════════════════
+  // ── MODO EDICIÓN
   if(id){
     var u = SYS.usuarios.find(function(x){return x.id===id;});
     if(!u){ msgEl('msg-modal-usuario','err','Usuario no encontrado.'); return; }
 
     showLoading('Actualizando usuario...');
     try{
-      // 1. Calcular nuevo hash si cambió la contraseña
-      var hash = u.passHash;
-      if(pass && pass.length >= 6){
-        hash = await sha256(pass);
-      } else if(pass && pass.length > 0 && pass.length < 6){
-        hideLoading();
-        msgEl('msg-modal-usuario','err','La contraseña debe tener mínimo 6 caracteres (o dejarla vacía para no cambiarla).');
-        return;
-      }
-
-      // 2. Actualizar en tabla usuarios — VERIFICAR ERRORES
       var updRes = await supa.from('usuarios').update({
-        nombre: nombre,
-        user_login: email,
-        pass_hash: hash,
-        rol: rol
+        nombre: nombre, user_login: email, rol: rol
       }).eq('id', id).select();
-
       if(updRes.error){
         hideLoading();
-        msgEl('msg-modal-usuario','err','Error al guardar en BD: '+updRes.error.message);
-        console.error('UPDATE error:', updRes.error);
+        msgEl('msg-modal-usuario','err','Error: '+updRes.error.message);
         return;
       }
       if(!updRes.data || !updRes.data.length){
         hideLoading();
-        msgEl('msg-modal-usuario','err','No se actualizó ningún registro. Verifica permisos en Supabase.');
-        console.warn('UPDATE devolvió 0 filas — posible problema RLS');
+        msgEl('msg-modal-usuario','err','No se actualizó. Verifica permisos en Supabase.');
         return;
       }
 
-      // 3. Actualizar relaciones empresa
       var delRes = await supa.from('usuario_empresa').delete().eq('usuario_id', id);
       if(delRes.error){
         hideLoading();
@@ -1665,89 +1647,37 @@ async function saveUsuario(){
         }
       }
 
-      // 4. Actualizar SYS en memoria
       u.nombre=nombre; u.user=email; u.rol=rol; u.empresaIds=empIds;
-      u.passHash=hash;
 
       hideLoading();
       closeModal('modal-nuevo-usuario');
       renderUsuariosSistema();
-      mostrarToast('Usuario actualizado correctamente. Cambios guardados en BD.','ok');
+
+      var msg = 'Usuario actualizado en BD.';
+      if(pass && pass.length >= 6){
+        msg += ' La contraseña debe cambiarse manualmente en Supabase → Authentication → Users.';
+      }
+      mostrarToast(msg, 'ok');
 
     }catch(e){
       hideLoading();
-      console.error('saveUsuario edición error:', e);
-      msgEl('msg-modal-usuario','err','Error inesperado: '+(e.message||e));
+      console.error('saveUsuario error:', e);
+      msgEl('msg-modal-usuario','err','Error: '+(e.message||e));
     }
     return;
   }
 
-  // ══════════════════════════════════════════════════════════
-  // MODO CREACIÓN (usuario nuevo)
-  // ══════════════════════════════════════════════════════════
-  if(!pass || pass.length < 6){
-    msgEl('msg-modal-usuario','err','La contraseña debe tener mínimo 6 caracteres.');
-    return;
-  }
-
-  showLoading('Creando usuario...');
-  try{
-    var hash = await sha256(pass);
-    var nuevoId = 'u_'+Date.now();
-
-    // 1. Insertar en tabla usuarios — VERIFICAR ERRORES
-    var insRes = await supa.from('usuarios').insert({
-      id: nuevoId,
-      nombre: nombre,
-      user_login: email,
-      pass_hash: hash,
-      rol: rol
-    }).select();
-
-    if(insRes.error){
-      hideLoading();
-      msgEl('msg-modal-usuario','err','Error al crear: '+insRes.error.message);
-      console.error('INSERT error:', insRes.error);
-      return;
-    }
-    if(!insRes.data || !insRes.data.length){
-      hideLoading();
-      msgEl('msg-modal-usuario','err','No se insertó. Verifica permisos en Supabase.');
-      return;
-    }
-
-    // 2. Asignar empresas
-    if(empIds.length){
-      var ueRes = await supa.from('usuario_empresa').insert(
-        empIds.map(function(eid){return{usuario_id:nuevoId, empresa_id:eid};})
-      );
-      if(ueRes.error){
-        hideLoading();
-        msgEl('msg-modal-usuario','err','Usuario creado pero no se asignaron empresas: '+ueRes.error.message);
-        return;
-      }
-    }
-
-    // 3. Actualizar SYS en memoria
-    SYS.usuarios.push({
-      id:nuevoId, nombre:nombre, user:email, passHash:hash,
-      auth_user_id:null, rol:rol, empresaIds:empIds
-    });
-
-    hideLoading();
-    closeModal('modal-nuevo-usuario');
-    document.getElementById('mu-edit-id').value='';
-    document.getElementById('mu-pass').value='';
-    var titulo=document.getElementById('modal-usuario-titulo');
-    if(titulo) titulo.textContent='Nuevo Usuario';
-    renderUsuariosSistema();
-    mostrarToast('Usuario '+nombre+' creado correctamente.','ok');
-
-  }catch(e){
-    hideLoading();
-    console.error('saveUsuario creación error:', e);
-    msgEl('msg-modal-usuario','err','Error inesperado: '+(e.message||e));
-  }
+  // ── MODO CREACIÓN — Mostrar instrucciones (no se crea automáticamente)
+  msgEl('msg-modal-usuario','warn',
+    'Para crear un usuario nuevo:\n'+
+    '1) Ve a Supabase → Authentication → Add User\n'+
+    '2) Crea cuenta con: '+email+' y contraseña\n'+
+    '3) Copia el UUID generado\n'+
+    '4) Ve a SQL Editor y ejecuta:\n'+
+    "INSERT INTO usuarios (id,nombre,user_login,rol,auth_user_id) VALUES "+
+    "(\'u_"+Date.now()+"\',\'"+nombre+"\',\'"+email+"\',\'"+rol+"\',\'UUID-AQUI\');\n"+
+    '5) Asignar empresa: INSERT INTO usuario_empresa...\n'+
+    'Luego recarga el sistema.');
 }
 
 function editUsuario(id){
@@ -3168,47 +3098,46 @@ function cambiarEmpresaDesdeSelector(empId){
 window.addEventListener('load', async function(){
   try{
     showLoading('Conectando...');
-    await Promise.all([loadSYS(), cargarCodSII()]);
-    await initSistemaSiVacio();
-    hideLoading();
-    initNavListeners();
 
-    // Intentar restaurar sesión via Supabase Auth
-    try{
-      var { data: authData } = await supa.auth.getSession();
-      if(authData && authData.session && authData.session.user){
-        var authUid = authData.session.user.id;
-        var usr = SYS.usuarios.find(function(u){ return u.auth_user_id===authUid; });
-        if(usr && usr.empresaIds && usr.empresaIds.length){
-          var sesLocal = recuperarSesion();
-          var empId = sesLocal ? sesLocal.empresaId : usr.empresaIds[0];
-          SESSION = {userId:usr.id,auth_user_id:authUid,empresaId:empId,rol:usr.rol,nombre:usr.nombre};
-          showLoading('Restaurando sesión...');
-          await loadDB(); hideLoading();
-          document.getElementById('login-screen').classList.remove('show');
-          document.getElementById('app-layout').style.display = 'flex';
-          iniciarWatchdogSesion(); initAppPostLogin();
-          return;
-        }
+    // Verificar si hay sesión Auth activa
+    var { data: authData } = await supa.auth.getSession();
+
+    if(authData && authData.session && authData.session.user){
+      // Sesión activa → cargar datos protegidos por RLS
+      await Promise.all([loadSYS(), cargarCodSII()]);
+      hideLoading();
+      initNavListeners();
+
+      var authUid = authData.session.user.id;
+      var usr = SYS.usuarios.find(function(u){ return u.auth_user_id===authUid; });
+      if(usr && usr.empresaIds && usr.empresaIds.length){
+        var sesLocal = recuperarSesion();
+        var empId = sesLocal ? sesLocal.empresaId : usr.empresaIds[0];
+        SESSION = {userId:usr.id,auth_user_id:authUid,empresaId:empId,rol:usr.rol,nombre:usr.nombre};
+        showLoading('Restaurando sesión...');
+        await loadDB();
+        hideLoading();
+        document.getElementById('login-screen').classList.remove('show');
+        document.getElementById('app-layout').style.display = 'flex';
+        iniciarWatchdogSesion();
+        initAppPostLogin();
+        return;
       }
-    }catch(e){ /* sin sesión Auth activa */ }
-
-    // Intentar restaurar sesión local (usuarios con hash, sin Auth aún)
-    var sesLocal = recuperarSesion();
-    if(sesLocal && SYS.usuarios.find(function(u){ return u.id===sesLocal.userId; })){
-      SESSION = {userId:sesLocal.userId,auth_user_id:null,empresaId:sesLocal.empresaId,rol:sesLocal.rol,nombre:sesLocal.nombre};
-      showLoading('Restaurando sesión...');
-      await loadDB(); hideLoading();
-      document.getElementById('login-screen').classList.remove('show');
-      document.getElementById('app-layout').style.display = 'flex';
-      iniciarWatchdogSesion(); initAppPostLogin();
-      return;
+      // Auth válido pero sin usuario en sistema → cerrar sesión
+      await supa.auth.signOut();
+    } else {
+      // Sin sesión → solo cargar datos públicos para mostrar login
+      await cargarCodSII();
     }
 
+    hideLoading();
+    initNavListeners();
     document.getElementById('login-screen').classList.add('show');
+
   }catch(e){
     console.error('Load error:',e);
     hideLoading();
+    initNavListeners();
     document.getElementById('login-screen').classList.add('show');
   }
 });
@@ -3232,6 +3161,11 @@ async function loadSYS(){
       supa.from('usuario_empresa').select('*'),
       supa.from('plan_base').select('cod,nom,tipo,aux,desc_').order('cod'),
     ]);
+    // Detectar errores de RLS y reportarlos
+    if(r1.error) console.error('ERROR cargando empresas:', r1.error.message);
+    if(r2.error) console.error('ERROR cargando usuarios:', r2.error.message);
+    if(r3.error) console.error('ERROR cargando usuario_empresa:', r3.error.message);
+    if(r4.error) console.error('ERROR cargando plan_base:', r4.error.message);
     SYS.empresas = r1.data||[];
     SYS.usuarios = (r2.data||[]).map(function(u){
       var eids=(r3.data||[]).filter(function(x){return x.usuario_id===u.id;}).map(function(x){return x.empresa_id;});
@@ -3239,6 +3173,9 @@ async function loadSYS(){
              auth_user_id:u.auth_user_id||null,rol:u.rol,empresaIds:eids};
     });
     SYS.planBase = (r4.data||[]).map(function(c){return{cod:c.cod,nom:c.nom,tipo:c.tipo,aux:c.aux,desc:c.desc_||''};});
+    if(SYS.usuarios.length===0 && !r2.error){
+      console.warn('SYS.usuarios vacío pero sin error — verificar tabla usuarios en Supabase');
+    }
   }catch(e){console.error('loadSYS:',e);}
 }
 async function saveDB(){if(!SESSION.empresaId)return;try{await supa.from('empresa_config').upsert({empresa_id:SESSION.empresaId,num_asiento:DB.numAsiento});}catch(e){}}
