@@ -1035,7 +1035,7 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
 
 <!-- ===== MODAL NUEVO ASIENTO ===== -->
 <div class="modal-overlay" id="modal-asiento">
-  <div class="modal" style="width:720px">
+  <div class="modal" style="width:960px;max-width:96vw">
     <div class="modal-head">
       <div class="modal-title">Nuevo Asiento Contable — <span id="ma-num-label"></span></div>
       <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-asiento')">
@@ -1044,28 +1044,39 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
     </div>
     <div class="modal-body">
       <div id="msg-modal-asiento"></div>
-      <div class="form-grid cols3" style="gap:12px;margin-bottom:16px">
-        <div class="field"><label>Fecha *</label><input type="date" id="ma-fecha"></div>
+      <div class="form-grid cols3" style="gap:12px;margin-bottom:12px">
+        <div class="field"><label>Fecha *</label><input type="date" id="ma-fecha" onchange="onFechaCabeceraChange()"></div>
         <div class="field span2"><label>Glosa / Descripción *</label><input id="ma-glosa" placeholder="Descripción del asiento contable"></div>
+      </div>
+      <div class="form-grid cols3" style="gap:12px;margin-bottom:16px">
+        <div class="field"><label id="ma-tipo-doc-lbl">Tipo de documento</label><select id="ma-tipo-doc" disabled><option value="">— deshabilitado —</option></select></div>
+        <div class="field"><label id="ma-folio-lbl">Folio</label><input id="ma-folio" placeholder="N° documento" disabled></div>
+        <div class="field"><label>&nbsp;</label><div id="ma-cabecera-hint" style="font-size:12px;color:var(--text3);padding-top:6px">Se habilita si alguna línea tiene cuenta auxiliar.</div></div>
       </div>
       <div style="overflow-x:auto">
         <table class="lineas-table">
           <thead>
             <tr>
-              <th style="min-width:220px">Cuenta *</th>
-              <th style="min-width:150px">Auxiliar</th>
-              <th style="min-width:120px;text-align:right">Debe</th>
-              <th style="min-width:120px;text-align:right">Haber</th>
+              <th style="min-width:200px">Cuenta *</th>
+              <th style="min-width:170px">Auxiliar (Tercero)</th>
+              <th style="min-width:140px">Centro de Costo</th>
+              <th style="min-width:140px">Vencimiento</th>
+              <th style="min-width:110px;text-align:right">Debe</th>
+              <th style="min-width:110px;text-align:right">Haber</th>
               <th style="width:36px"></th>
             </tr>
           </thead>
           <tbody id="ma-lineas"></tbody>
         </table>
       </div>
-      <div style="margin-top:8px;display:flex;gap:8px">
+      <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn btn-sm" onclick="addLinea()">
           <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Agregar línea
         </button>
+        <button class="btn btn-sm btn-ghost" onclick="abrirTerceroDesdeAsiento()" title="Crear un tercero sin perder el asiento en curso">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Agregar tercero
+        </button>
+        <div id="ma-terceros-empty" style="font-size:12px;color:var(--warning);padding-top:6px;display:none">⚠ Esta empresa no tiene terceros registrados. Use "+ Agregar tercero" antes de usar cuentas auxiliares.</div>
       </div>
       <div class="cuadre-bar" style="margin-top:12px">
         <div class="cuadre-item">Debe: <span id="ma-tot-debe" class="text-blue">$0</span></div>
@@ -1171,7 +1182,8 @@ function hideLoading(){
 var SYS_KEY = 'sc_sys_v2';
 
 // Plan de cuentas base — compartido, se replica al crear empresa
-var SYS = { planBase: [], empresas: [], usuarios: [] };
+// tiposDoc: catálogo SII global (loadSYS). centrosCosto: per-empresa pero residente en SYS por convención del handoff (cargado dentro de loadDB tras seleccionar empresa).
+var SYS = { planBase: [], empresas: [], usuarios: [], perfiles: [], tiposDoc: [], centrosCosto: [] };
 
 // Datos de la empresa activa
 var DB = {
@@ -1984,15 +1996,39 @@ function renderCuentas(){
 // LIBRO DIARIO
 // ============================================================
 var lineasTemp = [];
+// Flag de origen del modal-tercero: si true, se abrió desde modal-asiento
+// y al guardar hay que refrescar el selector y restaurar z-index.
+var _terceroOrigenAsiento = false;
+
+function _addDays(yyyy_mm_dd, days){
+  if(!yyyy_mm_dd) return '';
+  var d = new Date(yyyy_mm_dd+'T00:00:00');
+  if(isNaN(d.getTime())) return '';
+  d.setDate(d.getDate()+days);
+  return d.toISOString().split('T')[0];
+}
 
 function initAsientoModal(){
   var hoy = new Date().toISOString().split('T')[0];
   document.getElementById('ma-fecha').value = hoy;
   document.getElementById('ma-glosa').value = '';
+  document.getElementById('ma-tipo-doc').value = '';
+  document.getElementById('ma-folio').value = '';
   document.getElementById('ma-num-label').textContent = 'A-'+String(DB.numAsiento).padStart(4,'0');
   document.getElementById('msg-modal-asiento').innerHTML = '';
-  lineasTemp = [{cuenta:'',aux:'',debe:0,haber:0},{cuenta:'',aux:'',debe:0,haber:0}];
+  // Poblar selector de tipo de documento desde SYS.tiposDoc (catálogo SII)
+  var tdSel = document.getElementById('ma-tipo-doc');
+  tdSel.innerHTML = '<option value="">— seleccionar —</option>'
+    +(SYS.tiposDoc||[]).map(function(td){return '<option value="'+td.id+'">'+td.cod_sii+' — '+td.nombre+'</option>';}).join('');
+  lineasTemp = [
+    {cuenta:'',aux_id:null,cc_id:null,vencimiento:'',debe:0,haber:0},
+    {cuenta:'',aux_id:null,cc_id:null,vencimiento:'',debe:0,haber:0}
+  ];
+  // Mensaje informativo si la empresa no tiene terceros (R66 + decisión 5)
+  var emptyHint = document.getElementById('ma-terceros-empty');
+  if(emptyHint) emptyHint.style.display = (DB.terceros && DB.terceros.length) ? 'none' : '';
   renderLineas();
+  recalcCabeceraAux();
 }
 
 function openAsientoModal(){
@@ -2000,47 +2036,120 @@ function openAsientoModal(){
   openModal('modal-asiento');
 }
 
-function getAuxList(cod){
-  var set=new Set();
-  DB.asientos.forEach(function(a){ a.lineas.forEach(function(l){ if(l.cuenta===cod&&l.aux) set.add(l.aux); }); });
-  return Array.from(set);
+// Lista de terceros disponibles para asociar a línea con cuenta aux=true.
+// Reemplaza a getAuxiliaresDeCuenta_extended (R66: solo terceros registrados, sin nombres libres).
+function getTercerosDisponibles(){
+  return (DB.terceros||[]).slice().sort(function(a,b){return a.razon.localeCompare(b.razon,'es');});
+}
+
+function onFechaCabeceraChange(){
+  // Recalcular vencimientos por defecto (fecha + 30d) en líneas que aún no tengan vencimiento manual
+  var fecha = document.getElementById('ma-fecha').value;
+  lineasTemp.forEach(function(l){ if(!l._vencManual && fecha){ l.vencimiento = _addDays(fecha,30); } });
+  renderLineas();
 }
 
 function renderLineas(){
-  var cuentaOpts = '<option value="">— seleccionar —</option>'+DB.cuentas.map(function(c){return '<option value="'+c.cod+'">'+c.cod+' - '+c.nom+'</option>';}).join('');
+  var cuentaOpts = '<option value="">— seleccionar —</option>'+DB.cuentas.map(function(c){return '<option value="'+c.cod+'">'+c.cod+' - '+c.nom+(c.aux?' ⓐ':'')+'</option>';}).join('');
+  var terceros = getTercerosDisponibles();
+  var ccs = SYS.centrosCosto||[];
+  var fechaCab = document.getElementById('ma-fecha') ? document.getElementById('ma-fecha').value : '';
   var tb = document.getElementById('ma-lineas');
   tb.innerHTML = lineasTemp.map(function(l,i){
     var c = DB.cuentas.find(function(x){return x.cod===l.cuenta;});
-    var auxEnabled = c && c.aux;
-    var auxList = auxEnabled ? getAuxiliaresDeCuenta_extended(l.cuenta) : [];
-    var auxOpts = '<option value="">—</option>'+auxList.map(function(a){return '<option value="'+a+'" '+(l.aux===a?'selected':'')+'>'+a+'</option>';}).join('')+'<option value="__new__">+ Nuevo auxiliar...</option>';
+    var auxEnabled = !!(c && c.aux);
+    // R66 inciso (b): si cuenta no es aux, los campos quedan NULL — limpieza preventiva en UI
+    if(!auxEnabled){ l.aux_id=null; l.vencimiento=''; l._vencManual=false; }
+    // Default vencimiento: fecha cabecera + 30d, solo si no fue tocado manualmente y la cuenta es aux
+    if(auxEnabled && !l.vencimiento && !l._vencManual && fechaCab){ l.vencimiento = _addDays(fechaCab,30); }
+
+    var auxOpts = '<option value="">—</option>'+terceros.map(function(t){
+      // Identificamos al tercero por RUT (DB.terceros no expone id local; el id real vendrá de Supabase en Fase 3)
+      return '<option value="'+t.rut+'" '+(l.aux_id===t.rut?'selected':'')+'>'+t.razon+'</option>';
+    }).join('');
+    var ccOpts = '<option value="">—</option>'+ccs.map(function(cc){
+      return '<option value="'+cc.id+'" '+(l.cc_id===cc.id?'selected':'')+'>'+cc.cod+' — '+cc.nombre+'</option>';
+    }).join('');
+
+    var auxTitle = auxEnabled ? 'Tercero registrado (obligatorio)' : 'Cuenta no auxiliar — campo deshabilitado';
+    var vtoTitle = auxEnabled ? 'Vencimiento (obligatorio)' : 'Cuenta no auxiliar — campo deshabilitado';
 
     return '<tr>'
-      +'<td><select style="width:100%" onchange="setLC('+i+',\'cuenta\',this.value)">'
+      +'<td><select data-field="cuenta" data-i="'+i+'" style="width:100%" onchange="setLineaCampo('+i+',\'cuenta\',this.value)">'
         + cuentaOpts.replace('value="'+l.cuenta+'"','value="'+l.cuenta+'" selected')
       +'</select></td>'
-      +'<td><select style="width:100%" '+(auxEnabled?'':'disabled')+' onchange="setLAux('+i+',this.value)">'
+      +'<td><select data-field="aux_id" data-i="'+i+'" style="width:100%" '+(auxEnabled?'':'disabled')+' title="'+auxTitle+'" onchange="setLineaCampo('+i+',\'aux_id\',this.value||null)">'
         +(auxEnabled?auxOpts:'<option>—</option>')
       +'</select></td>'
-      +'<td><input type="number" min="0" style="width:100%;text-align:right" placeholder="0" value="'+(l.debe||'')+'" onchange="setLC('+i+',\'debe\',parseFloat(this.value)||0);recalcCuadre()"></td>'
-      +'<td><input type="number" min="0" style="width:100%;text-align:right" placeholder="0" value="'+(l.haber||'')+'" onchange="setLC('+i+',\'haber\',parseFloat(this.value)||0);recalcCuadre()"></td>'
+      +'<td><select data-field="cc_id" data-i="'+i+'" style="width:100%" onchange="setLineaCampo('+i+',\'cc_id\',this.value||null)">'
+        +(ccs.length?ccOpts:'<option value="">— sin centros —</option>')
+      +'</select></td>'
+      +'<td><input data-field="vencimiento" data-i="'+i+'" type="date" style="width:100%" '+(auxEnabled?'':'disabled')+' title="'+vtoTitle+'" value="'+(l.vencimiento||'')+'" onchange="setLineaCampo('+i+',\'vencimiento\',this.value);lineasTemp['+i+']._vencManual=true"></td>'
+      +'<td><input data-field="debe" data-i="'+i+'" type="number" min="0" style="width:100%;text-align:right" placeholder="0" value="'+(l.debe||'')+'" onchange="setLineaCampo('+i+',\'debe\',parseFloat(this.value)||0);recalcCuadre()"></td>'
+      +'<td><input data-field="haber" data-i="'+i+'" type="number" min="0" style="width:100%;text-align:right" placeholder="0" value="'+(l.haber||'')+'" onchange="setLineaCampo('+i+',\'haber\',parseFloat(this.value)||0);recalcCuadre()"></td>'
       +'<td><button class="btn btn-danger btn-sm" onclick="delLinea('+i+')" style="padding:4px 7px">×</button></td>'
       +'</tr>';
   }).join('');
   recalcCuadre();
+  recalcCabeceraAux();
 }
 
-function setLC(i,k,v){ lineasTemp[i][k]=v; if(k==='cuenta'){lineasTemp[i].aux='';} renderLineas(); }
-function setLAux(i,v){
-  if(v==='__new__'){
-    var n = prompt('Nombre del nuevo auxiliar (ej: Banco Santander, Cliente González):');
-    if(n) lineasTemp[i].aux=n.trim();
-    else return;
-  } else { lineasTemp[i].aux=v; }
-  renderLineas();
+function setLineaCampo(i,k,v){
+  if(!lineasTemp[i]) return;
+  lineasTemp[i][k] = v;
+  if(k==='cuenta'){
+    // R66 inciso (b): cambio de cuenta resetea campos aux-dependientes; renderLineas hará la limpieza
+    lineasTemp[i].aux_id = null;
+    lineasTemp[i].vencimiento = '';
+    lineasTemp[i]._vencManual = false;
+    renderLineas();
+  } else if(k==='aux_id' || k==='vencimiento'){
+    // Solo refrescar cabecera (no re-renderizar todas las líneas para no perder foco)
+    recalcCabeceraAux();
+  }
 }
-function addLinea(){ lineasTemp.push({cuenta:'',aux:'',debe:0,haber:0}); renderLineas(); }
+
+function addLinea(){ lineasTemp.push({cuenta:'',aux_id:null,cc_id:null,vencimiento:'',debe:0,haber:0}); renderLineas(); }
 function delLinea(i){ if(lineasTemp.length>1){lineasTemp.splice(i,1);renderLineas();} }
+
+// R66 cabecera: tipo_doc_id y folio se habilitan/deshabilitan según haya alguna línea con cuenta aux=true
+function recalcCabeceraAux(){
+  var algunaAux = lineasTemp.some(function(l){
+    var c = DB.cuentas.find(function(x){return x.cod===l.cuenta;});
+    return c && c.aux;
+  });
+  var tdSel = document.getElementById('ma-tipo-doc');
+  var folio = document.getElementById('ma-folio');
+  var tdLbl = document.getElementById('ma-tipo-doc-lbl');
+  var foLbl = document.getElementById('ma-folio-lbl');
+  var hint  = document.getElementById('ma-cabecera-hint');
+  if(!tdSel || !folio) return;
+  if(algunaAux){
+    tdSel.disabled = false;
+    folio.disabled = false;
+    if(tdLbl) tdLbl.textContent = 'Tipo de documento *';
+    if(foLbl) foLbl.textContent = 'Folio *';
+    if(hint)  hint.textContent = 'Obligatorios: hay líneas con cuenta auxiliar.';
+  } else {
+    tdSel.disabled = true;
+    folio.disabled = true;
+    tdSel.value = '';
+    folio.value = '';
+    if(tdLbl) tdLbl.textContent = 'Tipo de documento';
+    if(foLbl) foLbl.textContent = 'Folio';
+    if(hint)  hint.textContent = 'Se habilita si alguna línea tiene cuenta auxiliar.';
+  }
+}
+
+// Atajo: abrir modal-tercero apilado sobre modal-asiento (decisión 3 v3.57+)
+function abrirTerceroDesdeAsiento(){
+  _terceroOrigenAsiento = true;
+  resetModalTercero();
+  // Elevar z-index del overlay de tercero por encima del de asiento (ambos default 200)
+  var ov = document.getElementById('modal-tercero');
+  if(ov) ov.style.zIndex = '300';
+  openModal('modal-tercero');
+}
 
 function recalcCuadre(){
   // leer valores del DOM para tener valores actualizados
@@ -2065,18 +2174,38 @@ function recalcCuadre(){
 function guardarAsiento(){
   var fecha = document.getElementById('ma-fecha').value;
   var glosa = document.getElementById('ma-glosa').value.trim();
-  // recolectar desde DOM
+  var tipoDocId = document.getElementById('ma-tipo-doc').value || null;
+  var folio     = document.getElementById('ma-folio').value.trim() || null;
+
+  // Recolectar líneas desde DOM por data-field (robusto frente a cambios de orden de columnas)
   var rows = document.querySelectorAll('#ma-lineas tr');
   var lineas = [];
-  rows.forEach(function(r){
-    var sels = r.querySelectorAll('select');
-    var inputs = r.querySelectorAll('input[type=number]');
-    var cod = sels[0] ? sels[0].value : '';
-    var aux = sels[1] ? sels[1].value : '';
-    if(aux==='__new__') aux='';
-    var d = parseFloat(inputs[0]?inputs[0].value:0)||0;
-    var h = parseFloat(inputs[1]?inputs[1].value:0)||0;
-    if(cod && (d||h)) lineas.push({cuenta:cod, aux:aux, debe:d, haber:h});
+  var algunaAux = false;
+  var lineasInvalidas = [];
+  rows.forEach(function(r,idx){
+    var cuenta = (r.querySelector('[data-field="cuenta"]')||{}).value || '';
+    var aux_id = (r.querySelector('[data-field="aux_id"]')||{}).value || null;
+    var cc_id  = (r.querySelector('[data-field="cc_id"]') ||{}).value || null;
+    var venc   = (r.querySelector('[data-field="vencimiento"]')||{}).value || '';
+    var debe   = parseFloat((r.querySelector('[data-field="debe"]') ||{}).value)||0;
+    var haber  = parseFloat((r.querySelector('[data-field="haber"]')||{}).value)||0;
+    if(!cuenta || (!debe && !haber)) return;
+    var c = DB.cuentas.find(function(x){return x.cod===cuenta;});
+    var auxEnabled = !!(c && c.aux);
+    if(auxEnabled){
+      algunaAux = true;
+      if(!aux_id || !venc){ lineasInvalidas.push({i:idx+1, falta:(!aux_id?'Auxiliar':'')+(!aux_id&&!venc?' y ':'')+(!venc?'Vencimiento':'')}); }
+    } else {
+      // R66 inciso (b): cuenta no auxiliar ⇒ los 4 campos NULL
+      aux_id = null; venc = '';
+    }
+    // Mitigación Fase 4 (decisión 4): poblar aux_nombre legacy desde terceros.razon por lookup
+    var auxNombreLegacy = '';
+    if(aux_id){
+      var t = DB.terceros.find(function(x){return x.rut===aux_id;});
+      if(t) auxNombreLegacy = t.razon;
+    }
+    lineas.push({cuenta:cuenta, aux_id:aux_id, cc_id:cc_id, vencimiento:venc||null, debe:debe, haber:haber, aux:auxNombreLegacy});
   });
 
   if(!fecha){ msgEl('msg-modal-asiento','err','Ingrese la fecha del asiento.'); return; }
@@ -2086,8 +2215,25 @@ function guardarAsiento(){
   var totH = lineas.reduce(function(s,l){return s+l.haber;},0);
   if(Math.abs(totD-totH)>0.01){ msgEl('msg-modal-asiento','err','El asiento no está cuadrado. Debe='+fmtM(totD)+' Haber='+fmtM(totH)); return; }
 
+  // R66: validaciones cruzadas catálogo↔línea
+  if(algunaAux){
+    if(!tipoDocId || !folio){
+      msgEl('msg-modal-asiento','err','Hay líneas con cuenta auxiliar. Indique tipo de documento y folio en la cabecera.');
+      return;
+    }
+    if(lineasInvalidas.length){
+      var det = lineasInvalidas.map(function(x){return 'línea '+x.i+' ('+x.falta+')';}).join(', ');
+      msgEl('msg-modal-asiento','err','Faltan datos en líneas con cuenta auxiliar: '+det+'.');
+      return;
+    }
+  } else {
+    // Cuenta no auxiliar en ninguna línea ⇒ cabecera debe quedar NULL en BD (la UI ya las deshabilita)
+    tipoDocId = null; folio = null;
+  }
+
   var num = 'A-'+String(DB.numAsiento).padStart(4,'0');
-  DB.asientos.push({num:num, fecha:fecha, glosa:glosa, lineas:lineas});
+  // En memoria conservamos los campos extendidos para que cuando Fase 3 conecte la persistencia, ya estén disponibles.
+  DB.asientos.push({num:num, fecha:fecha, glosa:glosa, tipo_doc_id:tipoDocId, folio:folio, lineas:lineas});
   DB.numAsiento++;
   saveDB();
   closeModal('modal-asiento');
@@ -2229,7 +2375,11 @@ function formatRut(input){
 }
 
 // ── guardar / editar tercero
-function saveTercero(){
+// FIX (Fase 2, política v3.58): existía un duplicado `async function saveTercero(t)` más abajo
+// que pisaba esta función (H3 + extensión R57). El botón "Guardar auxiliar" llamaba sin args
+// y el upsert moría en t.rut undefined → IGAL nunca pudo crear terceros desde la UI.
+// Ahora la versión async se llama saveTerceroDB y esta función la invoca con el objeto recolectado.
+async function saveTercero(){
   var rut    = document.getElementById('mt-rut').value.trim();
   var razon  = document.getElementById('mt-razon').value.trim();
   var tipo   = document.getElementById('mt-tipo').value;
@@ -2248,6 +2398,13 @@ function saveTercero(){
   }
 
   var obj = {rut:rut, razon:razon, tipo:tipo, dir:dir, email:email, tel:tel, notas:notas};
+  // Persistir primero; si falla, no tocar memoria.
+  try {
+    await saveTerceroDB(obj);
+  } catch(e) {
+    msgEl('msg-modal-tercero','err','Error al guardar en BD: '+(e&&e.message?e.message:e));
+    return;
+  }
   if(editIdx >= 0){
     DB.terceros[editIdx] = obj;
   } else {
@@ -2257,8 +2414,18 @@ function saveTercero(){
   saveDB();
   closeModal('modal-tercero');
   resetModalTercero();
-  renderAuxiliares();
-  renderStatsAuxiliares();
+  if(typeof renderAuxiliares==='function') renderAuxiliares();
+  if(typeof renderStatsAuxiliares==='function') renderStatsAuxiliares();
+  // Si el flujo se inició desde el modal de Asiento, restaurar z-index y refrescar selector
+  if(_terceroOrigenAsiento){
+    var ov = document.getElementById('modal-tercero');
+    if(ov) ov.style.zIndex = '';
+    _terceroOrigenAsiento = false;
+    var emptyHint = document.getElementById('ma-terceros-empty');
+    if(emptyHint) emptyHint.style.display = (DB.terceros && DB.terceros.length) ? 'none' : '';
+    renderLineas();
+    msgEl('msg-modal-asiento','ok','Tercero "'+obj.razon+'" agregado. Selecciónalo en la línea correspondiente.');
+  }
 }
 
 function resetModalTercero(){
@@ -2448,19 +2615,9 @@ function importarAuxiliaresCSV(input){
   reader.readAsText(file,'UTF-8');
 }
 
-// ── poblar selector de auxiliar en modal asiento (con terceros + nombres libres)
-function getAuxiliaresDeCuenta_extended(cod){
-  // Combina terceros registrados + nombres usados en asientos
-  var set = new Set();
-  DB.asientos.forEach(function(a){
-    a.lineas.forEach(function(l){ if(l.cuenta===cod&&l.aux) set.add(l.aux); });
-  });
-  // Añadir terceros registrados como opciones (por razón social)
-  if(DB.terceros){
-    DB.terceros.forEach(function(t){ set.add(t.razon); });
-  }
-  return Array.from(set).sort();
-}
+// ── selector de auxiliar en modal asiento — Fase 2 (v3.58):
+// El helper getAuxiliaresDeCuenta_extended fue eliminado. Bajo R66 los auxiliares
+// son terceros registrados, no nombres libres. Ver getTercerosDisponibles() arriba.
 
 // ============================================================
 // BALANCE 8 COLUMNAS
@@ -3312,18 +3469,20 @@ const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
 
 async function loadSYS(){
   try{
-    var [r1,r2,r3,r4,r5] = await Promise.all([
+    var [r1,r2,r3,r4,r5,r6] = await Promise.all([
       supa.from('empresas').select('*').order('razon'),
       supa.from('usuarios').select('id,nombre,user_login,pass_hash,auth_user_id,perfil_id').order('nombre'),
       supa.from('usuario_empresa').select('*'),
       supa.from('plan_base').select('cod,nom,tipo,aux,desc_').order('cod'),
       supa.from('perfiles').select('*').order('built_in', {ascending:false}).order('nombre'),
+      supa.from('tipo_documento').select('id,cod_sii,nombre,activo').eq('activo',true).order('cod_sii'),
     ]);
     if(r1.error) console.error('ERROR empresas:', r1.error.message);
     if(r2.error) console.error('ERROR usuarios:', r2.error.message);
     if(r3.error) console.error('ERROR usuario_empresa:', r3.error.message);
     if(r4.error) console.error('ERROR plan_base:', r4.error.message);
     if(r5.error) console.warn('perfiles no disponible:', r5.error.message);
+    if(r6.error) console.warn('tipo_documento no disponible:', r6.error.message);
     SYS.empresas = r1.data||[];
     SYS.usuarios = (r2.data||[]).map(function(u){
       var eids=(r3.data||[]).filter(function(x){return x.usuario_id===u.id;}).map(function(x){return x.empresa_id;});
@@ -3332,6 +3491,7 @@ async function loadSYS(){
     });
     SYS.planBase = (r4.data||[]).map(function(c){return{cod:c.cod,nom:c.nom,tipo:c.tipo,aux:c.aux,desc:c.desc_||''};});
     SYS.perfiles = r5.data||[];
+    SYS.tiposDoc = r6.data||[];
   }catch(e){console.error('loadSYS:',e);}
 }
 async function saveDB(){if(!SESSION.empresaId)return;try{await supa.from('empresa_config').upsert({empresa_id:SESSION.empresaId,num_asiento:DB.numAsiento});}catch(e){}}
@@ -3344,11 +3504,12 @@ async function loadDB(){
     var emp=SYS.empresas.find(function(e){return e.id===SESSION.empresaId;});
     if(emp) DB.config={empresa:emp.razon,rut:emp.rut,giro:emp.giro||'',dir:emp.dir||'',periodo:emp.periodo||''};
 
-    // Paralelizar: config + cuentas + terceros al mismo tiempo
-    var [cfg,r1,r4] = await Promise.all([
+    // Paralelizar: config + cuentas + terceros + centros_costos al mismo tiempo
+    var [cfg,r1,r4,r5] = await Promise.all([
       supa.from('empresa_config').select('num_asiento').eq('empresa_id',SESSION.empresaId).maybeSingle(),
       supa.from('cuentas').select('*').eq('empresa_id',SESSION.empresaId).order('cod'),
       supa.from('terceros').select('*').eq('empresa_id',SESSION.empresaId).order('razon'),
+      supa.from('centros_costos').select('id,cod,nombre,activo').eq('empresa_id',SESSION.empresaId).eq('activo',true).order('cod'),
     ]);
     DB.numAsiento = cfg.data?cfg.data.num_asiento:1;
     DB.cuentas = (r1.data||[]).map(function(c){return{
@@ -3360,6 +3521,9 @@ async function loadDB(){
     DB.terceros = (r4.data||[]).map(function(t){return{
       rut:t.rut,razon:t.razon,tipo:t.tipo,dir:t.dir||'',email:t.email||'',tel:t.tel||'',notas:t.notas||''
     };});
+    // SYS.centrosCosto: residente en SYS por convención del handoff v5, pero cargado per-empresa
+    // dentro de loadDB porque la tabla está particionada por empresa_id con RLS.
+    SYS.centrosCosto = r5.data||[];
 
     // Asientos: primero los headers, luego las líneas en paralelo
     var r2 = await supa.from('asientos').select('id,num,fecha,glosa').eq('empresa_id',SESSION.empresaId).order('fecha').order('num');
@@ -3384,7 +3548,7 @@ async function loadDB(){
   finally{hideLoading();}
 }
 async function saveCuenta(c){await supa.from('cuentas').upsert({empresa_id:SESSION.empresaId,cod:c.cod,nom:c.nom,tipo:c.tipo||c.tipo_plan||'Activo',aux:c.aux||false,desc_:c.desc||'',tipo_plan:c.tipo_plan||'',cod_sii:c.cod_sii||'',concepto:c.concepto||'',subtipo_plan:c.subtipo_plan||'',subtipo_flujo:c.subtipo_flujo||'',cta_cobrar:c.cta_cobrar||false,cta_pagar:c.cta_pagar||false,disp_pago:c.disp_pago||false},{onConflict:'empresa_id,cod'});}
-async function saveTercero(t){await supa.from('terceros').upsert({empresa_id:SESSION.empresaId,rut:t.rut,razon:t.razon,tipo:t.tipo,dir:t.dir||'',email:t.email||'',tel:t.tel||'',notas:t.notas||''},{onConflict:'empresa_id,rut'});}
+async function saveTerceroDB(t){await supa.from('terceros').upsert({empresa_id:SESSION.empresaId,rut:t.rut,razon:t.razon,tipo:t.tipo,dir:t.dir||'',email:t.email||'',tel:t.tel||'',notas:t.notas||''},{onConflict:'empresa_id,rut'});}
 // ═════════════════════════════════════════════════════════════
 
 // ══ NAVEGACIÓN ═══════════════════════════════════════════════
