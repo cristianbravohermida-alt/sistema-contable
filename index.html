@@ -1060,7 +1060,7 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
 
 <!-- ===== MODAL NUEVO ASIENTO ===== -->
 <div class="modal-overlay" id="modal-asiento">
-  <div class="modal" style="width:960px;max-width:96vw">
+  <div class="modal" style="width:1100px;max-width:97vw">
     <div class="modal-head">
       <div class="modal-title">Nuevo Asiento Contable — <span id="ma-num-label"></span></div>
       <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-asiento')">
@@ -1069,23 +1069,20 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
     </div>
     <div class="modal-body">
       <div id="msg-modal-asiento"></div>
-      <div class="form-grid cols3" style="gap:12px;margin-bottom:12px">
+      <div class="form-grid cols3" style="gap:12px;margin-bottom:16px">
         <div class="field"><label>Fecha *</label><input type="date" id="ma-fecha" onchange="onFechaCabeceraChange()"></div>
         <div class="field span2"><label>Glosa / Descripción *</label><input id="ma-glosa" placeholder="Descripción del asiento contable"></div>
-      </div>
-      <div class="form-grid cols3" style="gap:12px;margin-bottom:16px">
-        <div class="field"><label id="ma-tipo-doc-lbl">Tipo de documento</label><select id="ma-tipo-doc" disabled><option value="">— deshabilitado —</option></select></div>
-        <div class="field"><label id="ma-folio-lbl">Folio</label><input id="ma-folio" placeholder="N° documento" disabled></div>
-        <div class="field"><label>&nbsp;</label><div id="ma-cabecera-hint" style="font-size:12px;color:var(--text3);padding-top:6px">Se habilita si alguna línea tiene cuenta auxiliar.</div></div>
       </div>
       <div style="overflow-x:auto">
         <table class="lineas-table">
           <thead>
             <tr>
-              <th style="min-width:200px">Cuenta *</th>
-              <th style="min-width:170px">Auxiliar (Tercero)</th>
-              <th style="min-width:140px">Centro de Costo</th>
-              <th style="min-width:140px">Vencimiento</th>
+              <th style="min-width:180px">Cuenta *</th>
+              <th style="min-width:150px">Auxiliar (Tercero)</th>
+              <th style="min-width:120px">Tipo doc.</th>
+              <th style="min-width:100px">Folio</th>
+              <th style="min-width:130px">Vencimiento</th>
+              <th style="min-width:130px">Centro de Costo</th>
               <th style="min-width:110px;text-align:right">Debe</th>
               <th style="min-width:110px;text-align:right">Haber</th>
               <th style="width:36px"></th>
@@ -1094,14 +1091,15 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
           <tbody id="ma-lineas"></tbody>
         </table>
       </div>
-      <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+      <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
         <button class="btn btn-sm" onclick="addLinea()">
           <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Agregar línea
         </button>
         <button class="btn btn-sm btn-ghost" onclick="abrirTerceroDesdeAsiento()" title="Crear un tercero sin perder el asiento en curso">
           <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Agregar tercero
         </button>
-        <div id="ma-terceros-empty" style="font-size:12px;color:var(--warning);padding-top:6px;display:none">⚠ Esta empresa no tiene terceros registrados. Use "+ Agregar tercero" antes de usar cuentas auxiliares.</div>
+        <span style="font-size:12px;color:var(--text3)">Tipo de documento, folio y vencimiento se completan por línea cuando la cuenta es auxiliar.</span>
+        <div id="ma-terceros-empty" style="font-size:12px;color:var(--warning);display:none">⚠ Esta empresa no tiene terceros registrados. Use "+ Agregar tercero" antes de usar cuentas auxiliares.</div>
       </div>
       <div class="cuadre-bar" style="margin-top:12px">
         <div class="cuadre-item">Debe: <span id="ma-tot-debe" class="text-blue">$0</span></div>
@@ -2170,23 +2168,16 @@ function initAsientoModal(){
   var hoy = new Date().toISOString().split('T')[0];
   document.getElementById('ma-fecha').value = hoy;
   document.getElementById('ma-glosa').value = '';
-  document.getElementById('ma-tipo-doc').value = '';
-  document.getElementById('ma-folio').value = '';
   document.getElementById('ma-num-label').textContent = 'A-'+String(DB.numAsiento).padStart(4,'0');
   document.getElementById('msg-modal-asiento').innerHTML = '';
-  // Poblar selector de tipo de documento desde SYS.tiposDoc (catálogo SII)
-  var tdSel = document.getElementById('ma-tipo-doc');
-  tdSel.innerHTML = '<option value="">— seleccionar —</option>'
-    +(SYS.tiposDoc||[]).map(function(td){return '<option value="'+td.id+'">'+td.cod_sii+' — '+td.nombre+'</option>';}).join('');
   lineasTemp = [
-    {cuenta:'',aux_id:null,cc_id:null,vencimiento:'',debe:0,haber:0},
-    {cuenta:'',aux_id:null,cc_id:null,vencimiento:'',debe:0,haber:0}
+    {cuenta:'',aux_id:null,tipo_doc_id:null,folio:'',cc_id:null,vencimiento:'',debe:0,haber:0},
+    {cuenta:'',aux_id:null,tipo_doc_id:null,folio:'',cc_id:null,vencimiento:'',debe:0,haber:0}
   ];
   // Mensaje informativo si la empresa no tiene terceros (R66 + decisión 5)
   var emptyHint = document.getElementById('ma-terceros-empty');
   if(emptyHint) emptyHint.style.display = (DB.terceros && DB.terceros.length) ? 'none' : '';
   renderLineas();
-  recalcCabeceraAux();
 }
 
 function openAsientoModal(){
@@ -2211,13 +2202,14 @@ function renderLineas(){
   var cuentaOpts = '<option value="">— seleccionar —</option>'+DB.cuentas.map(function(c){return '<option value="'+c.cod+'">'+c.cod+' - '+c.nom+(c.aux?' ⓐ':'')+'</option>';}).join('');
   var terceros = getTercerosDisponibles();
   var ccs = SYS.centrosCosto||[];
+  var tipos = SYS.tiposDoc||[];
   var fechaCab = document.getElementById('ma-fecha') ? document.getElementById('ma-fecha').value : '';
   var tb = document.getElementById('ma-lineas');
   tb.innerHTML = lineasTemp.map(function(l,i){
     var c = DB.cuentas.find(function(x){return x.cod===l.cuenta;});
     var auxEnabled = !!(c && c.aux);
     // R66 inciso (b): si cuenta no es aux, los campos quedan NULL — limpieza preventiva en UI
-    if(!auxEnabled){ l.aux_id=null; l.vencimiento=''; l._vencManual=false; }
+    if(!auxEnabled){ l.aux_id=null; l.tipo_doc_id=null; l.folio=''; l.vencimiento=''; l._vencManual=false; }
     // Default vencimiento: fecha cabecera + 30d, solo si no fue tocado manualmente y la cuenta es aux
     if(auxEnabled && !l.vencimiento && !l._vencManual && fechaCab){ l.vencimiento = _addDays(fechaCab,30); }
 
@@ -2228,8 +2220,13 @@ function renderLineas(){
     var ccOpts = '<option value="">—</option>'+ccs.map(function(cc){
       return '<option value="'+cc.id+'" '+(l.cc_id===cc.id?'selected':'')+'>'+cc.cod+' — '+cc.nombre+'</option>';
     }).join('');
+    var tdOpts = '<option value="">—</option>'+tipos.map(function(td){
+      return '<option value="'+td.id+'" '+(l.tipo_doc_id===td.id?'selected':'')+'>'+td.cod_sii+' — '+td.nombre+'</option>';
+    }).join('');
 
     var auxTitle = auxEnabled ? 'Tercero registrado (obligatorio)' : 'Cuenta no auxiliar — campo deshabilitado';
+    var docTitle = auxEnabled ? 'Tipo de documento (obligatorio)' : 'Cuenta no auxiliar — campo deshabilitado';
+    var folTitle = auxEnabled ? 'N° folio del documento (obligatorio)' : 'Cuenta no auxiliar — campo deshabilitado';
     var vtoTitle = auxEnabled ? 'Vencimiento (obligatorio)' : 'Cuenta no auxiliar — campo deshabilitado';
 
     return '<tr>'
@@ -2239,65 +2236,40 @@ function renderLineas(){
       +'<td><select data-field="aux_id" data-i="'+i+'" style="width:100%" '+(auxEnabled?'':'disabled')+' title="'+auxTitle+'" onchange="setLineaCampo('+i+',\'aux_id\',this.value||null)">'
         +(auxEnabled?auxOpts:'<option>—</option>')
       +'</select></td>'
+      +'<td><select data-field="tipo_doc_id" data-i="'+i+'" style="width:100%" '+(auxEnabled?'':'disabled')+' title="'+docTitle+'" onchange="setLineaCampo('+i+',\'tipo_doc_id\',this.value||null)">'
+        +(auxEnabled?tdOpts:'<option>—</option>')
+      +'</select></td>'
+      +'<td><input data-field="folio" data-i="'+i+'" type="text" style="width:100%" '+(auxEnabled?'':'disabled')+' title="'+folTitle+'" placeholder="N°" value="'+(l.folio||'')+'" onchange="setLineaCampo('+i+',\'folio\',this.value.trim())"></td>'
+      +'<td><input data-field="vencimiento" data-i="'+i+'" type="date" style="width:100%" '+(auxEnabled?'':'disabled')+' title="'+vtoTitle+'" value="'+(l.vencimiento||'')+'" onchange="setLineaCampo('+i+',\'vencimiento\',this.value);lineasTemp['+i+']._vencManual=true"></td>'
       +'<td><select data-field="cc_id" data-i="'+i+'" style="width:100%" onchange="setLineaCampo('+i+',\'cc_id\',this.value||null)">'
         +(ccs.length?ccOpts:'<option value="">— sin centros —</option>')
       +'</select></td>'
-      +'<td><input data-field="vencimiento" data-i="'+i+'" type="date" style="width:100%" '+(auxEnabled?'':'disabled')+' title="'+vtoTitle+'" value="'+(l.vencimiento||'')+'" onchange="setLineaCampo('+i+',\'vencimiento\',this.value);lineasTemp['+i+']._vencManual=true"></td>'
       +'<td><input data-field="debe" data-i="'+i+'" type="number" min="0" style="width:100%;text-align:right" placeholder="0" value="'+(l.debe||'')+'" onchange="setLineaCampo('+i+',\'debe\',parseFloat(this.value)||0);recalcCuadre()"></td>'
       +'<td><input data-field="haber" data-i="'+i+'" type="number" min="0" style="width:100%;text-align:right" placeholder="0" value="'+(l.haber||'')+'" onchange="setLineaCampo('+i+',\'haber\',parseFloat(this.value)||0);recalcCuadre()"></td>'
       +'<td><button class="btn btn-danger btn-sm" onclick="delLinea('+i+')" style="padding:4px 7px">×</button></td>'
       +'</tr>';
   }).join('');
   recalcCuadre();
-  recalcCabeceraAux();
 }
 
 function setLineaCampo(i,k,v){
   if(!lineasTemp[i]) return;
   lineasTemp[i][k] = v;
   if(k==='cuenta'){
-    // R66 inciso (b): cambio de cuenta resetea campos aux-dependientes; renderLineas hará la limpieza
+    // R66 inciso (b): cambio de cuenta resetea TODOS los campos aux-dependientes
     lineasTemp[i].aux_id = null;
+    lineasTemp[i].tipo_doc_id = null;
+    lineasTemp[i].folio = '';
     lineasTemp[i].vencimiento = '';
     lineasTemp[i]._vencManual = false;
     renderLineas();
-  } else if(k==='aux_id' || k==='vencimiento'){
-    // Solo refrescar cabecera (no re-renderizar todas las líneas para no perder foco)
-    recalcCabeceraAux();
   }
+  // Para los campos aux-dependientes (aux_id, tipo_doc_id, folio, vencimiento, cc_id) no se re-renderiza
+  // porque rompería el foco; el valor se persiste en lineasTemp y se valida al guardar.
 }
 
-function addLinea(){ lineasTemp.push({cuenta:'',aux_id:null,cc_id:null,vencimiento:'',debe:0,haber:0}); renderLineas(); }
+function addLinea(){ lineasTemp.push({cuenta:'',aux_id:null,tipo_doc_id:null,folio:'',cc_id:null,vencimiento:'',debe:0,haber:0}); renderLineas(); }
 function delLinea(i){ if(lineasTemp.length>1){lineasTemp.splice(i,1);renderLineas();} }
-
-// R66 cabecera: tipo_doc_id y folio se habilitan/deshabilitan según haya alguna línea con cuenta aux=true
-function recalcCabeceraAux(){
-  var algunaAux = lineasTemp.some(function(l){
-    var c = DB.cuentas.find(function(x){return x.cod===l.cuenta;});
-    return c && c.aux;
-  });
-  var tdSel = document.getElementById('ma-tipo-doc');
-  var folio = document.getElementById('ma-folio');
-  var tdLbl = document.getElementById('ma-tipo-doc-lbl');
-  var foLbl = document.getElementById('ma-folio-lbl');
-  var hint  = document.getElementById('ma-cabecera-hint');
-  if(!tdSel || !folio) return;
-  if(algunaAux){
-    tdSel.disabled = false;
-    folio.disabled = false;
-    if(tdLbl) tdLbl.textContent = 'Tipo de documento *';
-    if(foLbl) foLbl.textContent = 'Folio *';
-    if(hint)  hint.textContent = 'Obligatorios: hay líneas con cuenta auxiliar.';
-  } else {
-    tdSel.disabled = true;
-    folio.disabled = true;
-    tdSel.value = '';
-    folio.value = '';
-    if(tdLbl) tdLbl.textContent = 'Tipo de documento';
-    if(foLbl) foLbl.textContent = 'Folio';
-    if(hint)  hint.textContent = 'Se habilita si alguna línea tiene cuenta auxiliar.';
-  }
-}
 
 // Atajo: abrir modal-tercero apilado sobre modal-asiento (decisión 3 v3.57+)
 function abrirTerceroDesdeAsiento(){
@@ -2332,17 +2304,16 @@ function recalcCuadre(){
 function guardarAsiento(){
   var fecha = document.getElementById('ma-fecha').value;
   var glosa = document.getElementById('ma-glosa').value.trim();
-  var tipoDocId = document.getElementById('ma-tipo-doc').value || null;
-  var folio     = document.getElementById('ma-folio').value.trim() || null;
 
   // Recolectar líneas desde DOM por data-field (robusto frente a cambios de orden de columnas)
   var rows = document.querySelectorAll('#ma-lineas tr');
   var lineas = [];
-  var algunaAux = false;
   var lineasInvalidas = [];
   rows.forEach(function(r,idx){
     var cuenta = (r.querySelector('[data-field="cuenta"]')||{}).value || '';
     var aux_id = (r.querySelector('[data-field="aux_id"]')||{}).value || null;
+    var tipo_doc_id = (r.querySelector('[data-field="tipo_doc_id"]')||{}).value || null;
+    var folio  = ((r.querySelector('[data-field="folio"]')||{}).value || '').trim();
     var cc_id  = (r.querySelector('[data-field="cc_id"]') ||{}).value || null;
     var venc   = (r.querySelector('[data-field="vencimiento"]')||{}).value || '';
     var debe   = parseFloat((r.querySelector('[data-field="debe"]') ||{}).value)||0;
@@ -2351,11 +2322,16 @@ function guardarAsiento(){
     var c = DB.cuentas.find(function(x){return x.cod===cuenta;});
     var auxEnabled = !!(c && c.aux);
     if(auxEnabled){
-      algunaAux = true;
-      if(!aux_id || !venc){ lineasInvalidas.push({i:idx+1, falta:(!aux_id?'Auxiliar':'')+(!aux_id&&!venc?' y ':'')+(!venc?'Vencimiento':'')}); }
+      // R66 (v3.60): los 4 campos auxiliares son TODOS por línea ahora.
+      var faltan = [];
+      if(!aux_id) faltan.push('Auxiliar');
+      if(!tipo_doc_id) faltan.push('Tipo de documento');
+      if(!folio) faltan.push('Folio');
+      if(!venc) faltan.push('Vencimiento');
+      if(faltan.length) lineasInvalidas.push({i:idx+1, falta:faltan.join(', ')});
     } else {
-      // R66 inciso (b): cuenta no auxiliar ⇒ los 4 campos NULL
-      aux_id = null; venc = '';
+      // R66 inciso (b): cuenta no auxiliar ⇒ los 4 campos NULL en BD
+      aux_id = null; tipo_doc_id = null; folio = ''; venc = '';
     }
     // Mitigación Fase 4 (decisión 4): poblar aux_nombre legacy desde terceros.razon por lookup
     var auxNombreLegacy = '';
@@ -2363,7 +2339,17 @@ function guardarAsiento(){
       var t = DB.terceros.find(function(x){return x.rut===aux_id;});
       if(t) auxNombreLegacy = t.razon;
     }
-    lineas.push({cuenta:cuenta, aux_id:aux_id, cc_id:cc_id, vencimiento:venc||null, debe:debe, haber:haber, aux:auxNombreLegacy});
+    lineas.push({
+      cuenta: cuenta,
+      aux_id: aux_id,
+      tipo_doc_id: tipo_doc_id,
+      folio: folio || null,
+      cc_id: cc_id,
+      vencimiento: venc || null,
+      debe: debe,
+      haber: haber,
+      aux: auxNombreLegacy
+    });
   });
 
   if(!fecha){ msgEl('msg-modal-asiento','err','Ingrese la fecha del asiento.'); return; }
@@ -2373,25 +2359,17 @@ function guardarAsiento(){
   var totH = lineas.reduce(function(s,l){return s+l.haber;},0);
   if(Math.abs(totD-totH)>0.01){ msgEl('msg-modal-asiento','err','El asiento no está cuadrado. Debe='+fmtM(totD)+' Haber='+fmtM(totH)); return; }
 
-  // R66: validaciones cruzadas catálogo↔línea
-  if(algunaAux){
-    if(!tipoDocId || !folio){
-      msgEl('msg-modal-asiento','err','Hay líneas con cuenta auxiliar. Indique tipo de documento y folio en la cabecera.');
-      return;
-    }
-    if(lineasInvalidas.length){
-      var det = lineasInvalidas.map(function(x){return 'línea '+x.i+' ('+x.falta+')';}).join(', ');
-      msgEl('msg-modal-asiento','err','Faltan datos en líneas con cuenta auxiliar: '+det+'.');
-      return;
-    }
-  } else {
-    // Cuenta no auxiliar en ninguna línea ⇒ cabecera debe quedar NULL en BD (la UI ya las deshabilita)
-    tipoDocId = null; folio = null;
+  // R66 (v3.60): validación 100% por línea, sin cabecera
+  if(lineasInvalidas.length){
+    var det = lineasInvalidas.map(function(x){return 'línea '+x.i+' (faltan: '+x.falta+')';}).join('; ');
+    msgEl('msg-modal-asiento','err','Faltan datos en líneas con cuenta auxiliar. '+det+'.');
+    return;
   }
 
   var num = 'A-'+String(DB.numAsiento).padStart(4,'0');
   // En memoria conservamos los campos extendidos para que cuando Fase 3 conecte la persistencia, ya estén disponibles.
-  DB.asientos.push({num:num, fecha:fecha, glosa:glosa, tipo_doc_id:tipoDocId, folio:folio, lineas:lineas});
+  // tipo_doc_id y folio ya NO viven en cabecera (sql_06): viven en cada línea.
+  DB.asientos.push({num:num, fecha:fecha, glosa:glosa, lineas:lineas});
   DB.numAsiento++;
   saveDB();
   closeModal('modal-asiento');
