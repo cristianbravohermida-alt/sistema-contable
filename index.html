@@ -481,7 +481,7 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
   <div class="topbar">
     <div><div class="page-title">Plan de Cuentas</div><div class="page-sub">Gestión del catálogo de cuentas contables</div></div>
     <div class="topbar-actions">
-      <button class="btn btn-primary role-escritura" onclick="openModal('modal-cuenta')">
+      <button class="btn btn-primary role-escritura" onclick="openModalNuevaCuenta()">
         <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Nueva Cuenta
       </button>
       <button class="btn role-admin" onclick="actualizarPlanBase()" title="Publicar como plan base del sistema">
@@ -995,15 +995,16 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
 
 <!-- ===== MODAL NUEVA CUENTA ===== -->
 <div class="modal-overlay" id="modal-cuenta">
-  <div class="modal">
+  <div class="modal" style="width:640px;max-width:96vw">
     <div class="modal-head">
-      <div class="modal-title">Nueva Cuenta Contable</div>
-      <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-cuenta')">
+      <div class="modal-title" id="modal-cuenta-titulo">Nueva Cuenta Contable</div>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-cuenta');resetModalCuenta()">
         <svg viewBox="0 0 24 24" width="16" height="16"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
     <div class="modal-body">
       <div id="msg-modal-cuenta"></div>
+      <input type="hidden" id="mc-edit-cod" value="">
       <div class="form-grid cols2" style="gap:14px">
         <div class="field"><label>Código *</label><input id="mc-cod" placeholder="ej: 1.1.01"></div>
         <div class="field"><label>Tipo *</label>
@@ -1018,17 +1019,41 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
         </div>
         <div class="field span2"><label>Nombre de la cuenta *</label><input id="mc-nom" placeholder="ej: Caja y Bancos"></div>
         <div class="field span2"><label>Descripción (opcional)</label><input id="mc-desc" placeholder="Descripción adicional"></div>
-        <div class="field"><label>Cuenta con auxiliares</label>
-          <select id="mc-aux">
-            <option value="0">No</option>
-            <option value="1">Sí — permite auxiliares</option>
-          </select>
+      </div>
+      <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
+        <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:10px">Atributos contables</div>
+        <div class="form-grid cols2" style="gap:14px">
+          <div class="field"><label>Cuenta con auxiliares</label>
+            <select id="mc-aux" onchange="onCuentaFlagChange()">
+              <option value="0">No</option>
+              <option value="1">Sí — permite asignar tercero</option>
+            </select>
+          </div>
+          <div class="field"><label>Cuenta por cobrar (CXC)</label>
+            <select id="mc-cta-cobrar" onchange="onCuentaFlagChange()">
+              <option value="0">No</option>
+              <option value="1">Sí</option>
+            </select>
+          </div>
+          <div class="field"><label>Cuenta por pagar (CXP)</label>
+            <select id="mc-cta-pagar" onchange="onCuentaFlagChange()">
+              <option value="0">No</option>
+              <option value="1">Sí</option>
+            </select>
+          </div>
+          <div class="field"><label>Disponibilidad de pago</label>
+            <select id="mc-disp-pago">
+              <option value="0">No</option>
+              <option value="1">Sí — caja / banco</option>
+            </select>
+          </div>
         </div>
+        <div id="mc-flags-hint" style="font-size:12px;color:var(--text3);margin-top:10px"></div>
       </div>
     </div>
     <div class="modal-foot">
-      <button class="btn" onclick="closeModal('modal-cuenta')">Cancelar</button>
-      <button class="btn btn-primary" onclick="addCuenta()">Agregar cuenta</button>
+      <button class="btn" onclick="closeModal('modal-cuenta');resetModalCuenta()">Cancelar</button>
+      <button class="btn btn-primary" id="mc-btn-guardar" onclick="guardarCuenta()">Guardar cuenta</button>
     </div>
   </div>
 </div>
@@ -1935,33 +1960,157 @@ function nav(id, el){
 // ============================================================
 // PLAN DE CUENTAS
 // ============================================================
-function addCuenta(){
+// FIX (Hotfix-B v3.59): saveCuenta async existía huérfana (M15). addCuenta y delCuenta
+// solo tocaban memoria → cualquier alta/baja se perdía al recargar. Ahora la UI persiste vía
+// saveCuenta() y deleteCuentaDB(), y el modal opera en modo dual (Nueva / Editar).
+
+function resetModalCuenta(){
+  document.getElementById('mc-edit-cod').value = '';
+  document.getElementById('mc-cod').value = '';
+  document.getElementById('mc-cod').disabled = false;
+  document.getElementById('mc-nom').value = '';
+  document.getElementById('mc-tipo').value = 'Activo';
+  document.getElementById('mc-desc').value = '';
+  document.getElementById('mc-aux').value = '0';
+  document.getElementById('mc-cta-cobrar').value = '0';
+  document.getElementById('mc-cta-pagar').value = '0';
+  document.getElementById('mc-disp-pago').value = '0';
+  document.getElementById('msg-modal-cuenta').innerHTML = '';
+  document.getElementById('mc-flags-hint').textContent = '';
+  document.getElementById('modal-cuenta-titulo').textContent = 'Nueva Cuenta Contable';
+  document.getElementById('mc-btn-guardar').textContent = 'Guardar cuenta';
+}
+
+function openModalNuevaCuenta(){
+  resetModalCuenta();
+  openModal('modal-cuenta');
+}
+
+function editarCuenta(cod){
+  var c = DB.cuentas.find(function(x){return x.cod===cod;});
+  if(!c){ alert('Cuenta no encontrada en memoria.'); return; }
+  resetModalCuenta();
+  document.getElementById('mc-edit-cod').value = c.cod;
+  document.getElementById('mc-cod').value = c.cod;
+  document.getElementById('mc-cod').disabled = true; // el código es PK; no editable en edit
+  document.getElementById('mc-nom').value = c.nom || '';
+  document.getElementById('mc-tipo').value = c.tipo || 'Activo';
+  document.getElementById('mc-desc').value = c.desc || '';
+  document.getElementById('mc-aux').value = c.aux ? '1' : '0';
+  document.getElementById('mc-cta-cobrar').value = c.cta_cobrar ? '1' : '0';
+  document.getElementById('mc-cta-pagar').value  = c.cta_pagar  ? '1' : '0';
+  document.getElementById('mc-disp-pago').value  = c.disp_pago  ? '1' : '0';
+  document.getElementById('modal-cuenta-titulo').textContent = 'Editar Cuenta — ' + c.cod;
+  document.getElementById('mc-btn-guardar').textContent = 'Guardar cambios';
+  onCuentaFlagChange();
+  openModal('modal-cuenta');
+}
+
+// R67: cta_cobrar / cta_pagar implican que la cuenta debe ser auxiliar (tercero obligatorio en línea).
+// disp_pago no implica aux (caja/banco general puede no tener auxiliar).
+function onCuentaFlagChange(){
+  var aux = document.getElementById('mc-aux').value === '1';
+  var cob = document.getElementById('mc-cta-cobrar').value === '1';
+  var pag = document.getElementById('mc-cta-pagar').value === '1';
+  var hint = document.getElementById('mc-flags-hint');
+  if((cob || pag) && !aux){
+    hint.style.color = 'var(--warning)';
+    hint.textContent = '⚠ CXC y CXP requieren tercero por línea — al guardar se forzará "Cuenta con auxiliares = Sí".';
+  } else if(cob && pag){
+    hint.style.color = 'var(--warning)';
+    hint.textContent = '⚠ Marcar CXC y CXP simultáneamente es inusual. Confirme que es correcto.';
+  } else {
+    hint.style.color = 'var(--text3)';
+    hint.textContent = '';
+  }
+}
+
+async function guardarCuenta(){
+  var editCod = document.getElementById('mc-edit-cod').value;
+  var modoEdit = !!editCod;
   var cod = document.getElementById('mc-cod').value.trim();
   var nom = document.getElementById('mc-nom').value.trim();
   var tipo = document.getElementById('mc-tipo').value;
-  var aux = document.getElementById('mc-aux').value === '1';
+  var aux  = document.getElementById('mc-aux').value === '1';
+  var cob  = document.getElementById('mc-cta-cobrar').value === '1';
+  var pag  = document.getElementById('mc-cta-pagar').value === '1';
+  var disp = document.getElementById('mc-disp-pago').value === '1';
   var desc = document.getElementById('mc-desc').value.trim();
-  if(!cod||!nom){ msgEl('msg-modal-cuenta','err','Complete código y nombre de la cuenta.'); return; }
-  if(DB.cuentas.find(function(c){return c.cod===cod;})){ msgEl('msg-modal-cuenta','err','El código ya existe en el plan de cuentas.'); return; }
-  DB.cuentas.push({cod:cod,nom:nom,tipo:tipo,aux:aux,desc:desc});
-  DB.cuentas.sort(function(a,b){return a.cod.localeCompare(b.cod);});
-  saveDB();
+
+  if(!cod || !nom){ msgEl('msg-modal-cuenta','err','Complete código y nombre de la cuenta.'); return; }
+
+  // En alta nueva: validar que el código no exista en memoria
+  if(!modoEdit && DB.cuentas.find(function(c){return c.cod===cod;})){
+    msgEl('msg-modal-cuenta','err','El código ya existe en el plan de cuentas.'); return;
+  }
+
+  // R67 inferencia: CXC o CXP fuerzan aux=true
+  if((cob || pag) && !aux) aux = true;
+
+  var obj = {
+    cod: cod, nom: nom, tipo: tipo, aux: aux, desc: desc,
+    cta_cobrar: cob, cta_pagar: pag, disp_pago: disp,
+    // Conservar campos no editables si veníamos de edición (preserva tipo_plan, cod_sii, etc.)
+    tipo_plan: '', cod_sii: '', concepto: '', subtipo_plan: '', subtipo_flujo: ''
+  };
+  if(modoEdit){
+    var prev = DB.cuentas.find(function(c){return c.cod===editCod;});
+    if(prev){
+      obj.tipo_plan = prev.tipo_plan || '';
+      obj.cod_sii = prev.cod_sii || '';
+      obj.concepto = prev.concepto || '';
+      obj.subtipo_plan = prev.subtipo_plan || '';
+      obj.subtipo_flujo = prev.subtipo_flujo || '';
+    }
+  }
+
+  // Persistir primero. Si falla, no tocar memoria.
+  try {
+    await saveCuenta(obj);
+  } catch(e) {
+    msgEl('msg-modal-cuenta','err','Error al guardar en BD: '+(e&&e.message?e.message:e));
+    return;
+  }
+
+  if(modoEdit){
+    var idx = DB.cuentas.findIndex(function(c){return c.cod===editCod;});
+    if(idx >= 0) DB.cuentas[idx] = obj;
+  } else {
+    DB.cuentas.push(obj);
+    DB.cuentas.sort(function(a,b){return a.cod.localeCompare(b.cod);});
+  }
   closeModal('modal-cuenta');
-  document.getElementById('mc-cod').value='';
-  document.getElementById('mc-nom').value='';
-  document.getElementById('mc-desc').value='';
-  document.getElementById('mc-aux').value='0';
+  resetModalCuenta();
   renderCuentas();
   renderStatsCuentas();
-  msgEl('msg-cuentas','ok','Cuenta <b>'+cod+' - '+nom+'</b> agregada correctamente.');
+  msgEl('msg-cuentas','ok','Cuenta <b>'+cod+' - '+nom+'</b> '+(modoEdit?'actualizada':'agregada')+' correctamente.');
 }
 
-function delCuenta(cod){
-  var enUso = DB.asientos.some(function(a){return a.lineas.some(function(l){return l.cuenta===cod;});});
-  if(enUso){ alert('No se puede eliminar: la cuenta tiene movimientos registrados.'); return; }
-  if(!confirm('¿Eliminar la cuenta '+cod+'?')) return;
+async function deleteCuentaDB(cod){
+  await supa.from('cuentas').delete().eq('empresa_id', SESSION.empresaId).eq('cod', cod);
+}
+
+async function delCuenta(cod){
+  // Validación 1: en memoria (asientos cargados de esta sesión)
+  var enUsoMem = DB.asientos.some(function(a){return a.lineas.some(function(l){return l.cuenta===cod;});});
+  if(enUsoMem){ alert('No se puede eliminar: la cuenta tiene movimientos registrados.'); return; }
+  // Validación 2: en BD (puede haber líneas que no estén cargadas en memoria)
+  try {
+    var chk = await supa.from('lineas_asiento').select('id', {count:'exact', head:true}).eq('cuenta_cod', cod);
+    if(chk.count && chk.count > 0){ alert('No se puede eliminar: la cuenta tiene '+chk.count+' movimientos en BD.'); return; }
+  } catch(e) { /* si la verificación remota falla, seguir con la validación local */ }
+
+  if(!confirm('¿Eliminar la cuenta '+cod+'? Esta acción no se puede deshacer.')) return;
+  try {
+    await deleteCuentaDB(cod);
+  } catch(e) {
+    alert('Error al eliminar en BD: '+(e&&e.message?e.message:e));
+    return;
+  }
   DB.cuentas = DB.cuentas.filter(function(c){return c.cod!==cod;});
-  saveDB(); renderCuentas(); renderStatsCuentas();
+  renderCuentas();
+  renderStatsCuentas();
+  msgEl('msg-cuentas','ok','Cuenta <b>'+cod+'</b> eliminada.');
 }
 
 function renderStatsCuentas(){
@@ -1980,14 +2129,23 @@ function renderCuentas(){
   tb.innerHTML = DB.cuentas.map(function(c){
     var s = getSaldo(c.cod);
     var sClass = s>0?'text-green':(s<0?'text-red':'');
+    var flags = [];
+    if(c.aux)        flags.push('<span class="badge" style="background:#dcfce7;color:#15803d" title="Cuenta con auxiliares">Aux</span>');
+    if(c.cta_cobrar) flags.push('<span class="badge" style="background:#dbeafe;color:#1e40af" title="Cuenta por cobrar">CXC</span>');
+    if(c.cta_pagar)  flags.push('<span class="badge" style="background:#fef3c7;color:#92400e" title="Cuenta por pagar">CXP</span>');
+    if(c.disp_pago)  flags.push('<span class="badge" style="background:#e0e7ff;color:#3730a3" title="Disponibilidad de pago">Disp</span>');
+    var flagsHtml = flags.length ? flags.join(' ') : '<span style="color:var(--text3)">—</span>';
     return '<tr>'
       +'<td><code>'+c.cod+'</code></td>'
       +'<td><b>'+c.nom+'</b>'+(c.desc?'<br><span style="font-size:11px;color:var(--text3)">'+c.desc+'</span>':'')+'</td>'
       +'<td>'+typeBadge(c.tipo)+'</td>'
       +'<td style="font-size:12px;color:var(--text3)">'+getNaturaleza(c.tipo)+'</td>'
-      +'<td style="font-size:12px">'+(c.aux?'<span class="badge" style="background:#dcfce7;color:#15803d">Sí</span>':'<span style="color:var(--text3)">—</span>')+'</td>'
+      +'<td style="font-size:12px;display:flex;gap:4px;flex-wrap:wrap">'+flagsHtml+'</td>'
       +'<td class="num '+sClass+'">'+(s!==0?fmtM(Math.abs(s)):'—')+'</td>'
-      +'<td class="no-print"><button class="btn btn-danger btn-sm" onclick="delCuenta(\''+c.cod+'\')">Eliminar</button></td>'
+      +'<td class="no-print" style="display:flex;gap:4px">'
+        +'<button class="btn btn-sm btn-ghost role-escritura" onclick="editarCuenta(\''+c.cod+'\')" title="Editar cuenta">Editar</button>'
+        +'<button class="btn btn-danger btn-sm role-escritura" onclick="delCuenta(\''+c.cod+'\')" title="Eliminar cuenta">×</button>'
+      +'</td>'
       +'</tr>';
   }).join('');
 }
