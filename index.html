@@ -2214,8 +2214,8 @@ function renderLineas(){
     if(auxEnabled && !l.vencimiento && !l._vencManual && fechaCab){ l.vencimiento = _addDays(fechaCab,30); }
 
     var auxOpts = '<option value="">—</option>'+terceros.map(function(t){
-      // Identificamos al tercero por RUT (DB.terceros no expone id local; el id real vendrá de Supabase en Fase 3)
-      return '<option value="'+t.rut+'" '+(l.aux_id===t.rut?'selected':'')+'>'+t.razon+'</option>';
+      // Fase 3: identificamos al tercero por id (uuid de Supabase). loadDB ahora trae terceros.id.
+      return '<option value="'+t.id+'" '+(l.aux_id===t.id?'selected':'')+'>'+t.razon+'</option>';
     }).join('');
     var ccOpts = '<option value="">—</option>'+ccs.map(function(cc){
       return '<option value="'+cc.id+'" '+(l.cc_id===cc.id?'selected':'')+'>'+cc.cod+' — '+cc.nombre+'</option>';
@@ -2301,7 +2301,7 @@ function recalcCuadre(){
   }
 }
 
-function guardarAsiento(){
+async function guardarAsiento(){
   var fecha = document.getElementById('ma-fecha').value;
   var glosa = document.getElementById('ma-glosa').value.trim();
 
@@ -2334,9 +2334,10 @@ function guardarAsiento(){
       aux_id = null; tipo_doc_id = null; folio = ''; venc = '';
     }
     // Mitigación Fase 4 (decisión 4): poblar aux_nombre legacy desde terceros.razon por lookup
+    // Fase 3: aux_id ahora es uuid (terceros.id), no rut.
     var auxNombreLegacy = '';
     if(aux_id){
-      var t = DB.terceros.find(function(x){return x.rut===aux_id;});
+      var t = DB.terceros.find(function(x){return x.id===aux_id;});
       if(t) auxNombreLegacy = t.razon;
     }
     lineas.push({
@@ -2367,9 +2368,29 @@ function guardarAsiento(){
   }
 
   var num = 'A-'+String(DB.numAsiento).padStart(4,'0');
-  // En memoria conservamos los campos extendidos para que cuando Fase 3 conecte la persistencia, ya estén disponibles.
-  // tipo_doc_id y folio ya NO viven en cabecera (sql_06): viven en cada línea.
-  DB.asientos.push({num:num, fecha:fecha, glosa:glosa, lineas:lineas});
+  // Fase 3: persistencia real. Persistir en BD ANTES de mutar memoria (R49 manifiesto explícito; M18).
+  // Si falla, no se incrementa numAsiento ni se agrega a DB.asientos. Compensación manual si líneas falla
+  // (M17: el editor/cliente puede no honrar transacciones; compensar a mano).
+  var dbId;
+  try{
+    showLoading('Guardando asiento...');
+    dbId = await saveAsientoDB({num:num, fecha:fecha, glosa:glosa});
+    try{
+      await saveLineasAsientoDB(dbId, lineas);
+    }catch(eLineas){
+      try{ await supa.from('asientos').delete().eq('id', dbId); }
+      catch(eRollback){ console.error('rollback header tras falla en lineas:', eRollback); }
+      throw eLineas;
+    }
+  }catch(e){
+    hideLoading();
+    console.error('guardarAsiento:', e);
+    msgEl('msg-modal-asiento','err','No se pudo guardar el asiento: '+(e.message||e));
+    return;
+  }
+  hideLoading();
+  // Persistencia BD OK: ahora sí mutar memoria. tipo_doc_id y folio viven por línea (sql_06).
+  DB.asientos.push({_dbId:dbId, num:num, fecha:fecha, glosa:glosa, lineas:lineas});
   DB.numAsiento++;
   saveDB();
   closeModal('modal-asiento');
@@ -2428,10 +2449,29 @@ function verAsiento(num){
   openModal('modal-ver-asiento');
 }
 
-function delAsiento(num){
+async function delAsiento(num){
   if(!confirm('¿Eliminar el asiento '+num+'? Esta acción no se puede deshacer.')) return;
-  DB.asientos = DB.asientos.filter(function(a){return a.num!==num;});
+  var a = DB.asientos.find(function(x){return x.num===num;});
+  if(!a){ msgEl('msg-diario','err','Asiento '+num+' no encontrado en memoria.'); return; }
+  // Fase 3 + R70 semántico (M18): borrar de BD antes de mutar memoria.
+  // FK lineas_asiento_asiento_id_fkey ON DELETE CASCADE — basta borrar el header (DIAG-4b).
+  // Si _dbId no existe (asiento creado pre-Fase 3, p.ej. por cargarDemo), borrar solo en memoria.
+  if(a._dbId){
+    try{
+      showLoading('Eliminando asiento...');
+      var { error } = await supa.from('asientos').delete().eq('id', a._dbId);
+      if(error) throw error;
+    }catch(e){
+      hideLoading();
+      console.error('delAsiento:', e);
+      msgEl('msg-diario','err','No se pudo eliminar el asiento: '+(e.message||e));
+      return;
+    }
+    hideLoading();
+  }
+  DB.asientos = DB.asientos.filter(function(x){return x.num!==num;});
   saveDB(); renderDiario(); renderCuentas();
+  msgEl('msg-diario','ok','Asiento <b>'+num+'</b> eliminado.');
 }
 
 // ============================================================
@@ -2535,8 +2575,9 @@ async function saveTercero(){
 
   var obj = {rut:rut, razon:razon, tipo:tipo, dir:dir, email:email, tel:tel, notas:notas};
   // Persistir primero; si falla, no tocar memoria.
+  // Fase 3: capturar id devuelto por Supabase para que el select aux del modal asiento (que ahora usa t.id) funcione sin necesidad de refresh.
   try {
-    await saveTerceroDB(obj);
+    obj.id = await saveTerceroDB(obj);
   } catch(e) {
     msgEl('msg-modal-tercero','err','Error al guardar en BD: '+(e&&e.message?e.message:e));
     return;
@@ -2724,12 +2765,12 @@ function renderStatsAuxiliares(){
 function importarAuxiliaresCSV(input){
   var file = input.files[0]; if(!file) return;
   var reader = new FileReader();
-  reader.onload = function(e){
+  reader.onload = async function(e){
     var lines = e.target.result.split(/\r?\n/).filter(function(l){ return l.trim(); });
     if(!lines.length){ alert('Archivo vacío.'); return; }
     var agregados=0, dup=0, err=0;
-    // Detectar si primera línea es encabezado
     var start = lines[0].toLowerCase().includes('rut') ? 1 : 0;
+    showLoading('Importando auxiliares...');
     for(var i=start; i<lines.length; i++){
       var cols = lines[i].split(',').map(function(c){ return c.trim().replace(/^"|"$/g,''); });
       var rut=cols[0]||'', razon=cols[1]||'', tipo=cols[2]||'Otro';
@@ -2737,14 +2778,23 @@ function importarAuxiliaresCSV(input){
       if(DB.terceros.find(function(t){ return t.rut===rut; })){ dup++; continue; }
       var tiposValidos=['Cliente','Proveedor','Empleado','Otro'];
       if(!tiposValidos.includes(tipo)) tipo='Otro';
-      DB.terceros.push({rut:rut,razon:razon,tipo:tipo,dir:cols[3]||'',email:cols[4]||'',tel:cols[5]||'',notas:cols[6]||''});
-      agregados++;
+      var obj = {rut:rut, razon:razon, tipo:tipo, dir:cols[3]||'', email:cols[4]||'', tel:cols[5]||'', notas:cols[6]||''};
+      // Fase 3: persistir cada uno a BD y capturar id (M18 fix; el select aux del modal asiento usa t.id).
+      try{
+        obj.id = await saveTerceroDB(obj);
+        DB.terceros.push(obj);
+        agregados++;
+      }catch(eIns){
+        console.error('importarAuxiliaresCSV fila '+i+':', eIns);
+        err++;
+      }
     }
+    hideLoading();
     DB.terceros.sort(function(a,b){ return a.razon.localeCompare(b.razon,'es'); });
     saveDB(); renderAuxiliares(); renderStatsAuxiliares();
     var msg = '✓ Importación: '+agregados+' auxiliares agregados'
       +(dup?' · '+dup+' RUT duplicados omitidos':'')
-      +(err?' · '+err+' filas inválidas':'');
+      +(err?' · '+err+' filas inválidas o con error de BD':'');
     msgEl('msg-terceros','ok',msg);
     input.value='';
   };
@@ -3655,7 +3705,7 @@ async function loadDB(){
       cta_cobrar:c.cta_cobrar||false,cta_pagar:c.cta_pagar||false,disp_pago:c.disp_pago||false
     };});
     DB.terceros = (r4.data||[]).map(function(t){return{
-      rut:t.rut,razon:t.razon,tipo:t.tipo,dir:t.dir||'',email:t.email||'',tel:t.tel||'',notas:t.notas||''
+      id:t.id,rut:t.rut,razon:t.razon,tipo:t.tipo,dir:t.dir||'',email:t.email||'',tel:t.tel||'',notas:t.notas||''
     };});
     // SYS.centrosCosto: residente en SYS por convención del handoff v5, pero cargado per-empresa
     // dentro de loadDB porque la tabla está particionada por empresa_id con RLS.
@@ -3679,12 +3729,47 @@ async function loadDB(){
         });
       });
     }
-    DB.asientos=(r2.data||[]).map(function(a){return{num:a.num,fecha:a.fecha,glosa:a.glosa,lineas:lmap[a.id]||[]};});
+    DB.asientos=(r2.data||[]).map(function(a){return{_dbId:a.id,num:a.num,fecha:a.fecha,glosa:a.glosa,lineas:lmap[a.id]||[]};});
   }catch(e){console.error('loadDB:',e);}
   finally{hideLoading();}
 }
 async function saveCuenta(c){await supa.from('cuentas').upsert({empresa_id:SESSION.empresaId,cod:c.cod,nom:c.nom,tipo:c.tipo||c.tipo_plan||'Activo',aux:c.aux||false,desc_:c.desc||'',tipo_plan:c.tipo_plan||'',cod_sii:c.cod_sii||'',concepto:c.concepto||'',subtipo_plan:c.subtipo_plan||'',subtipo_flujo:c.subtipo_flujo||'',cta_cobrar:c.cta_cobrar||false,cta_pagar:c.cta_pagar||false,disp_pago:c.disp_pago||false},{onConflict:'empresa_id,cod'});}
-async function saveTerceroDB(t){await supa.from('terceros').upsert({empresa_id:SESSION.empresaId,rut:t.rut,razon:t.razon,tipo:t.tipo,dir:t.dir||'',email:t.email||'',tel:t.tel||'',notas:t.notas||''},{onConflict:'empresa_id,rut'});}
+async function saveTerceroDB(t){var res=await supa.from('terceros').upsert({empresa_id:SESSION.empresaId,rut:t.rut,razon:t.razon,tipo:t.tipo,dir:t.dir||'',email:t.email||'',tel:t.tel||'',notas:t.notas||''},{onConflict:'empresa_id,rut'}).select('id').single();if(res.error)throw res.error;return res.data.id;}
+// ── Fase 3: persistencia real de asientos ───────────────────────
+// saveAsientoDB: INSERT a `asientos`. Devuelve el id (uuid) generado por Postgres (default gen_random_uuid).
+// `tipo_doc_id` y `folio` ya NO viven en cabecera (sql_06): viven por línea, los maneja saveLineasAsientoDB.
+async function saveAsientoDB(a){
+  var res = await supa.from('asientos').insert({
+    empresa_id: SESSION.empresaId,
+    num: a.num,
+    fecha: a.fecha,
+    glosa: a.glosa
+  }).select('id').single();
+  if(res.error) throw res.error;
+  return res.data.id;
+}
+// saveLineasAsientoDB: INSERT batch a `lineas_asiento`. Schema verificado por DIAG-4a:
+// `lineas_asiento` NO tiene empresa_id (tenancia vía asiento_id → asientos.empresa_id).
+// `aux_id` es uuid → terceros.id (D1 Opción A). `tipo_doc_id` es text → tipo_documento.id (post sql_06_v2).
+// `aux_nombre` legacy hasta sql_07; lo poblamos por compatibilidad con loadDB actual.
+async function saveLineasAsientoDB(asientoId, lineas){
+  var rows = lineas.map(function(l){
+    return {
+      asiento_id: asientoId,
+      cuenta_cod: l.cuenta,
+      aux_id: l.aux_id || null,
+      tipo_doc_id: l.tipo_doc_id || null,
+      folio: l.folio || null,
+      cc_id: l.cc_id || null,
+      vencimiento: l.vencimiento || null,
+      debe: l.debe || 0,
+      haber: l.haber || 0,
+      aux_nombre: l.aux || null
+    };
+  });
+  var res = await supa.from('lineas_asiento').insert(rows);
+  if(res.error) throw res.error;
+}
 // ═════════════════════════════════════════════════════════════
 
 // ══ NAVEGACIÓN ═══════════════════════════════════════════════
