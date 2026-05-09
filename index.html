@@ -1600,7 +1600,7 @@ async function saveEmpresa(){
   // ── MODO CREACIÓN
   showLoading('Creando empresa...');
   try{
-    var nuevoId = 'e_'+Date.now();
+    var nuevoId = crypto.randomUUID();
     var insRes = await supa.from('empresas').insert({
       id: nuevoId, rut: rut, razon: razon, periodo: periodo, giro: giro, dir: dir
     }).select();
