@@ -2221,7 +2221,7 @@ function renderLineas(){
       return '<option value="'+cc.id+'" '+(l.cc_id===cc.id?'selected':'')+'>'+cc.cod+' — '+cc.nombre+'</option>';
     }).join('');
     var tdOpts = '<option value="">—</option>'+tipos.map(function(td){
-      return '<option value="'+td.id+'" '+(l.tipo_doc_id===td.id?'selected':'')+'>'+td.cod_sii+' — '+td.nombre+'</option>';
+      return '<option value="'+td.id+'" '+(l.tipo_doc_id===td.id?'selected':'')+'>'+td.id+' — '+td.nombre+'</option>';
     }).join('');
 
     var auxTitle = auxEnabled ? 'Tercero registrado (obligatorio)' : 'Cuenta no auxiliar — campo deshabilitado';
@@ -3664,7 +3664,7 @@ async function loadSYS(){
       supa.from('usuario_empresa').select('*'),
       supa.from('plan_base').select('cod,nom,tipo,aux,desc_').order('cod'),
       supa.from('perfiles').select('*').order('built_in', {ascending:false}).order('nombre'),
-      supa.from('tipo_documento').select('id,cod_sii,nombre,activo').eq('activo',true).order('cod_sii'),
+      supa.from('tipo_documento').select('id,nombre,naturaleza,activo').eq('activo',true).order('id'),
     ]);
     if(r1.error) console.error('ERROR empresas:', r1.error.message);
     if(r2.error) console.error('ERROR usuarios:', r2.error.message);
