@@ -1060,7 +1060,7 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
 
 <!-- ===== MODAL NUEVO ASIENTO ===== -->
 <div class="modal-overlay" id="modal-asiento">
-  <div class="modal" style="width:1100px;max-width:97vw">
+  <div class="modal" style="width:1240px;max-width:98vw">
     <div class="modal-head">
       <div class="modal-title">Nuevo Asiento Contable — <span id="ma-num-label"></span></div>
       <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-asiento')">
@@ -1074,17 +1074,17 @@ code{font-family:'Consolas','Courier New',monospace;font-size:12px;background:va
         <div class="field span2"><label>Glosa / Descripción *</label><input id="ma-glosa" placeholder="Descripción del asiento contable"></div>
       </div>
       <div style="overflow-x:auto">
-        <table class="lineas-table">
+        <table class="lineas-table" style="width:100%">
           <thead>
             <tr>
               <th style="min-width:180px">Cuenta *</th>
-              <th style="min-width:150px">Auxiliar (Tercero)</th>
-              <th style="min-width:120px">Tipo doc.</th>
-              <th style="min-width:100px">Folio</th>
-              <th style="min-width:130px">Vencimiento</th>
-              <th style="min-width:130px">Centro de Costo</th>
-              <th style="min-width:110px;text-align:right">Debe</th>
-              <th style="min-width:110px;text-align:right">Haber</th>
+              <th style="min-width:140px">Auxiliar (Tercero)</th>
+              <th style="min-width:110px">Tipo doc.</th>
+              <th style="min-width:90px">Folio</th>
+              <th style="min-width:120px">Vencimiento</th>
+              <th style="min-width:120px">Centro de Costo</th>
+              <th style="min-width:100px;text-align:right">Debe</th>
+              <th style="min-width:100px;text-align:right">Haber</th>
               <th style="width:36px"></th>
             </tr>
           </thead>
@@ -3537,7 +3537,10 @@ function cargarDemo(){
 // CLOSE MODAL ON OVERLAY CLICK
 // ============================================================
 document.querySelectorAll('.modal-overlay').forEach(function(overlay){
-  overlay.addEventListener('click',function(e){ if(e.target===overlay) overlay.classList.remove('open'); });
+  overlay.addEventListener('click',function(e){
+    // modal-asiento NO se cierra por click fuera — protege el trabajo en curso (Tema 1).
+    if(e.target===overlay && overlay.id !== 'modal-asiento') overlay.classList.remove('open');
+  });
 });
 
 // Botón nuevo asiento abre modal
